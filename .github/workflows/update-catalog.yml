@@ -1,0 +1,45 @@
+name: Auto-Update Music Catalog
+
+# Runs whenever audio files are pushed to the music/ folder.
+# Scans for new tracks and adds skeleton entries to data/music.json.
+# You still need to edit the JSON to fill in title, tags, etc.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'music/**'
+
+jobs:
+  update-catalog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Scan music folder and update catalog
+        run: node scripts/update-catalog.js
+
+      - name: Commit updated catalog (if changed)
+        run: |
+          git config user.name  "Portal Music Bot"
+          git config user.email "bot@portal-music.com"
+          git add data/music.json
+          if git diff --staged --quiet; then
+            echo "No new tracks detected — catalog is up to date."
+          else
+            git commit -m "🎵 Auto-update music catalog"
+            git push
+          fi
