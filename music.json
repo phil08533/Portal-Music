@@ -1,0 +1,13 @@
+[
+  {
+    "id": "1",
+    "title": "Neon Sunset",
+    "category": "Sci-Fi",
+    "tags": [
+      "synth",
+      "dark",
+      "atmospheric"
+    ],
+    "file": "music/sci-fi/neon-sunset.mp3"
+  }
+]

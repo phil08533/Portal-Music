@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browse Music</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" style="text-decoration:none; color:inherit;"><strong>← Back</strong></a>
+        <h2 id="page-title">Library</h2>
+    </header>
+
+    <div class="container">
+        <div id="music-list" class="grid" style="margin-top:2rem;"></div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const categoryFilter = params.get('cat');
+            const searchQuery = params.get('q')?.toLowerCase();
+
+            const response = await fetch('data/music.json');
+            let songs = await response.json();
+
+            if (categoryFilter) {
+                document.getElementById('page-title').innerText = categoryFilter;
+                songs = songs.filter(s => s.category === categoryFilter);
+            } else if (searchQuery) {
+                document.getElementById('page-title').innerText = `Results for "${searchQuery}"`;
+                songs = songs.filter(s => 
+                    s.title.toLowerCase().includes(searchQuery) || 
+                    s.tags.some(t => t.toLowerCase().includes(searchQuery))
+                );
+            }
+
+            document.getElementById('music-list').innerHTML = 
+                songs.length ? songs.map(createTrackCard).join('') : '<p>No tracks found.</p>';
+        }
+        init();
+    </script>
+</body>
+</html>

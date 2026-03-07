@@ -1,0 +1,23 @@
+<main>
+  <h1>Preparing your download...</h1>
+  <p>Your free AI music will be ready in <span id="timer">5</span> seconds.</p>
+  <a id="dl-link" style="display:none;" download>Click here if it doesn't start</a>
+</main>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const file = params.get('file');
+  let timeLeft = 5;
+
+  const countdown = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').innerText = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(countdown);
+      const link = document.getElementById('dl-link');
+      link.href = file;
+      link.style.display = 'block';
+      window.location.href = file; // Auto-trigger
+    }
+  }, 1000);
+</script>
