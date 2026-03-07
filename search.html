@@ -1,45 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <title>Browse Music</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search — Portal Music</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <header>
-        <a href="index.html" style="text-decoration:none; color:inherit;"><strong>← Back</strong></a>
-        <h2 id="page-title">Library</h2>
-    </header>
 
-    <div class="container">
-        <div id="music-list" class="grid" style="margin-top:2rem;"></div>
+  <div id="fav-banner" class="fav-banner">
+    ❤️ &nbsp;Favorites are saved for this session only and will clear when you close this tab.
+    <button id="fav-banner-dismiss" class="fav-banner-dismiss" title="Dismiss">✕</button>
+  </div>
+
+  <header>
+    <a href="index.html" class="logo">Portal Music</a>
+    <nav class="nav-links">
+      <a href="browse.html">Browse</a>
+      <a href="search.html">Search</a>
+      <a href="browse.html?filter=favorites">Favorites</a>
+      <a href="license.html">License</a>
+    </nav>
+    <div class="theme-btns">
+      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="light" title="Light">☀️</button>
+      <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="search-page-wrap">
+      <div class="search-bar-wrap" style="max-width:700px;margin:0 auto;">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input"
+               placeholder="Search by genre, mood, artist, title…"
+               autocomplete="off">
+        <button class="search-btn" id="do-search-btn">Search</button>
+      </div>
     </div>
 
-    <script src="js/main.js"></script>
-    <script>
-        async function init() {
-            const params = new URLSearchParams(window.location.search);
-            const categoryFilter = params.get('cat');
-            const searchQuery = params.get('q')?.toLowerCase();
+    <!-- Quick genre chips -->
+    <div class="chips-row" id="genre-chips"></div>
 
-            const response = await fetch('data/music.json');
-            let songs = await response.json();
+    <!-- Ad Slot -->
+    <div class="ad-slot">
+      <!-- PASTE YOUR AD NETWORK CODE HERE -->
+      <span>Advertisement</span>
+    </div>
 
-            if (categoryFilter) {
-                document.getElementById('page-title').innerText = categoryFilter;
-                songs = songs.filter(s => s.category === categoryFilter);
-            } else if (searchQuery) {
-                document.getElementById('page-title').innerText = `Results for "${searchQuery}"`;
-                songs = songs.filter(s => 
-                    s.title.toLowerCase().includes(searchQuery) || 
-                    s.tags.some(t => t.toLowerCase().includes(searchQuery))
-                );
-            }
+    <!-- Results info bar -->
+    <div id="results-info" class="search-results-info"></div>
 
-            document.getElementById('music-list').innerHTML = 
-                songs.length ? songs.map(createTrackCard).join('') : '<p>No tracks found.</p>';
-        }
-        init();
-    </script>
+    <!-- Results grid -->
+    <div class="grid" id="results-grid">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>Start typing to search for music…</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Player Bar -->
+  <div id="player-bar">
+    <div class="player-art">🎵</div>
+    <div class="player-info">
+      <div class="player-title"  id="player-title">Select a track</div>
+      <div class="player-artist" id="player-artist"></div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="play-pause-btn">▶</button>
+    </div>
+    <div class="player-progress">
+      <div class="progress-track" id="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="player-time" id="player-time">0:00 / 0:00</div>
+    </div>
+    <button class="player-fav" id="player-fav-btn">🤍</button>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    var songs = [];
+    var debounceTimer = null;
+
+    // --- Run search ---
+    function doSearch() {
+      var q = document.getElementById('search-input').value;
+      var infoEl = document.getElementById('results-info');
+      var gridEl = document.getElementById('results-grid');
+
+      if (!q.trim()) {
+        infoEl.textContent = '';
+        gridEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>Start typing to search for music…</p></div>';
+        return;
+      }
+
+      var results = fuzzySearch(songs, q);
+      var n = results.length;
+      infoEl.textContent = n + ' result' + (n !== 1 ? 's' : '') + ' for "' + q + '"';
+
+      if (results.length) {
+        gridEl.innerHTML = results.map(createTrackCard).join('');
+      } else {
+        gridEl.innerHTML =
+          '<div class="empty-state">' +
+            '<div class="empty-icon">😔</div>' +
+            '<p>No tracks found for <strong>"' + q + '"</strong></p>' +
+            '<p style="font-size:.85rem;margin-top:8px;">Try a genre name, mood, or similar word.</p>' +
+          '</div>';
+      }
+    }
+
+    // --- Debounced live search ---
+    document.getElementById('search-input').addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(doSearch, 220);
+    });
+    document.getElementById('search-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { clearTimeout(debounceTimer); doSearch(); }
+    });
+    document.getElementById('do-search-btn').addEventListener('click', function() {
+      clearTimeout(debounceTimer); doSearch();
+    });
+
+    // --- Genre quick chips ---
+    function renderGenreChips() {
+      document.getElementById('genre-chips').innerHTML = Object.entries(GENRES).map(function(entry) {
+        var genre = entry[0], info = entry[1];
+        return '<a href="browse.html?genre=' + encodeURIComponent(genre) + '" class="chip">' +
+          info.icon + ' ' + genre + '</a>';
+      }).join('');
+    }
+
+    // --- Load & init ---
+    loadSongs().then(function(s) {
+      songs = s;
+      renderGenreChips();
+
+      // If navigated here with ?q=... run search immediately
+      var initialQ = new URLSearchParams(window.location.search).get('q') || '';
+      if (initialQ) {
+        document.getElementById('search-input').value = initialQ;
+        doSearch();
+      } else {
+        // Auto-focus for desktop
+        document.getElementById('search-input').focus();
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,23 +1,91 @@
-<main>
-  <h1>Preparing your download...</h1>
-  <p>Your free AI music will be ready in <span id="timer">5</span> seconds.</p>
-  <a id="dl-link" style="display:none;" download>Click here if it doesn't start</a>
-</main>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download — Portal Music</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
 
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const file = params.get('file');
-  let timeLeft = 5;
+  <header>
+    <a href="index.html" class="logo">Portal Music</a>
+    <nav class="nav-links">
+      <a href="browse.html">Browse</a>
+      <a href="search.html">Search</a>
+    </nav>
+    <div class="theme-btns">
+      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="light" title="Light">☀️</button>
+      <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
+    </div>
+  </header>
 
-  const countdown = setInterval(() => {
-    timeLeft--;
-    document.getElementById('timer').innerText = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(countdown);
-      const link = document.getElementById('dl-link');
-      link.href = file;
-      link.style.display = 'block';
-      window.location.href = file; // Auto-trigger
-    }
-  }, 1000);
-</script>
+  <div class="download-wrap">
+
+    <h1>Preparing your download</h1>
+    <p class="dl-subtitle" id="dl-title"></p>
+
+    <!-- ============================================
+         AD SLOT — Download Interstitial
+         Recommended size: 300×250 or 728×90
+         PASTE YOUR AD NETWORK CODE BELOW
+         ============================================ -->
+    <div class="ad-slot tall" style="margin:2rem 0;">
+      <!-- PASTE YOUR AD NETWORK CODE HERE -->
+      <span>Advertisement</span>
+    </div>
+
+    <div class="countdown-ring" id="countdown">5</div>
+    <p style="color:var(--text-muted);font-size:.9rem;">Your file will download automatically…</p>
+
+    <a id="dl-link" class="dl-btn" style="display:none;" download>
+      ⬇ &nbsp;Download MP3
+    </a>
+
+    <p style="margin-top:1.5rem;font-size:.78rem;color:var(--text-muted);">
+      Free to use in videos, podcasts &amp; projects.
+      <a href="license.html" style="color:var(--accent);">View License</a>
+    </p>
+
+    <a href="browse.html" style="display:inline-block;margin-top:1rem;font-size:.85rem;color:var(--text-muted);">
+      ← Back to library
+    </a>
+
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var file   = params.get('file');
+    var title  = params.get('title') || 'Track';
+
+    document.getElementById('dl-title').textContent = title;
+
+    var timeLeft  = 5;
+    var countEl   = document.getElementById('countdown');
+    var dlLink    = document.getElementById('dl-link');
+
+    var tick = setInterval(function() {
+      timeLeft--;
+      countEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(tick);
+        countEl.style.display = 'none';
+        if (file) {
+          var decoded = decodeURIComponent(file);
+          dlLink.href = decoded;
+          dlLink.style.display = 'inline-flex';
+          // Auto-trigger download
+          var a = document.createElement('a');
+          a.href = decoded;
+          a.download = '';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

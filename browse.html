@@ -1,45 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <title>Browse Music</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Music — Portal Music</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <header>
-        <a href="index.html" style="text-decoration:none; color:inherit;"><strong>← Back</strong></a>
-        <h2 id="page-title">Library</h2>
-    </header>
 
-    <div class="container">
-        <div id="music-list" class="grid" style="margin-top:2rem;"></div>
+  <div id="fav-banner" class="fav-banner">
+    ❤️ &nbsp;Favorites are saved for this session only and will clear when you close this tab.
+    <button id="fav-banner-dismiss" class="fav-banner-dismiss" title="Dismiss">✕</button>
+  </div>
+
+  <header>
+    <a href="index.html" class="logo">Portal Music</a>
+    <nav class="nav-links">
+      <a href="browse.html">Browse</a>
+      <a href="search.html">Search</a>
+      <a href="browse.html?filter=favorites">Favorites</a>
+      <a href="license.html">License</a>
+    </nav>
+    <div class="theme-btns">
+      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="light" title="Light">☀️</button>
+      <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="browse-header">
+      <h1 id="page-title">All Music</h1>
+      <p class="browse-subtitle" id="page-subtitle"></p>
     </div>
 
-    <script src="js/main.js"></script>
-    <script>
-        async function init() {
-            const params = new URLSearchParams(window.location.search);
-            const categoryFilter = params.get('cat');
-            const searchQuery = params.get('q')?.toLowerCase();
+    <!-- Sub-genre / filter chips -->
+    <div class="subgenre-filters" id="subgenre-filters" style="display:none;"></div>
 
-            const response = await fetch('data/music.json');
-            let songs = await response.json();
+    <!-- Ad Slot -->
+    <div class="ad-slot">
+      <!-- PASTE YOUR AD NETWORK CODE HERE -->
+      <span>Advertisement</span>
+    </div>
 
-            if (categoryFilter) {
-                document.getElementById('page-title').innerText = categoryFilter;
-                songs = songs.filter(s => s.category === categoryFilter);
-            } else if (searchQuery) {
-                document.getElementById('page-title').innerText = `Results for "${searchQuery}"`;
-                songs = songs.filter(s => 
-                    s.title.toLowerCase().includes(searchQuery) || 
-                    s.tags.some(t => t.toLowerCase().includes(searchQuery))
-                );
-            }
+    <!-- Track grid -->
+    <div class="grid" id="music-grid">
+      <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
+    </div>
 
-            document.getElementById('music-list').innerHTML = 
-                songs.length ? songs.map(createTrackCard).join('') : '<p>No tracks found.</p>';
+  </div>
+
+  <!-- Player Bar -->
+  <div id="player-bar">
+    <div class="player-art">🎵</div>
+    <div class="player-info">
+      <div class="player-title"  id="player-title">Select a track</div>
+      <div class="player-artist" id="player-artist"></div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="play-pause-btn">▶</button>
+    </div>
+    <div class="player-progress">
+      <div class="progress-track" id="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="player-time" id="player-time">0:00 / 0:00</div>
+    </div>
+    <button class="player-fav" id="player-fav-btn">🤍</button>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    var params       = new URLSearchParams(window.location.search);
+    var genre        = params.get('genre');
+    var artist       = params.get('artist');
+    var filterMode   = params.get('filter');   // "favorites" or null
+    var activeSub    = 'all';
+    var pageSongs    = [];                     // songs for this page (before sub-filter)
+
+    // --- Render sub-genre filter chips ---
+    function renderSubgenreFilters(songs) {
+      var filtersEl = document.getElementById('subgenre-filters');
+      var subs = [];
+      songs.forEach(function(s) {
+        if (s.subgenre && subs.indexOf(s.subgenre) === -1) subs.push(s.subgenre);
+      });
+      if (subs.length < 2) { filtersEl.style.display = 'none'; return; }
+
+      filtersEl.style.display = 'flex';
+      filtersEl.innerHTML =
+        '<button class="chip active" data-sub="all">All</button>' +
+        subs.map(function(s) {
+          return '<button class="chip" data-sub="' + s.replace(/"/g, '') + '">' + s + '</button>';
+        }).join('');
+
+      filtersEl.querySelectorAll('.chip').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          activeSub = btn.dataset.sub;
+          filtersEl.querySelectorAll('.chip').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.sub === activeSub);
+          });
+          renderGrid();
+        });
+      });
+    }
+
+    // --- Render track grid (respects activeSub) ---
+    function renderGrid() {
+      var songs = activeSub === 'all'
+        ? pageSongs
+        : pageSongs.filter(function(s) { return s.subgenre === activeSub; });
+
+      document.getElementById('music-grid').innerHTML = songs.length
+        ? songs.map(createTrackCard).join('')
+        : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks in this sub-genre yet.</p></div>';
+    }
+
+    // --- Main load ---
+    loadSongs().then(function(songs) {
+      var titleEl    = document.getElementById('page-title');
+      var subtitleEl = document.getElementById('page-subtitle');
+
+      if (filterMode === 'favorites') {
+        // Show only favorited tracks
+        var favIds = getFavorites();
+        titleEl.textContent = '❤️ Favorites';
+        subtitleEl.textContent = 'Your session favorites — clears when you close this tab.';
+        pageSongs = songs.filter(function(s) { return favIds.indexOf(String(s.id)) !== -1; });
+        if (pageSongs.length === 0) {
+          document.getElementById('music-grid').innerHTML =
+            '<div class="empty-state"><div class="empty-icon">🤍</div>' +
+            '<p>No favorites yet — tap 🤍 on any track to save it.</p></div>';
+          return;
         }
-        init();
-    </script>
+
+      } else if (genre) {
+        titleEl.textContent = genre;
+        var genreInfo = GENRES[genre];
+        if (genreInfo) subtitleEl.textContent = genreInfo.subgenres.join(' · ');
+        pageSongs = songs.filter(function(s) { return s.genre === genre; });
+
+      } else if (artist) {
+        titleEl.textContent = artist;
+        subtitleEl.textContent = 'All tracks by ' + artist;
+        pageSongs = songs.filter(function(s) { return s.artist === artist; });
+
+      } else {
+        titleEl.textContent = 'All Music';
+        subtitleEl.textContent = songs.length + ' tracks';
+        pageSongs = songs;
+      }
+
+      renderSubgenreFilters(pageSongs);
+      renderGrid();
+    });
+  </script>
 </body>
 </html>
