@@ -563,17 +563,30 @@ header {
   border: 1px dashed var(--border);
   border-radius: 12px;
   min-height: 90px;
+  display: block;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  text-align: center;
+}
+/* The adsbygoogle ins element */
+.ad-slot ins.adsbygoogle {
+  display: block !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+/* Fallback label shown when no ad renders */
+.ad-slot .ad-label {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 90px;
   color: var(--text-muted);
-  font-size: 0.78rem;
-  margin: 1.5rem 0;
-  text-align: center;
-  padding: 1rem;
-  overflow: hidden;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 .ad-slot.tall { min-height: 280px; }
+.ad-slot.tall .ad-label { min-height: 280px; }
 
 /* --- Player Bar --- */
 #player-bar {
