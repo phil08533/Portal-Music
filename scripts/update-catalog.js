@@ -1,31 +1,41 @@
 /**
- * Portal Music — Auto Catalog Updater
+ * Portal Music — Catalog Generator
  *
- * Run this script whenever you add new .mp3 files to the music/ folder.
- * It scans all subdirectories and adds skeleton entries to data/music.json
- * for any tracks not already listed.
+ * Scans the music/ folder and rebuilds data/music.json from the actual files.
  *
- * Usage:
+ * HOW IT WORKS:
+ *   - Reads every audio file from music/<genre-folder>/
+ *   - New files → added with auto-generated title, genre, and a unique id
+ *   - Existing entries (matched by file path) → kept exactly as-is so you
+ *     don't lose any edits you made (artist, tags, subgenre, featured, etc.)
+ *   - Files that no longer exist on disk → removed from the catalog
+ *
+ * USAGE:
  *   node scripts/update-catalog.js
  *
- * After running, open data/music.json and fill in:
- *   - "title"     → human-readable track name
- *   - "artist"    → leave null if unattributed
- *   - "subgenre"  → pick from the sub-genres listed for that genre (see GENRES below)
- *   - "tags"      → 3–6 descriptive words (mood, feel, instruments)
- *   - "duration"  → "M:SS" format (optional but helpful)
- *   - "featured"  → true to show on the homepage Featured section
+ * NAMING CONVENTION (optional but recommended):
+ *   Put files in the right genre folder and name them clearly:
+ *     music/hip-hop/block-moves.mp3        → title "Block Moves"
+ *     music/rb-soul/midnight-drive.mp3     → title "Midnight Drive"
+ *   Hyphens and underscores are converted to spaces and title-cased.
+ *
+ * AFTER RUNNING:
+ *   For each new entry, you can optionally fill in:
+ *     "artist"    → featured artist name, or leave null
+ *     "subgenre"  → e.g. "Trap", "Neo-Soul" (shows as filter chip)
+ *     "tags"      → ["dark", "bass", "heavy"] (powers fuzzy search)
+ *     "duration"  → "3:24"
+ *     "featured"  → true to show on the homepage Featured section
  */
 
 const fs   = require('fs');
 const path = require('path');
 
-// ── Configuration ─────────────────────────────────────────────────────────────
+// ── Config ────────────────────────────────────────────────────────────────────
 
 const MUSIC_DIR    = path.join(__dirname, '..', 'music');
 const CATALOG_PATH = path.join(__dirname, '..', 'data', 'music.json');
 
-// Maps folder name → display genre name
 const FOLDER_TO_GENRE = {
   'hip-hop':    'Hip-Hop',
   'electronic': 'Electronic',
@@ -37,7 +47,6 @@ const FOLDER_TO_GENRE = {
   'acoustic':   'Acoustic'
 };
 
-// Accepted audio extensions
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac']);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -49,76 +58,98 @@ function toTitleCase(str) {
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function shortId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-// ── Load existing catalog ─────────────────────────────────────────────────────
+// ── Load existing catalog (so we can preserve hand-edited fields) ─────────────
 
-let catalog = [];
+let existing = {};
 if (fs.existsSync(CATALOG_PATH)) {
   try {
-    catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
-    console.log(`Loaded existing catalog: ${catalog.length} track(s)`);
-  } catch (err) {
-    console.warn('Warning: Could not parse existing catalog. Starting fresh.');
-    catalog = [];
+    const raw = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
+    // Index by file path for fast lookup
+    raw.forEach(entry => { existing[entry.file] = entry; });
+    console.log(`Loaded ${raw.length} existing catalog entries.`);
+  } catch {
+    console.warn('Could not parse existing catalog — starting fresh.');
   }
 }
 
-const existingFiles = new Set(catalog.map(e => e.file));
-
 // ── Scan music/ folder ────────────────────────────────────────────────────────
 
-let added = 0;
-
 if (!fs.existsSync(MUSIC_DIR)) {
-  console.error('music/ directory not found. Create it and add subfolders.');
+  console.error('ERROR: music/ directory not found.');
   process.exit(1);
 }
 
+const catalog = [];
+let added   = 0;
+let kept    = 0;
+let removed = 0;
+
 const folders = fs.readdirSync(MUSIC_DIR, { withFileTypes: true })
   .filter(d => d.isDirectory())
-  .map(d => d.name);
+  .map(d => d.name)
+  .sort();
 
 for (const folder of folders) {
   const genre      = FOLDER_TO_GENRE[folder] || toTitleCase(folder);
   const folderPath = path.join(MUSIC_DIR, folder);
 
   const files = fs.readdirSync(folderPath)
-    .filter(f => AUDIO_EXTS.has(path.extname(f).toLowerCase()));
+    .filter(f => AUDIO_EXTS.has(path.extname(f).toLowerCase()))
+    .sort();
 
   for (const file of files) {
-    const relativePath = `music/${folder}/${file}`;
-    if (existingFiles.has(relativePath)) continue;  // already in catalog
+    const filePath = `music/${folder}/${file}`;
 
-    const nameNoExt = path.parse(file).name;
-    const title     = toTitleCase(nameNoExt);
-
-    catalog.push({
-      id:       shortId(),
-      title:    title,
-      artist:   null,          // ← fill in if attributed to an artist
-      genre:    genre,
-      subgenre: '',            // ← fill in sub-genre (see js/app.js GENRES)
-      tags:     [],            // ← add 3–6 descriptive tags
-      file:     relativePath,
-      duration: '',            // ← add "M:SS" duration (optional)
-      featured: false          // ← set true to appear on homepage
-    });
-
-    existingFiles.add(relativePath);
-    added++;
-    console.log(`  ✅ Added: ${relativePath}`);
+    if (existing[filePath]) {
+      // File was already in the catalog — keep all existing metadata
+      catalog.push(existing[filePath]);
+      kept++;
+    } else {
+      // New file — generate a skeleton entry
+      const title = toTitleCase(path.parse(file).name);
+      catalog.push({
+        id:       uid(),
+        title:    title,
+        artist:   null,
+        genre:    genre,
+        subgenre: '',
+        tags:     [],
+        file:     filePath,
+        duration: '',
+        featured: false
+      });
+      console.log(`  + Added:   ${filePath}`);
+      added++;
+    }
   }
 }
 
-// ── Write updated catalog ─────────────────────────────────────────────────────
+// Count removed (entries that were in catalog but file is gone from disk)
+const catalogFiles = new Set(catalog.map(e => e.file));
+Object.keys(existing).forEach(f => {
+  if (!catalogFiles.has(f)) {
+    console.log(`  - Removed: ${f} (file not found on disk)`);
+    removed++;
+  }
+});
+
+// ── Write ─────────────────────────────────────────────────────────────────────
 
 fs.mkdirSync(path.dirname(CATALOG_PATH), { recursive: true });
 fs.writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2), 'utf8');
 
-console.log(`\nDone. ${added} new track(s) added. Total in catalog: ${catalog.length}`);
+console.log(`
+Done.
+  ${added}   new track(s) added
+  ${kept}   existing track(s) kept (metadata preserved)
+  ${removed}   stale entry(s) removed
+  ${catalog.length}   total tracks in catalog
+`);
+
 if (added > 0) {
-  console.log('\n👉 Open data/music.json and fill in the empty fields for each new entry.');
+  console.log('Tip: For each new entry you can optionally fill in subgenre, tags, artist, and featured.');
 }
