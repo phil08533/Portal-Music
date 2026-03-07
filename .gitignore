@@ -1,0 +1,24 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment / secrets — NEVER commit these
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# Node (if you ever use npm locally)
+node_modules/
+npm-debug.log
+
+# Build output
+dist/
