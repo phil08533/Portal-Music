@@ -5,7 +5,13 @@
     "artist": "Avilyn Grace",
     "genre": "R&B / Soul",
     "subgenre": "Alt R&B",
-    "tags": ["dreamy", "atmospheric", "vocals", "smooth", "night"],
+    "tags": [
+      "dreamy",
+      "atmospheric",
+      "vocals",
+      "smooth",
+      "night"
+    ],
     "file": "music/rb-soul/neon-reflections.mp3",
     "duration": "3:42",
     "featured": true
@@ -16,7 +22,13 @@
     "artist": "Avilyn Grace",
     "genre": "R&B / Soul",
     "subgenre": "Neo-Soul",
-    "tags": ["late night", "soulful", "mellow", "emotional", "chill"],
+    "tags": [
+      "late night",
+      "soulful",
+      "mellow",
+      "emotional",
+      "chill"
+    ],
     "file": "music/rb-soul/midnight-drive.mp3",
     "duration": "4:10",
     "featured": true
@@ -27,7 +39,13 @@
     "artist": "Avilyn Grace",
     "genre": "Pop",
     "subgenre": "Indie Pop",
-    "tags": ["upbeat", "bright", "melodic", "summer", "feel-good"],
+    "tags": [
+      "upbeat",
+      "bright",
+      "melodic",
+      "summer",
+      "feel-good"
+    ],
     "file": "music/pop/city-lights.mp3",
     "duration": "3:28",
     "featured": false
@@ -38,7 +56,13 @@
     "artist": "Avilyn Grace",
     "genre": "Pop",
     "subgenre": "Dream Pop",
-    "tags": ["ethereal", "emotional", "soft", "vocals", "beautiful"],
+    "tags": [
+      "ethereal",
+      "emotional",
+      "soft",
+      "vocals",
+      "beautiful"
+    ],
     "file": "music/pop/glass-heart.mp3",
     "duration": "3:55",
     "featured": false
@@ -49,7 +73,13 @@
     "artist": "Dem Bois",
     "genre": "Hip-Hop",
     "subgenre": "Boom Bap",
-    "tags": ["hard", "lyrical", "raw", "drums", "classic"],
+    "tags": [
+      "hard",
+      "lyrical",
+      "raw",
+      "drums",
+      "classic"
+    ],
     "file": "music/hip-hop/street-sermon.mp3",
     "duration": "3:55",
     "featured": true
@@ -60,7 +90,13 @@
     "artist": "Dem Bois",
     "genre": "Hip-Hop",
     "subgenre": "Trap",
-    "tags": ["bass heavy", "dark", "808", "energy", "hard"],
+    "tags": [
+      "bass heavy",
+      "dark",
+      "808",
+      "energy",
+      "hard"
+    ],
     "file": "music/hip-hop/block-moves.mp3",
     "duration": "2:58",
     "featured": true
@@ -71,7 +107,13 @@
     "artist": "Dem Bois",
     "genre": "Hip-Hop",
     "subgenre": "Alternative Hip-Hop",
-    "tags": ["soulful", "storytelling", "deep", "melodic", "conscious"],
+    "tags": [
+      "soulful",
+      "storytelling",
+      "deep",
+      "melodic",
+      "conscious"
+    ],
     "file": "music/hip-hop/hood-gospel.mp3",
     "duration": "4:22",
     "featured": false
@@ -82,7 +124,13 @@
     "artist": null,
     "genre": "Electronic",
     "subgenre": "Synthwave",
-    "tags": ["synth", "dark", "atmospheric", "80s", "retro"],
+    "tags": [
+      "synth",
+      "dark",
+      "atmospheric",
+      "80s",
+      "retro"
+    ],
     "file": "music/electronic/neon-sunset.mp3",
     "duration": "4:18",
     "featured": false
@@ -93,7 +141,13 @@
     "artist": null,
     "genre": "Electronic",
     "subgenre": "House",
-    "tags": ["groovy", "upbeat", "dance", "four-on-floor", "club"],
+    "tags": [
+      "groovy",
+      "upbeat",
+      "dance",
+      "four-on-floor",
+      "club"
+    ],
     "file": "music/electronic/pulse-cascade.mp3",
     "duration": "5:02",
     "featured": false
@@ -104,7 +158,13 @@
     "artist": null,
     "genre": "Electronic",
     "subgenre": "Future Bass",
-    "tags": ["energetic", "drops", "bright", "modern", "festival"],
+    "tags": [
+      "energetic",
+      "drops",
+      "bright",
+      "modern",
+      "festival"
+    ],
     "file": "music/electronic/warp-gate.mp3",
     "duration": "3:35",
     "featured": false
@@ -115,7 +175,13 @@
     "artist": null,
     "genre": "Electronic",
     "subgenre": "Techno",
-    "tags": ["industrial", "driving", "dark", "hypnotic", "underground"],
+    "tags": [
+      "industrial",
+      "driving",
+      "dark",
+      "hypnotic",
+      "underground"
+    ],
     "file": "music/electronic/dark-signal.mp3",
     "duration": "6:04",
     "featured": false
@@ -126,7 +192,13 @@
     "artist": null,
     "genre": "Cinematic",
     "subgenre": "Epic",
-    "tags": ["orchestral", "triumphant", "intense", "choir", "powerful"],
+    "tags": [
+      "orchestral",
+      "triumphant",
+      "intense",
+      "choir",
+      "powerful"
+    ],
     "file": "music/cinematic/battle-hymn.mp3",
     "duration": "3:50",
     "featured": false
@@ -137,7 +209,13 @@
     "artist": null,
     "genre": "Cinematic",
     "subgenre": "Suspense",
-    "tags": ["tense", "dark", "thriller", "strings", "mysterious"],
+    "tags": [
+      "tense",
+      "dark",
+      "thriller",
+      "strings",
+      "mysterious"
+    ],
     "file": "music/cinematic/shadow-protocol.mp3",
     "duration": "2:45",
     "featured": false
@@ -148,7 +226,13 @@
     "artist": null,
     "genre": "Cinematic",
     "subgenre": "Adventure",
-    "tags": ["hopeful", "sweeping", "journey", "inspiring", "wide"],
+    "tags": [
+      "hopeful",
+      "sweeping",
+      "journey",
+      "inspiring",
+      "wide"
+    ],
     "file": "music/cinematic/open-roads.mp3",
     "duration": "4:05",
     "featured": false
@@ -159,7 +243,13 @@
     "artist": null,
     "genre": "Cinematic",
     "subgenre": "Dramatic",
-    "tags": ["emotional", "piano", "heavy", "moving", "film"],
+    "tags": [
+      "emotional",
+      "piano",
+      "heavy",
+      "moving",
+      "film"
+    ],
     "file": "music/cinematic/aftermath.mp3",
     "duration": "3:18",
     "featured": false
@@ -170,7 +260,13 @@
     "artist": null,
     "genre": "Lo-Fi",
     "subgenre": "Study Beats",
-    "tags": ["chill", "relaxing", "background", "focus", "cozy"],
+    "tags": [
+      "chill",
+      "relaxing",
+      "background",
+      "focus",
+      "cozy"
+    ],
     "file": "music/lo-fi/coffee-and-rain.mp3",
     "duration": "3:22",
     "featured": false
@@ -181,7 +277,13 @@
     "artist": null,
     "genre": "Lo-Fi",
     "subgenre": "Late Night",
-    "tags": ["melancholy", "slow", "introspective", "jazz", "quiet"],
+    "tags": [
+      "melancholy",
+      "slow",
+      "introspective",
+      "jazz",
+      "quiet"
+    ],
     "file": "music/lo-fi/2am-thoughts.mp3",
     "duration": "3:48",
     "featured": false
@@ -192,7 +294,13 @@
     "artist": null,
     "genre": "Lo-Fi",
     "subgenre": "Jazz Hop",
-    "tags": ["warm", "jazzy", "smooth", "vintage", "mellow"],
+    "tags": [
+      "warm",
+      "jazzy",
+      "smooth",
+      "vintage",
+      "mellow"
+    ],
     "file": "music/lo-fi/vinyl-cafe.mp3",
     "duration": "3:10",
     "featured": false
@@ -203,7 +311,13 @@
     "artist": null,
     "genre": "Acoustic",
     "subgenre": "Folk",
-    "tags": ["peaceful", "nature", "guitar", "gentle", "outdoor"],
+    "tags": [
+      "peaceful",
+      "nature",
+      "guitar",
+      "gentle",
+      "outdoor"
+    ],
     "file": "music/acoustic/forest-walk.mp3",
     "duration": "2:58",
     "featured": false
@@ -214,7 +328,13 @@
     "artist": null,
     "genre": "Acoustic",
     "subgenre": "Singer-Songwriter",
-    "tags": ["soft", "warm", "happy", "simple", "relaxed"],
+    "tags": [
+      "soft",
+      "warm",
+      "happy",
+      "simple",
+      "relaxed"
+    ],
     "file": "music/acoustic/sunday-morning.mp3",
     "duration": "3:33",
     "featured": false
@@ -225,7 +345,13 @@
     "artist": null,
     "genre": "Ambient",
     "subgenre": "Space",
-    "tags": ["vast", "space", "ethereal", "pads", "floating"],
+    "tags": [
+      "vast",
+      "space",
+      "ethereal",
+      "pads",
+      "floating"
+    ],
     "file": "music/ambient/starfield.mp3",
     "duration": "6:12",
     "featured": false
@@ -236,7 +362,13 @@
     "artist": null,
     "genre": "Ambient",
     "subgenre": "Focus",
-    "tags": ["concentration", "minimal", "calm", "productivity", "steady"],
+    "tags": [
+      "concentration",
+      "minimal",
+      "calm",
+      "productivity",
+      "steady"
+    ],
     "file": "music/ambient/deep-focus.mp3",
     "duration": "7:00",
     "featured": false
