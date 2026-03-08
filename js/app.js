@@ -292,7 +292,7 @@ function createTrackCard(song) {
           'onclick=\'playSong(' + songJson + ')\'>▶ Play</button>' +
         '<a class="btn-dl" ' +
           'href="download.html?file=' + encodeURIComponent(song.file) +
-          '&title=' + encodeURIComponent(song.title) + '">⬇</a>' +
+          '&title=' + encodeURIComponent(song.title) + '">Download</a>' +
       '</div>' +
     '</div>'
   );
