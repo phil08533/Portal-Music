@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer ring -->
+  <circle cx="60" cy="60" r="42" fill="none" stroke="url(#g)" stroke-width="4"/>
+  <!-- Spiral arms -->
+  <path d="M60 18 C85 18, 102 40, 102 60 C102 80, 85 98, 65 95 C45 92, 30 78, 32 60 C34 42, 48 32, 60 34 C72 36, 80 46, 78 58 C76 70, 66 78, 56 75 C46 72, 40 62, 44 54 C48 46, 56 42, 62 46" fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/>
+  <!-- Stars -->
+  <path d="M16 38 l2-4 2 4-4-2 4 0z" fill="#60a5fa"/>
+  <path d="M98 38 l2-4 2 4-4-2 4 0z" fill="#a78bfa"/>
+  <path d="M16 82 l1.5-3 1.5 3-3-1.5 3 0z" fill="#818cf8" opacity="0.7"/>
+</svg>
