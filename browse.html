@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browse Music — Portal Music</title>
+  <meta name="description" content="Browse free royalty-free music by genre. Rock, Jazz, Hip-Hop, Electronic, Cinematic, Classical, Country, and more.">
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
@@ -17,7 +18,7 @@
   </div>
 
   <header>
-    <a href="index.html" class="logo">Portal Music</a>
+    <a href="index.html" class="logo"><span class="portal-emoji">🕳️</span> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
       <a href="search.html">Search</a>
@@ -31,33 +32,57 @@
     </div>
   </header>
 
-  <div class="container">
-
-    <div class="browse-header">
-      <h1 id="page-title">All Music</h1>
-      <p class="browse-subtitle" id="page-subtitle"></p>
-    </div>
-
-    <!-- Sub-genre / filter chips -->
-    <div class="subgenre-filters" id="subgenre-filters" style="display:none;"></div>
-
-    <!-- Ad Slot — Responsive Banner -->
-    <div class="ad-slot">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="XXXXXXXXXX"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+  <div class="page-with-side-ads">
+    <aside class="side-ad left-ad">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+           data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <div class="container">
+
+      <div class="browse-header">
+        <h1 id="page-title">All Music</h1>
+        <p class="browse-subtitle" id="page-subtitle"></p>
+      </div>
+
+      <!-- Genre Accordion (shown when no specific genre/artist selected) -->
+      <div id="genre-accordion" class="genre-accordion"></div>
+
+      <!-- Sub-genre / filter chips (shown when browsing a genre) -->
+      <div class="subgenre-filters" id="subgenre-filters" style="display:none;"></div>
+
+      <!-- Ad Slot -->
+      <div class="ad-slot">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+             data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+
+      <!-- Track grid -->
+      <div class="grid" id="music-grid">
+        <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
+      </div>
+
     </div>
 
-    <!-- Track grid -->
-    <div class="grid" id="music-grid">
-      <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
-    </div>
-
+    <aside class="side-ad right-ad">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+           data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
   </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2025 Portal Music. All tracks are free to use.</p>
+      <div class="footer-links">
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Player Bar -->
   <div id="player-bar">
@@ -82,10 +107,66 @@
   <script>
     var params       = new URLSearchParams(window.location.search);
     var genre        = params.get('genre');
+    var subgenreParam = params.get('subgenre');
     var artist       = params.get('artist');
-    var filterMode   = params.get('filter');   // "favorites" or null
+    var filterMode   = params.get('filter');
     var activeSub    = 'all';
-    var pageSongs    = [];                     // songs for this page (before sub-filter)
+    var pageSongs    = [];
+
+    // --- Genre Accordion (all genres with slide-down subgenres) ---
+    function renderAccordion(songs) {
+      var accordion = document.getElementById('genre-accordion');
+      if (genre || artist || filterMode) {
+        accordion.style.display = 'none';
+        return;
+      }
+
+      // Count per subgenre
+      var subCounts = {};
+      songs.forEach(function(s) {
+        if (s.subgenre) subCounts[s.subgenre] = (subCounts[s.subgenre] || 0) + 1;
+      });
+
+      accordion.innerHTML = Object.entries(GENRES).map(function(entry) {
+        var g = entry[0], info = entry[1];
+        var totalCount = 0;
+        info.subgenres.forEach(function(sub) { totalCount += (subCounts[sub] || 0); });
+
+        var subItems = info.subgenres.map(function(sub) {
+          var c = subCounts[sub] || 0;
+          return '<a href="browse.html?genre=' + encodeURIComponent(g) +
+            '&subgenre=' + encodeURIComponent(sub) +
+            '" class="accordion-sub-item">' +
+            '<span>' + sub + '</span>' +
+            '<span class="sub-count">' + c + '</span>' +
+          '</a>';
+        }).join('');
+
+        return '<div class="accordion-item">' +
+          '<button class="accordion-trigger" data-genre="' + g + '">' +
+            '<span class="accordion-icon">' + info.icon + '</span>' +
+            '<span class="accordion-label">' + g + '</span>' +
+            '<span class="accordion-count">' + totalCount + ' tracks</span>' +
+            '<span class="accordion-arrow">▸</span>' +
+          '</button>' +
+          '<div class="accordion-panel">' + subItems + '</div>' +
+        '</div>';
+      }).join('');
+
+      // Click handlers
+      accordion.querySelectorAll('.accordion-trigger').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var item = btn.parentElement;
+          var wasOpen = item.classList.contains('open');
+          // Close all
+          accordion.querySelectorAll('.accordion-item.open').forEach(function(el) {
+            el.classList.remove('open');
+          });
+          // Toggle this one
+          if (!wasOpen) item.classList.add('open');
+        });
+      });
+    }
 
     // --- Render sub-genre filter chips ---
     function renderSubgenreFilters(songs) {
@@ -100,8 +181,15 @@
       filtersEl.innerHTML =
         '<button class="chip active" data-sub="all">All</button>' +
         subs.map(function(s) {
-          return '<button class="chip" data-sub="' + s.replace(/"/g, '') + '">' + s + '</button>';
+          var isActive = (s === subgenreParam) ? ' active' : '';
+          return '<button class="chip' + isActive + '" data-sub="' + s.replace(/"/g, '') + '">' + s + '</button>';
         }).join('');
+
+      // If subgenre param set, activate it
+      if (subgenreParam) {
+        activeSub = subgenreParam;
+        filtersEl.querySelector('.chip[data-sub="all"]').classList.remove('active');
+      }
 
       filtersEl.querySelectorAll('.chip').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -114,7 +202,7 @@
       });
     }
 
-    // --- Render track grid (respects activeSub) ---
+    // --- Render track grid ---
     function renderGrid() {
       var songs = activeSub === 'all'
         ? pageSongs
@@ -131,7 +219,6 @@
       var subtitleEl = document.getElementById('page-subtitle');
 
       if (filterMode === 'favorites') {
-        // Show only favorited tracks
         var favIds = getFavorites();
         titleEl.textContent = '❤️ Favorites';
         subtitleEl.textContent = 'Your session favorites — clears when you close this tab.';
@@ -147,7 +234,13 @@
         titleEl.textContent = genre;
         var genreInfo = GENRES[genre];
         if (genreInfo) subtitleEl.textContent = genreInfo.subgenres.join(' · ');
-        pageSongs = songs.filter(function(s) { return s.genre === genre; });
+        // Filter to songs in this parent genre's subgenres
+        pageSongs = songs.filter(function(s) {
+          if (genreInfo) {
+            return genreInfo.subgenres.indexOf(s.subgenre) !== -1 || s.genre === genre;
+          }
+          return s.genre === genre;
+        });
 
       } else if (artist) {
         titleEl.textContent = artist;
@@ -155,13 +248,19 @@
         pageSongs = songs.filter(function(s) { return s.artist === artist; });
 
       } else {
-        titleEl.textContent = 'All Music';
-        subtitleEl.textContent = songs.length + ' tracks';
+        titleEl.textContent = 'Browse All Genres';
+        subtitleEl.textContent = songs.length + ' tracks available. Click a genre to expand.';
         pageSongs = songs;
       }
 
+      renderAccordion(songs);
       renderSubgenreFilters(pageSongs);
       renderGrid();
+
+      // If browsing all (no filter), hide the track grid initially
+      if (!genre && !artist && !filterMode) {
+        document.getElementById('music-grid').style.display = 'none';
+      }
     });
   </script>
 </body>

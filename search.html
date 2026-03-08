@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search — Portal Music</title>
+  <meta name="description" content="Search free royalty-free music by genre, mood, artist, or title. Filter by multiple categories.">
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
@@ -17,7 +18,7 @@
   </div>
 
   <header>
-    <a href="index.html" class="logo">Portal Music</a>
+    <a href="index.html" class="logo"><span class="portal-emoji">🕳️</span> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
       <a href="search.html">Search</a>
@@ -31,44 +32,77 @@
     </div>
   </header>
 
-  <div class="container">
-
-    <div class="search-page-wrap">
-      <div class="search-bar-wrap" style="max-width:700px;margin:0 auto;">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="search-input"
-               placeholder="Search by genre, mood, artist, title…"
-               autocomplete="off">
-        <button class="search-btn" id="do-search-btn">Search</button>
-      </div>
-    </div>
-
-    <!-- Quick genre chips -->
-    <div class="chips-row" id="genre-chips"></div>
-
-    <!-- Ad Slot — Responsive Banner -->
-    <div class="ad-slot">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="XXXXXXXXXX"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+  <div class="page-with-side-ads">
+    <aside class="side-ad left-ad">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+           data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <div class="container">
+
+      <div class="search-page-wrap">
+        <div class="search-bar-wrap" style="max-width:700px;margin:0 auto;">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-input"
+                 placeholder="Search by genre, mood, artist, title…"
+                 autocomplete="off">
+          <button class="search-btn" id="do-search-btn">Search</button>
+        </div>
+      </div>
+
+      <!-- Category filter section: main genres with subgenres -->
+      <div class="filter-section">
+        <h3>Filter by Genre &amp; Subgenre <span class="filter-hint">(select multiple)</span></h3>
+        <div class="filter-genres" id="filter-genres"></div>
+      </div>
+
+      <!-- Ad Slot -->
+      <div class="ad-slot">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+             data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+
+      <!-- Results info bar -->
+      <div id="results-info" class="search-results-info"></div>
+
+      <!-- Results grid -->
+      <div class="grid" id="results-grid">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>Start typing or select categories to filter music…</p>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Results info bar -->
-    <div id="results-info" class="search-results-info"></div>
+    <aside class="side-ad right-ad">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+           data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+  </div>
 
-    <!-- Results grid -->
-    <div class="grid" id="results-grid">
-      <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <p>Start typing to search for music…</p>
+  <!-- Selected filters bar (pops up at bottom) -->
+  <div id="selected-filters-bar" class="selected-filters-bar" style="display:none;">
+    <div class="selected-filters-inner">
+      <span class="selected-label">Filters:</span>
+      <div class="selected-chips" id="selected-chips"></div>
+      <button class="clear-filters-btn" id="clear-filters-btn">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2025 Portal Music. All tracks are free to use.</p>
+      <div class="footer-links">
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy Policy</a>
       </div>
     </div>
-
-  </div>
+  </footer>
 
   <!-- Player Bar -->
   <div id="player-bar">
@@ -93,31 +127,128 @@
   <script>
     var songs = [];
     var debounceTimer = null;
+    var selectedFilters = []; // { type: 'genre'|'subgenre', value: 'Rock' }
 
-    // --- Run search ---
+    // --- Build filter UI with all genres and subgenres ---
+    function renderFilterGenres() {
+      var html = '';
+      Object.entries(GENRES).forEach(function(entry) {
+        var g = entry[0], info = entry[1];
+        html += '<div class="filter-group">';
+        html += '<button class="chip filter-chip" data-type="genre" data-value="' + g + '">' +
+          info.icon + ' ' + g + '</button>';
+        info.subgenres.forEach(function(sub) {
+          html += '<button class="chip filter-chip sub-chip" data-type="subgenre" data-value="' + sub + '">' +
+            sub + '</button>';
+        });
+        html += '</div>';
+      });
+      document.getElementById('filter-genres').innerHTML = html;
+
+      // Add click handlers
+      document.querySelectorAll('.filter-chip').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var type = btn.dataset.type;
+          var value = btn.dataset.value;
+          var idx = selectedFilters.findIndex(function(f) { return f.type === type && f.value === value; });
+          if (idx >= 0) {
+            selectedFilters.splice(idx, 1);
+            btn.classList.remove('active');
+          } else {
+            selectedFilters.push({ type: type, value: value });
+            btn.classList.add('active');
+          }
+          updateSelectedBar();
+          doSearch();
+        });
+      });
+    }
+
+    // --- Update bottom selected filters bar ---
+    function updateSelectedBar() {
+      var bar = document.getElementById('selected-filters-bar');
+      var chips = document.getElementById('selected-chips');
+      if (selectedFilters.length === 0) {
+        bar.style.display = 'none';
+        return;
+      }
+      bar.style.display = 'flex';
+      chips.innerHTML = selectedFilters.map(function(f, i) {
+        return '<span class="selected-chip">' + f.value +
+          '<button class="remove-chip" data-idx="' + i + '">✕</button></span>';
+      }).join('');
+
+      chips.querySelectorAll('.remove-chip').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var idx = parseInt(btn.dataset.idx);
+          var removed = selectedFilters[idx];
+          selectedFilters.splice(idx, 1);
+          // Deactivate the corresponding chip
+          document.querySelectorAll('.filter-chip').forEach(function(fc) {
+            if (fc.dataset.type === removed.type && fc.dataset.value === removed.value) {
+              fc.classList.remove('active');
+            }
+          });
+          updateSelectedBar();
+          doSearch();
+        });
+      });
+    }
+
+    document.getElementById('clear-filters-btn').addEventListener('click', function() {
+      selectedFilters = [];
+      document.querySelectorAll('.filter-chip.active').forEach(function(c) { c.classList.remove('active'); });
+      updateSelectedBar();
+      doSearch();
+    });
+
+    // --- Run search (combines text query + category filters) ---
     function doSearch() {
       var q = document.getElementById('search-input').value;
       var infoEl = document.getElementById('results-info');
       var gridEl = document.getElementById('results-grid');
 
-      if (!q.trim()) {
-        infoEl.textContent = '';
-        gridEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>Start typing to search for music…</p></div>';
-        return;
+      var filtered = songs;
+
+      // Apply category filters
+      if (selectedFilters.length > 0) {
+        filtered = songs.filter(function(s) {
+          return selectedFilters.some(function(f) {
+            if (f.type === 'genre') return s.genre === f.value;
+            if (f.type === 'subgenre') return s.subgenre === f.value;
+            return false;
+          });
+        });
       }
 
-      var results = fuzzySearch(songs, q);
-      var n = results.length;
-      infoEl.textContent = n + ' result' + (n !== 1 ? 's' : '') + ' for "' + q + '"';
+      // Apply text search on top
+      if (q.trim()) {
+        filtered = fuzzySearch(filtered, q);
+      }
 
-      if (results.length) {
-        gridEl.innerHTML = results.map(createTrackCard).join('');
+      var n = filtered.length;
+      var label = '';
+      if (q.trim() && selectedFilters.length > 0) {
+        label = n + ' result' + (n !== 1 ? 's' : '') + ' for "' + q + '" in selected categories';
+      } else if (q.trim()) {
+        label = n + ' result' + (n !== 1 ? 's' : '') + ' for "' + q + '"';
+      } else if (selectedFilters.length > 0) {
+        label = n + ' track' + (n !== 1 ? 's' : '') + ' in selected categories';
+      } else {
+        label = '';
+      }
+      infoEl.textContent = label;
+
+      if (!q.trim() && selectedFilters.length === 0) {
+        gridEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>Start typing or select categories to filter music…</p></div>';
+      } else if (filtered.length) {
+        gridEl.innerHTML = filtered.map(createTrackCard).join('');
       } else {
         gridEl.innerHTML =
           '<div class="empty-state">' +
             '<div class="empty-icon">😔</div>' +
-            '<p>No tracks found for <strong>"' + q + '"</strong></p>' +
-            '<p style="font-size:.85rem;margin-top:8px;">Try a genre name, mood, or similar word.</p>' +
+            '<p>No tracks found</p>' +
+            '<p style="font-size:.85rem;margin-top:8px;">Try a different search or category combination.</p>' +
           '</div>';
       }
     }
@@ -134,27 +265,16 @@
       clearTimeout(debounceTimer); doSearch();
     });
 
-    // --- Genre quick chips ---
-    function renderGenreChips() {
-      document.getElementById('genre-chips').innerHTML = Object.entries(GENRES).map(function(entry) {
-        var genre = entry[0], info = entry[1];
-        return '<a href="browse.html?genre=' + encodeURIComponent(genre) + '" class="chip">' +
-          info.icon + ' ' + genre + '</a>';
-      }).join('');
-    }
-
     // --- Load & init ---
     loadSongs().then(function(s) {
       songs = s;
-      renderGenreChips();
+      renderFilterGenres();
 
-      // If navigated here with ?q=... run search immediately
       var initialQ = new URLSearchParams(window.location.search).get('q') || '';
       if (initialQ) {
         document.getElementById('search-input').value = initialQ;
         doSearch();
       } else {
-        // Auto-focus for desktop
         document.getElementById('search-input').focus();
       }
     });

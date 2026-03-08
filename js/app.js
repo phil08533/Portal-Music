@@ -2,17 +2,25 @@
 // Portal Music — Application JavaScript
 // ============================================
 
-// --- Genre Config (main genres + sub-genres) ---
+// --- Genre Config (main genres + sub-genres mapped from music folders) ---
 const GENRES = {
-  'Hip-Hop':      { icon: '🎤', subgenres: ['Trap', 'Boom Bap', 'Drill', 'Lo-Fi Hip-Hop', 'East Coast', 'West Coast', 'Alternative Hip-Hop'] },
-  'Electronic':   { icon: '🎛️', subgenres: ['Synthwave', 'House', 'Techno', 'Future Bass', 'Dubstep', 'Electro'] },
-  'Cinematic':    { icon: '🎬', subgenres: ['Epic', 'Suspense', 'Adventure', 'Dramatic', 'Orchestral', 'Dark Cinematic'] },
-  'Lo-Fi':        { icon: '☕', subgenres: ['Study Beats', 'Jazz Hop', 'Late Night', 'Chill Hop', 'Rainy Day'] },
-  'R&B / Soul':   { icon: '🎶', subgenres: ['Neo-Soul', 'Alt R&B', 'Contemporary R&B', 'Gospel', 'Slow Jam'] },
-  'Pop':          { icon: '✨', subgenres: ['Indie Pop', 'Dream Pop', 'Dance Pop', 'Electropop', 'Synth Pop'] },
-  'Ambient':      { icon: '🌊', subgenres: ['Space', 'Focus', 'Meditation', 'Nature', 'Dark Ambient'] },
-  'Acoustic':     { icon: '🎸', subgenres: ['Folk', 'Singer-Songwriter', 'Fingerstyle', 'Indie Folk', 'Bluegrass'] }
+  'Rock':              { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock'] },
+  'Jazz':              { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
+  'Hip-Hop':           { icon: '🎤', subgenres: ['Hiphop'] },
+  'Electronic':        { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop'] },
+  'Cinematic':         { icon: '🎬', subgenres: ['Cinematic', 'Dramatic'] },
+  'Classical':         { icon: '🎻', subgenres: ['Classical', 'Romantic'] },
+  'Country & Folk':    { icon: '🤠', subgenres: ['Country', 'Bluegrass'] },
+  'Ambient & Chill':   { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting'] },
+  'Dark & Suspense':   { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
+  'Playful & Mood':    { icon: '🎭', subgenres: ['Playful', 'Sad'] }
 };
+
+// Map each music folder name to its parent genre
+const FOLDER_TO_PARENT = {};
+Object.entries(GENRES).forEach(function(entry) {
+  entry[1].subgenres.forEach(function(sub) { FOLDER_TO_PARENT[sub] = entry[0]; });
+});
 
 // --- Storage Keys ---
 const THEME_KEY   = 'pm_theme';
@@ -31,7 +39,7 @@ function setTheme(theme) {
 }
 
 function initTheme() {
-  setTheme(localStorage.getItem(THEME_KEY) || 'dark');
+  setTheme(localStorage.getItem(THEME_KEY) || 'light');
 }
 
 // ============================================
