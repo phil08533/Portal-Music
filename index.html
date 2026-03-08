@@ -1,16 +1,32 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Music — Free AI Music for Creators</title>
-  <meta name="description" content="Download free AI-generated music for your videos, podcasts, and creative projects. Royalty-free tracks across Hip-Hop, Electronic, Cinematic, Lo-Fi, R&B, and more.">
+  <title>Portal Music — Free Music for Creators</title>
+  <meta name="description" content="Download free royalty-free music for your videos, podcasts, and creative projects. We never copyright strike YouTube videos. Commercial use allowed.">
+  <meta name="keywords" content="free music, royalty free, no copyright, youtube music, background music, creator music">
+  <link rel="canonical" href="https://portal-music.com/">
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
           crossorigin="anonymous"></script>
 </head>
 <body>
+
+  <!-- Splash Overlay -->
+  <div id="splash-overlay" class="splash-overlay">
+    <div class="splash-content">
+      <div class="portal-vortex">
+        <div class="vortex-ring r1"></div>
+        <div class="vortex-ring r2"></div>
+        <div class="vortex-ring r3"></div>
+        <div class="vortex-ring r4"></div>
+        <div class="portal-core"></div>
+      </div>
+      <h1 class="splash-title">Portal Music</h1>
+    </div>
+  </div>
 
   <!-- Favorites Banner -->
   <div id="fav-banner" class="fav-banner">
@@ -20,7 +36,7 @@
 
   <!-- Header -->
   <header>
-    <a href="index.html" class="logo">Portal Music</a>
+    <a href="index.html" class="logo"><span class="portal-emoji">🕳️</span> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
       <a href="search.html">Search</a>
@@ -34,83 +50,139 @@
     </div>
   </header>
 
-  <div class="container">
-
-    <!-- Hero Search -->
-    <section class="hero">
-      <h1>Free AI Music<br>for <span>Creators</span></h1>
-      <p>Royalty-free tracks for videos, podcasts, streams &amp; projects.</p>
-      <div class="search-bar-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="hero-search"
-               placeholder="Search genres, moods, artists, titles…"
-               autocomplete="off">
-        <button class="search-btn" id="hero-search-btn">Search</button>
-      </div>
-    </section>
-
-    <!-- Top Ad Slot — Leaderboard / Responsive -->
-    <div class="ad-slot" id="ad-top">
-      <!-- To activate: create an ad unit in AdSense → Ads → By ad unit,
-           copy its data-ad-slot value, and replace XXXXXXXXXX below.
-           Auto Ads (enabled in your AdSense account) will also place ads
-           automatically without needing a slot ID here. -->
+  <div class="page-with-side-ads">
+    <!-- Left Ad Rail -->
+    <aside class="side-ad left-ad">
       <ins class="adsbygoogle"
            style="display:block"
            data-ad-client="ca-pub-5642457707478801"
            data-ad-slot="XXXXXXXXXX"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-ad-format="vertical"
+           data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
+    </aside>
 
-    <!-- Genre Categories -->
-    <div class="section-header">
-      <h2>Browse by Genre</h2>
-      <a href="browse.html">View all →</a>
-    </div>
-    <div class="genre-grid" id="genre-grid">
-      <div style="grid-column:1/-1;color:var(--text-muted);font-size:.85rem;">Loading genres…</div>
-    </div>
+    <div class="container">
 
-    <!-- Featured Artists -->
-    <div class="section-header">
-      <h2>Featured Artists</h2>
-    </div>
-    <div class="artists-grid" id="artists-grid">
-      <!-- Populated by JS -->
-    </div>
+      <!-- Hero Search -->
+      <section class="hero">
+        <h1>Free Music<br>for <span>Creators</span></h1>
+        <p>Royalty-free tracks for videos, podcasts, streams &amp; projects.</p>
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="hero-search"
+                 placeholder="Search genres, moods, artists, titles…"
+                 autocomplete="off">
+          <button class="search-btn" id="hero-search-btn">Search</button>
+        </div>
+      </section>
 
-    <!-- Featured Tracks -->
-    <div class="section-header">
-      <h2>Featured Tracks</h2>
-      <a href="browse.html">See all →</a>
-    </div>
-    <div class="grid" id="featured-grid">
-      <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
-    </div>
+      <!-- Trust Banner -->
+      <section class="trust-banner">
+        <div class="trust-item">
+          <span class="trust-icon">✅</span>
+          <div>
+            <strong>We Never Copyright Strike</strong>
+            <p>Use our music on YouTube, Twitch, TikTok &mdash; we will never claim or strike your videos. Ever.</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">💼</span>
+          <div>
+            <strong>Commercial Use Allowed</strong>
+            <p>Use in ads, client work, products, and commercial projects. No hidden fees.</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🎬</span>
+          <div>
+            <strong>100% Free Forever</strong>
+            <p>No subscriptions, no trials. Every track is free to download and use right now.</p>
+          </div>
+        </div>
+      </section>
 
-    <!-- Recently Played (hidden until there is history) -->
-    <div id="recent-section" style="display:none;">
+      <!-- Top Ad Slot -->
+      <div class="ad-slot" id="ad-top">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5642457707478801"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+
+      <!-- Genre Categories -->
       <div class="section-header">
-        <h2>Recently Played</h2>
-        <button id="clear-recent-btn">Clear history</button>
+        <h2>Browse by Genre</h2>
+        <a href="browse.html">View all →</a>
       </div>
-      <div class="grid" id="recent-grid"></div>
+      <div class="genre-grid" id="genre-grid">
+        <div style="grid-column:1/-1;color:var(--text-muted);font-size:.85rem;">Loading genres…</div>
+      </div>
+
+      <!-- Featured Artists -->
+      <div class="section-header">
+        <h2>Featured Artists</h2>
+      </div>
+      <div class="artists-grid" id="artists-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Featured Tracks -->
+      <div class="section-header">
+        <h2>Featured Tracks</h2>
+        <a href="browse.html">See all →</a>
+      </div>
+      <div class="grid" id="featured-grid">
+        <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
+      </div>
+
+      <!-- Recently Played (hidden until there is history) -->
+      <div id="recent-section" style="display:none;">
+        <div class="section-header">
+          <h2>Recently Played</h2>
+          <button id="clear-recent-btn">Clear history</button>
+        </div>
+        <div class="grid" id="recent-grid"></div>
+      </div>
+
+      <!-- Bottom Ad Slot -->
+      <div class="ad-slot" style="margin-top:2.5rem;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5642457707478801"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+
     </div>
 
-    <!-- Bottom Ad Slot — Leaderboard / Responsive -->
-    <div class="ad-slot" style="margin-top:2.5rem;">
+    <!-- Right Ad Rail -->
+    <aside class="side-ad right-ad">
       <ins class="adsbygoogle"
            style="display:block"
            data-ad-client="ca-pub-5642457707478801"
            data-ad-slot="XXXXXXXXXX"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-ad-format="vertical"
+           data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
+    </aside>
   </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2025 Portal Music. All tracks are free to use.</p>
+      <div class="footer-links">
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Player Bar -->
   <div id="player-bar">
@@ -133,6 +205,25 @@
 
   <script src="js/app.js"></script>
   <script>
+    // --- Splash animation ---
+    (function() {
+      var splash = document.getElementById('splash-overlay');
+      if (splash) {
+        // Check if already seen this session
+        if (sessionStorage.getItem('pm_splash_seen')) {
+          splash.style.display = 'none';
+        } else {
+          setTimeout(function() {
+            splash.classList.add('fade-out');
+            setTimeout(function() {
+              splash.style.display = 'none';
+              sessionStorage.setItem('pm_splash_seen', '1');
+            }, 800);
+          }, 2200);
+        }
+      }
+    })();
+
     // --- Hero search ---
     function heroSearch() {
       var q = document.getElementById('hero-search').value.trim();
@@ -143,10 +234,19 @@
     });
     document.getElementById('hero-search-btn').addEventListener('click', heroSearch);
 
-    // --- Genre grid ---
+    // --- Genre grid (shows main genres with track counts) ---
     function renderGenreGrid(songs) {
+      // Count tracks per parent genre
       var counts = {};
-      songs.forEach(function(s) { counts[s.genre] = (counts[s.genre] || 0) + 1; });
+      songs.forEach(function(s) {
+        // Find parent genre for this song
+        var parent = s.genre;
+        Object.entries(GENRES).forEach(function(entry) {
+          if (entry[1].subgenres.indexOf(s.subgenre) !== -1) parent = entry[0];
+        });
+        counts[parent] = (counts[parent] || 0) + 1;
+      });
+
       document.getElementById('genre-grid').innerHTML = Object.entries(GENRES).map(function(entry) {
         var genre = entry[0], info = entry[1];
         return '<a href="browse.html?genre=' + encodeURIComponent(genre) + '" class="genre-card">' +
