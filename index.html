@@ -39,7 +39,6 @@
     <a href="index.html" class="logo"><span class="portal-emoji">🕳️</span> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
-      <a href="search.html">Search</a>
       <a href="browse.html?filter=favorites">Favorites</a>
       <a href="license.html">License</a>
     </nav>
@@ -64,17 +63,11 @@
 
     <div class="container">
 
-      <!-- Hero Search -->
+      <!-- Hero -->
       <section class="hero">
         <h1>Free Music<br>for <span>Creators</span></h1>
         <p>Royalty-free tracks for videos, podcasts, streams &amp; projects.</p>
-        <div class="search-bar-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="hero-search"
-                 placeholder="Search genres, moods, artists, titles…"
-                 autocomplete="off">
-          <button class="search-btn" id="hero-search-btn">Search</button>
-        </div>
+        <a href="browse.html" class="hero-cta">Browse Music</a>
       </section>
 
       <!-- Trust Banner -->
@@ -223,16 +216,6 @@
         }
       }
     })();
-
-    // --- Hero search ---
-    function heroSearch() {
-      var q = document.getElementById('hero-search').value.trim();
-      if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
-    }
-    document.getElementById('hero-search').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') heroSearch();
-    });
-    document.getElementById('hero-search-btn').addEventListener('click', heroSearch);
 
     // --- Genre grid (shows main genres with track counts) ---
     function renderGenreGrid(songs) {
