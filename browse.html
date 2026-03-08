@@ -18,7 +18,7 @@
   </div>
 
   <header>
-    <a href="index.html" class="logo"><span class="portal-emoji">🕳️</span> Portal Music</a>
+    <a href="index.html" class="logo"><img src="images/portal-logo.svg" alt="" class="logo-img"> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
       <a href="browse.html?filter=favorites">Favorites</a>
@@ -45,11 +45,14 @@
         <p class="browse-subtitle" id="page-subtitle"></p>
       </div>
 
-      <!-- Genre Accordion (shown when no specific genre/artist selected) -->
-      <div id="genre-accordion" class="genre-accordion"></div>
+      <!-- Genre filter chips (multi-select) -->
+      <div class="browse-filters" id="browse-filters"></div>
 
-      <!-- Sub-genre / filter chips (shown when browsing a genre) -->
-      <div class="subgenre-filters" id="subgenre-filters" style="display:none;"></div>
+      <!-- Active filters count + clear -->
+      <div class="browse-active-bar" id="browse-active-bar" style="display:none;">
+        <span id="browse-results-count"></span>
+        <button class="browse-clear-btn" id="browse-clear-btn">Clear filters</button>
+      </div>
 
       <!-- Ad Slot -->
       <div class="ad-slot">
@@ -85,7 +88,7 @@
 
   <!-- Player Bar -->
   <div id="player-bar">
-    <div class="player-art">🎵</div>
+    <div class="player-art" id="player-art">🎵</div>
     <div class="player-info">
       <div class="player-title"  id="player-title">Select a track</div>
       <div class="player-artist" id="player-artist"></div>
@@ -109,14 +112,14 @@
     var subgenreParam = params.get('subgenre');
     var artist       = params.get('artist');
     var filterMode   = params.get('filter');
-    var activeSub    = 'all';
-    var pageSongs    = [];
+    var allSongsPage = [];
+    var activeFilters = []; // array of subgenre strings
 
-    // --- Genre Accordion (all genres with slide-down subgenres) ---
-    function renderAccordion(songs) {
-      var accordion = document.getElementById('genre-accordion');
+    // --- Build genre/subgenre chip grid (multi-select) ---
+    function renderBrowseFilters(songs) {
+      var filtersEl = document.getElementById('browse-filters');
       if (genre || artist || filterMode) {
-        accordion.style.display = 'none';
+        filtersEl.style.display = 'none';
         return;
       }
 
@@ -126,139 +129,148 @@
         if (s.subgenre) subCounts[s.subgenre] = (subCounts[s.subgenre] || 0) + 1;
       });
 
-      accordion.innerHTML = Object.entries(GENRES).map(function(entry) {
+      var html = '';
+      Object.entries(GENRES).forEach(function(entry) {
         var g = entry[0], info = entry[1];
         var totalCount = 0;
         info.subgenres.forEach(function(sub) { totalCount += (subCounts[sub] || 0); });
 
-        var subItems = info.subgenres.map(function(sub) {
+        html += '<div class="filter-genre-group">';
+        html += '<div class="filter-genre-header">';
+        html += '<span class="filter-genre-icon">' + info.icon + '</span>';
+        html += '<span class="filter-genre-name">' + g + '</span>';
+        html += '<span class="filter-genre-count">' + totalCount + '</span>';
+        html += '</div>';
+        html += '<div class="filter-genre-chips">';
+        info.subgenres.forEach(function(sub) {
           var c = subCounts[sub] || 0;
-          return '<a href="browse.html?genre=' + encodeURIComponent(g) +
-            '&subgenre=' + encodeURIComponent(sub) +
-            '" class="accordion-sub-item">' +
-            '<span>' + sub + '</span>' +
-            '<span class="sub-count">' + c + '</span>' +
-          '</a>';
-        }).join('');
-
-        return '<div class="accordion-item">' +
-          '<button class="accordion-trigger" data-genre="' + g + '">' +
-            '<span class="accordion-icon">' + info.icon + '</span>' +
-            '<span class="accordion-label">' + g + '</span>' +
-            '<span class="accordion-count">' + totalCount + ' tracks</span>' +
-            '<span class="accordion-arrow">▸</span>' +
-          '</button>' +
-          '<div class="accordion-panel">' + subItems + '</div>' +
-        '</div>';
-      }).join('');
-
-      // Click handlers
-      accordion.querySelectorAll('.accordion-trigger').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var item = btn.parentElement;
-          var wasOpen = item.classList.contains('open');
-          // Close all
-          accordion.querySelectorAll('.accordion-item.open').forEach(function(el) {
-            el.classList.remove('open');
-          });
-          // Toggle this one
-          if (!wasOpen) item.classList.add('open');
+          html += '<button class="chip browse-chip" data-sub="' + sub.replace(/"/g, '') + '">' +
+            sub + ' <span class="chip-count">' + c + '</span></button>';
         });
+        html += '</div></div>';
       });
-    }
 
-    // --- Render sub-genre filter chips ---
-    function renderSubgenreFilters(songs) {
-      var filtersEl = document.getElementById('subgenre-filters');
-      var subs = [];
-      songs.forEach(function(s) {
-        if (s.subgenre && subs.indexOf(s.subgenre) === -1) subs.push(s.subgenre);
-      });
-      if (subs.length < 2) { filtersEl.style.display = 'none'; return; }
+      filtersEl.innerHTML = html;
 
-      filtersEl.style.display = 'flex';
-      filtersEl.innerHTML =
-        '<button class="chip active" data-sub="all">All</button>' +
-        subs.map(function(s) {
-          var isActive = (s === subgenreParam) ? ' active' : '';
-          return '<button class="chip' + isActive + '" data-sub="' + s.replace(/"/g, '') + '">' + s + '</button>';
-        }).join('');
-
-      // If subgenre param set, activate it
+      // If subgenre param from URL, pre-select it
       if (subgenreParam) {
-        activeSub = subgenreParam;
-        filtersEl.querySelector('.chip[data-sub="all"]').classList.remove('active');
+        activeFilters = [subgenreParam];
+        var preBtn = filtersEl.querySelector('.browse-chip[data-sub="' + subgenreParam + '"]');
+        if (preBtn) preBtn.classList.add('active');
       }
 
-      filtersEl.querySelectorAll('.chip').forEach(function(btn) {
+      // Click handlers - multi-select toggle
+      filtersEl.querySelectorAll('.browse-chip').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          activeSub = btn.dataset.sub;
-          filtersEl.querySelectorAll('.chip').forEach(function(b) {
-            b.classList.toggle('active', b.dataset.sub === activeSub);
-          });
-          renderGrid();
+          var sub = btn.dataset.sub;
+          var idx = activeFilters.indexOf(sub);
+          if (idx >= 0) {
+            activeFilters.splice(idx, 1);
+            btn.classList.remove('active');
+          } else {
+            activeFilters.push(sub);
+            btn.classList.add('active');
+          }
+          renderFilteredGrid();
         });
       });
     }
 
-    // --- Render track grid ---
-    function renderGrid() {
-      var songs = activeSub === 'all'
-        ? pageSongs
-        : pageSongs.filter(function(s) { return s.subgenre === activeSub; });
+    // --- Clear filters ---
+    document.getElementById('browse-clear-btn').addEventListener('click', function() {
+      activeFilters = [];
+      document.querySelectorAll('.browse-chip.active').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      renderFilteredGrid();
+    });
 
-      document.getElementById('music-grid').innerHTML = songs.length
+    // --- Render grid based on active filters ---
+    function renderFilteredGrid() {
+      var bar = document.getElementById('browse-active-bar');
+      var gridEl = document.getElementById('music-grid');
+      var countEl = document.getElementById('browse-results-count');
+
+      if (activeFilters.length === 0) {
+        bar.style.display = 'none';
+        gridEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎵</div>' +
+          '<p>Select one or more genres above to browse tracks.</p></div>';
+        return;
+      }
+
+      var filtered = allSongsPage.filter(function(s) {
+        return activeFilters.indexOf(s.subgenre) !== -1;
+      });
+
+      bar.style.display = 'flex';
+      countEl.textContent = filtered.length + ' track' + (filtered.length !== 1 ? 's' : '') +
+        ' in ' + activeFilters.length + ' filter' + (activeFilters.length !== 1 ? 's' : '');
+
+      gridEl.style.display = '';
+      gridEl.innerHTML = filtered.length
+        ? filtered.map(createTrackCard).join('')
+        : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
+    }
+
+    // --- Render simple grid (for genre/artist/favorites views) ---
+    function renderSimpleGrid(songs) {
+      var gridEl = document.getElementById('music-grid');
+      gridEl.style.display = '';
+      gridEl.innerHTML = songs.length
         ? songs.map(createTrackCard).join('')
-        : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks in this sub-genre yet.</p></div>';
+        : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
     }
 
     // --- Main load ---
     loadSongs().then(function(songs) {
       var titleEl    = document.getElementById('page-title');
       var subtitleEl = document.getElementById('page-subtitle');
+      allSongsPage = songs;
 
       if (filterMode === 'favorites') {
         var favIds = getFavorites();
         titleEl.textContent = '❤️ Favorites';
         subtitleEl.textContent = 'Your session favorites — clears when you close this tab.';
-        pageSongs = songs.filter(function(s) { return favIds.indexOf(String(s.id)) !== -1; });
-        if (pageSongs.length === 0) {
+        var favSongs = songs.filter(function(s) { return favIds.indexOf(String(s.id)) !== -1; });
+        if (favSongs.length === 0) {
           document.getElementById('music-grid').innerHTML =
             '<div class="empty-state"><div class="empty-icon">🤍</div>' +
             '<p>No favorites yet — tap 🤍 on any track to save it.</p></div>';
-          return;
+        } else {
+          renderSimpleGrid(favSongs);
         }
 
       } else if (genre) {
         titleEl.textContent = genre;
         var genreInfo = GENRES[genre];
         if (genreInfo) subtitleEl.textContent = genreInfo.subgenres.join(' · ');
-        // Filter to songs in this parent genre's subgenres
-        pageSongs = songs.filter(function(s) {
+        var genreSongs = songs.filter(function(s) {
           if (genreInfo) {
             return genreInfo.subgenres.indexOf(s.subgenre) !== -1 || s.genre === genre;
           }
           return s.genre === genre;
         });
+        renderBrowseFilters(songs);
+        // Pre-select this genre's subgenres
+        if (genreInfo) {
+          activeFilters = genreInfo.subgenres.slice();
+          document.querySelectorAll('.browse-chip').forEach(function(btn) {
+            if (activeFilters.indexOf(btn.dataset.sub) !== -1) btn.classList.add('active');
+          });
+        }
+        renderSimpleGrid(genreSongs);
 
       } else if (artist) {
         titleEl.textContent = artist;
         subtitleEl.textContent = 'All tracks by ' + artist;
-        pageSongs = songs.filter(function(s) { return s.artist === artist; });
+        var artistSongs = songs.filter(function(s) { return s.artist === artist; });
+        renderSimpleGrid(artistSongs);
 
       } else {
-        titleEl.textContent = 'Browse All Genres';
-        subtitleEl.textContent = songs.length + ' tracks available. Click a genre to expand.';
-        pageSongs = songs;
-      }
-
-      renderAccordion(songs);
-      renderSubgenreFilters(pageSongs);
-      renderGrid();
-
-      // If browsing all (no filter), hide the track grid initially
-      if (!genre && !artist && !filterMode) {
-        document.getElementById('music-grid').style.display = 'none';
+        titleEl.textContent = 'Browse Music';
+        subtitleEl.textContent = songs.length + ' tracks available. Select genres to filter.';
+        renderBrowseFilters(songs);
+        renderFilteredGrid();
       }
     });
   </script>

@@ -94,8 +94,16 @@ function _updatePlayerUI(song) {
   bar.classList.add('visible');
   const titleEl  = document.getElementById('player-title');
   const artistEl = document.getElementById('player-artist');
+  const artEl    = document.getElementById('player-art');
   if (titleEl)  titleEl.textContent  = song.title;
   if (artistEl) artistEl.textContent = song.artist || song.subgenre || song.genre || '';
+  if (artEl) {
+    if (song.cover) {
+      artEl.innerHTML = '<img src="' + song.cover + '" alt="">';
+    } else {
+      artEl.textContent = '🎵';
+    }
+  }
   _updatePlayPauseBtn();
   _updatePlayerFavBtn(song.id);
 }
@@ -267,18 +275,23 @@ function createTrackCard(song) {
   // Safely encode song data for inline onclick
   const songJson = _esc(JSON.stringify(song));
 
+  // Album art: use cover image if available, else gradient with icon
+  const artContent = song.cover
+    ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy">'
+    : '<span class="art-icon">' + icon + '</span>';
+
   return (
     '<div class="music-card" data-id="' + song.id + '">' +
-      '<div class="music-card-header">' +
-        '<div class="music-card-art">' + icon + '</div>' +
+      '<div class="music-card-cover">' +
+        artContent +
         '<button class="fav-btn ' + (faved ? 'active' : '') + '" ' +
           'data-song-id="' + song.id + '" ' +
-          'onclick="toggleFavorite(\'' + song.id + '\')" ' +
+          'onclick="event.stopPropagation();toggleFavorite(\'' + song.id + '\')" ' +
           'title="' + (faved ? 'Remove from favorites' : 'Add to favorites') + '">' +
           (faved ? '❤️' : '🤍') +
         '</button>' +
       '</div>' +
-      '<div>' +
+      '<div class="music-card-body">' +
         '<h3>' + _esc(song.title) + '</h3>' +
         artistEl +
         '<div class="meta">' +
