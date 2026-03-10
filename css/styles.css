@@ -1211,6 +1211,10 @@ header {
   .player-progress { display: none; }
   .trust-banner { grid-template-columns: 1fr; }
   .hero { padding: 2.5rem 0 1.5rem; }
+  .ad-slot,
+  .side-ad {
+    display: none !important;
+  }
 }
 
 @media (max-width: 540px) {
@@ -1220,5 +1224,10 @@ header {
   .hero h1 { font-size: 1.9rem; }
   .genre-grid { grid-template-columns: repeat(3, 1fr); }
   .browse-header h1 { font-size: 1.5rem; }
+  .ad-slot,
+  .side-ad {
+    display: none !important;
+  }
   .dl-btn { padding: 16px 36px; font-size: 1.05rem; }
 }
+
