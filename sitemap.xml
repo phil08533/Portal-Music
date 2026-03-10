@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://portal-music.com/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <!-- Browse -->
+  <url>
+    <loc>https://portal-music.com/browse/</loc>
+    <priority>0.9</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <!-- Search -->
+  <url>
+    <loc>https://portal-music.com/search/</loc>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- License -->
+  <url>
+    <loc>https://portal-music.com/license/</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Genres (static pages) -->
+  <url>
+    <loc>https://portal-music.com/genre/ambient/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://portal-music.com/genre/electronic/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://portal-music.com/genre/cinematic/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://portal-music.com/genre/lofi/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://portal-music.com/genre/synthwave/</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Artists index -->
+  <url>
+    <loc>https://portal-music.com/artists/</loc>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
