@@ -8,47 +8,49 @@
   --surface: #111128;
   --card: #16162e;
   --card-hover: #1c1c3e;
-  --accent: #7c3aed;
-  --accent-2: #3b82f6;
-  --accent-light: #a78bfa;
-  --accent-glow: rgba(124, 58, 237, 0.2);
+  --accent: #a6ff00;
+  /* Acid Green Portal */
+  --accent-2: #49b300;
+  /* Toxic Green */
+  --accent-light: #d1ff46;
+  --accent-glow: rgba(166, 255, 0, 0.35);
   --text: #e8eaf0;
   --text-muted: #8892a8;
-  --border: rgba(255, 255, 255, 0.06);
-  --nav-bg: rgba(10, 10, 26, 0.85);
+  --border: rgba(166, 255, 0, 0.1);
+  --nav-bg: rgba(10, 10, 26, 0.9);
   --player-bg: #0c0c1e;
-  --chip-bg: rgba(124, 58, 237, 0.1);
-  --chip-hover: rgba(124, 58, 237, 0.22);
-  --heart: #ef4444;
-  --fav-banner-bg: rgba(239, 68, 68, 0.06);
-  --fav-banner-border: rgba(239, 68, 68, 0.2);
+  --chip-bg: rgba(166, 255, 0, 0.1);
+  --chip-hover: rgba(166, 255, 0, 0.2);
+  --heart: #ff3e3e;
+  --fav-banner-bg: rgba(255, 62, 62, 0.06);
+  --fav-banner-border: rgba(255, 62, 62, 0.2);
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.18);
-  --shadow-hover: 0 8px 32px rgba(124, 58, 237, 0.15);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 32px var(--accent-glow);
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme="light"] {
-  --bg: #f5f7fa;
-  --surface: #edf0f5;
+  --bg: #f8fafc;
+  --surface: #f1f5f9;
   --card: #ffffff;
-  --card-hover: #f8f5ff;
-  --accent: #7c3aed;
-  --accent-2: #3b82f6;
-  --accent-light: #8b5cf6;
-  --accent-glow: rgba(124, 58, 237, 0.08);
-  --text: #1a1a2e;
-  --text-muted: #6b7280;
-  --border: rgba(0, 0, 0, 0.06);
-  --nav-bg: rgba(255, 255, 255, 0.82);
-  --player-bg: #1a1a2e;
-  --chip-bg: #f3f0ff;
-  --chip-hover: #ede9fe;
+  --card-hover: #fafff5;
+  --accent: #49b300;
+  --accent-2: #2d6b00;
+  --accent-light: #a6ff00;
+  --accent-glow: rgba(73, 179, 0, 0.12);
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: rgba(73, 179, 0, 0.1);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --player-bg: #0f172a;
+  --chip-bg: #f0fdf4;
+  --chip-hover: #dcfce7;
   --fav-banner-bg: rgba(239, 68, 68, 0.04);
   --fav-banner-border: rgba(239, 68, 68, 0.18);
   --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 8px 32px rgba(124, 58, 237, 0.1);
+  --shadow-hover: 0 8px 32px var(--accent-glow);
 }
 
 [data-theme="sepia"] {
@@ -160,34 +162,36 @@ header {
   background: var(--nav-bg);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--accent);
   padding: 0 5%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
+  height: 75px;
   gap: 16px;
 }
 
 .logo {
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.4rem;
+  font-weight: 900;
   background: linear-gradient(135deg, var(--accent), var(--accent-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   white-space: nowrap;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  text-shadow: 0 0 15px var(--accent-glow);
 }
 
 .logo-img {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
+  filter: drop-shadow(0 0 5px var(--accent));
 }
 
 .nav-links {
@@ -1418,7 +1422,7 @@ header {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #0a0a1a;
+  background: #050510;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1434,15 +1438,36 @@ header {
   text-align: center;
 }
 
+.splash-logo {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  filter: drop-shadow(0 0 25px var(--accent));
+  animation: splash-float 3s ease-in-out infinite;
+}
+
+@keyframes splash-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
 .splash-title {
-  font-size: 2.5rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  font-size: 3.2rem;
+  font-weight: 950;
+  letter-spacing: -0.06em;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
 }
 
 .portal-vortex {

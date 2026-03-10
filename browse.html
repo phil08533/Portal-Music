@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browse Music — Portal Music</title>
-  <meta name="description" content="Browse free royalty-free music by genre. Rock, Jazz, Hip-Hop, Electronic, Cinematic, Classical, Country, and more.">
+  <meta name="description"
+    content="Browse free royalty-free music by genre. Rock, Jazz, Hip-Hop, Electronic, Cinematic, Classical, Country, and more.">
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
-          crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 </head>
+
 <body>
 
   <div id="fav-banner" class="fav-banner">
@@ -18,7 +21,7 @@
   </div>
 
   <header>
-    <a href="index.html" class="logo"><img src="images/portal-logo.svg" alt="" class="logo-img"> Portal Music</a>
+    <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
     <nav class="nav-links">
       <a href="index.html">Home</a>
       <a href="browse.html">Browse</a>
@@ -26,7 +29,7 @@
       <a href="license.html">License</a>
     </nav>
     <div class="theme-btns">
-      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
       <button class="theme-btn" data-theme="light" title="Light">☀️</button>
       <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
     </div>
@@ -34,8 +37,8 @@
 
   <div class="page-with-side-ads">
     <aside class="side-ad left-ad">
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="XXXXXXXXXX"
+        data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
@@ -58,20 +61,23 @@
       <!-- Ad Slot -->
       <div class="ad-slot">
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
-             data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+          data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
       <!-- Track grid -->
       <div class="grid" id="music-grid">
-        <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
+        <div class="empty-state">
+          <div class="empty-icon">🎵</div>
+          <p>Loading tracks…</p>
+        </div>
       </div>
 
     </div>
 
     <aside class="side-ad right-ad">
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="XXXXXXXXXX" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="XXXXXXXXXX"
+        data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
   </div>
@@ -91,7 +97,7 @@
   <div id="player-bar">
     <div class="player-art" id="player-art">🎵</div>
     <div class="player-info">
-      <div class="player-title"  id="player-title">Select a track</div>
+      <div class="player-title" id="player-title">Select a track</div>
       <div class="player-artist" id="player-artist"></div>
     </div>
     <div class="player-controls">
@@ -108,11 +114,11 @@
 
   <script src="js/app.js"></script>
   <script>
-    var params       = new URLSearchParams(window.location.search);
-    var genre        = params.get('genre');
+    var params = new URLSearchParams(window.location.search);
+    var genre = params.get('genre');
     var subgenreParam = params.get('subgenre');
-    var artist       = params.get('artist');
-    var filterMode   = params.get('filter');
+    var artist = params.get('artist');
+    var filterMode = params.get('filter');
     var allSongsPage = [];
     var activeFilters = []; // array of subgenre strings
 
@@ -126,15 +132,15 @@
 
       // Count per subgenre
       var subCounts = {};
-      songs.forEach(function(s) {
+      songs.forEach(function (s) {
         if (s.subgenre) subCounts[s.subgenre] = (subCounts[s.subgenre] || 0) + 1;
       });
 
       var html = '';
-      Object.entries(GENRES).forEach(function(entry) {
+      Object.entries(GENRES).forEach(function (entry) {
         var g = entry[0], info = entry[1];
         var totalCount = 0;
-        info.subgenres.forEach(function(sub) { totalCount += (subCounts[sub] || 0); });
+        info.subgenres.forEach(function (sub) { totalCount += (subCounts[sub] || 0); });
 
         html += '<div class="filter-genre-group">';
         html += '<div class="filter-genre-header">';
@@ -143,7 +149,7 @@
         html += '<span class="filter-genre-count">' + totalCount + '</span>';
         html += '</div>';
         html += '<div class="filter-genre-chips">';
-        info.subgenres.forEach(function(sub) {
+        info.subgenres.forEach(function (sub) {
           var c = subCounts[sub] || 0;
           html += '<button class="chip browse-chip" data-sub="' + sub.replace(/"/g, '') + '">' +
             sub + ' <span class="chip-count">' + c + '</span></button>';
@@ -161,8 +167,8 @@
       }
 
       // Click handlers - multi-select toggle
-      filtersEl.querySelectorAll('.browse-chip').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+      filtersEl.querySelectorAll('.browse-chip').forEach(function (btn) {
+        btn.addEventListener('click', function () {
           var sub = btn.dataset.sub;
           var idx = activeFilters.indexOf(sub);
           if (idx >= 0) {
@@ -178,9 +184,9 @@
     }
 
     // --- Clear filters ---
-    document.getElementById('browse-clear-btn').addEventListener('click', function() {
+    document.getElementById('browse-clear-btn').addEventListener('click', function () {
       activeFilters = [];
-      document.querySelectorAll('.browse-chip.active').forEach(function(b) {
+      document.querySelectorAll('.browse-chip.active').forEach(function (b) {
         b.classList.remove('active');
       });
       renderFilteredGrid();
@@ -199,7 +205,7 @@
         return;
       }
 
-      var filtered = allSongsPage.filter(function(s) {
+      var filtered = allSongsPage.filter(function (s) {
         return activeFilters.indexOf(s.subgenre) !== -1;
       });
 
@@ -223,8 +229,8 @@
     }
 
     // --- Main load ---
-    loadSongs().then(function(songs) {
-      var titleEl    = document.getElementById('page-title');
+    loadSongs().then(function (songs) {
+      var titleEl = document.getElementById('page-title');
       var subtitleEl = document.getElementById('page-subtitle');
       allSongsPage = songs;
 
@@ -232,7 +238,7 @@
         var favIds = getFavorites();
         titleEl.textContent = '❤️ Favorites';
         subtitleEl.textContent = 'Your session favorites — clears when you close this tab.';
-        var favSongs = songs.filter(function(s) { return favIds.indexOf(String(s.id)) !== -1; });
+        var favSongs = songs.filter(function (s) { return favIds.indexOf(String(s.id)) !== -1; });
         if (favSongs.length === 0) {
           document.getElementById('music-grid').innerHTML =
             '<div class="empty-state"><div class="empty-icon">🤍</div>' +
@@ -245,7 +251,7 @@
         titleEl.textContent = genre;
         var genreInfo = GENRES[genre];
         if (genreInfo) subtitleEl.textContent = genreInfo.subgenres.join(' · ');
-        var genreSongs = songs.filter(function(s) {
+        var genreSongs = songs.filter(function (s) {
           if (genreInfo) {
             return genreInfo.subgenres.indexOf(s.subgenre) !== -1 || s.genre === genre;
           }
@@ -255,7 +261,7 @@
         // Pre-select this genre's subgenres
         if (genreInfo) {
           activeFilters = genreInfo.subgenres.slice();
-          document.querySelectorAll('.browse-chip').forEach(function(btn) {
+          document.querySelectorAll('.browse-chip').forEach(function (btn) {
             if (activeFilters.indexOf(btn.dataset.sub) !== -1) btn.classList.add('active');
           });
         }
@@ -264,7 +270,7 @@
       } else if (artist) {
         titleEl.textContent = artist;
         subtitleEl.textContent = 'All tracks by ' + artist;
-        var artistSongs = songs.filter(function(s) { return s.artist === artist; });
+        var artistSongs = songs.filter(function (s) { return s.artist === artist; });
         renderSimpleGrid(artistSongs);
 
       } else {
@@ -276,5 +282,5 @@
     });
   </script>
 </body>
-</html>
 
+</html>

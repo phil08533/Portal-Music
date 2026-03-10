@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,17 +8,26 @@
   <meta name="description" content="Portal Music privacy policy. Learn how we handle your data.">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
+  <!-- Splash Overlay -->
+  <div id="splash-overlay" class="splash-overlay">
+    <div class="splash-content">
+      <img src="images/portal.png" alt="Portal Music" class="splash-logo">
+      <h1 class="splash-title">Portal Music</h1>
+    </div>
+  </div>
+
   <header>
-    <a href="index.html" class="logo"><img src="images/portal-logo.svg" alt="" class="logo-img"> Portal Music</a>
+    <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
       <a href="browse.html?filter=favorites">Favorites</a>
       <a href="license.html">License</a>
     </nav>
     <div class="theme-btns">
-      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
       <button class="theme-btn" data-theme="light" title="Light">☀️</button>
       <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
     </div>
@@ -29,7 +39,8 @@
 
     <div class="license-section">
       <h2>Information We Collect</h2>
-      <p>Portal Music is a static website. We do not collect personal information, require account creation, or store user data on our servers.</p>
+      <p>Portal Music is a static website. We do not collect personal information, require account creation, or store
+        user data on our servers.</p>
       <p>The following data is stored locally in your browser and never sent to us:</p>
       <ul>
         <li><strong>Theme preference</strong> — saved in localStorage so your preferred theme persists</li>
@@ -42,20 +53,28 @@
       <h2>Third-Party Services</h2>
       <p>We use the following third-party services:</p>
       <ul>
-        <li><strong>Google AdSense</strong> — displays advertisements on our site. Google may use cookies to serve ads based on your prior visits to this or other websites. You can opt out of personalized advertising at <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Ads Settings</a>.</li>
-        <li><strong>GitHub Pages</strong> — hosts our website. GitHub may collect technical information such as IP addresses in server logs.</li>
+        <li><strong>Google AdSense</strong> — displays advertisements on our site. Google may use cookies to serve ads
+          based on your prior visits to this or other websites. You can opt out of personalized advertising at <a
+            href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Ads Settings</a>.</li>
+        <li><strong>GitHub Pages</strong> — hosts our website. GitHub may collect technical information such as IP
+          addresses in server logs.</li>
       </ul>
     </div>
 
     <div class="license-section">
       <h2>Cookies</h2>
-      <p>Portal Music itself does not set cookies. However, Google AdSense and other third-party services may use cookies to serve relevant advertisements. By using this site, you consent to the use of cookies by these third-party services.</p>
-      <p>For more information about how Google uses data, visit <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google's Partner Sites Policy</a>.</p>
+      <p>Portal Music itself does not set cookies. However, Google AdSense and other third-party services may use
+        cookies to serve relevant advertisements. By using this site, you consent to the use of cookies by these
+        third-party services.</p>
+      <p>For more information about how Google uses data, visit <a
+          href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google's Partner
+          Sites Policy</a>.</p>
     </div>
 
     <div class="license-section">
       <h2>Children's Privacy</h2>
-      <p>Portal Music is not directed at children under 13. We do not knowingly collect personal information from children.</p>
+      <p>Portal Music is not directed at children under 13. We do not knowingly collect personal information from
+        children.</p>
     </div>
 
     <div class="license-section">
@@ -79,5 +98,24 @@
   </footer>
 
   <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var splash = document.getElementById('splash-overlay');
+      if (splash) {
+        if (sessionStorage.getItem('pm_splash_seen')) {
+          splash.style.display = 'none';
+        } else {
+          setTimeout(function () {
+            splash.classList.add('fade-out');
+            setTimeout(function () {
+              splash.style.display = 'none';
+              sessionStorage.setItem('pm_splash_seen', '1');
+            }, 800);
+          }, 2000);
+        }
+      }
+    })();
+  </script>
 </body>
+
 </html>

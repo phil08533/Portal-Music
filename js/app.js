@@ -4,28 +4,28 @@
 
 // --- Genre Config (main genres + sub-genres mapped from music folders) ---
 const GENRES = {
-  'Rock':              { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock'] },
-  'Jazz':              { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
-  'Hip-Hop':           { icon: '🎤', subgenres: ['Hiphop'] },
-  'Electronic':        { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop'] },
-  'Cinematic':         { icon: '🎬', subgenres: ['Cinematic', 'Dramatic'] },
-  'Classical':         { icon: '🎻', subgenres: ['Classical', 'Romantic'] },
-  'Country & Folk':    { icon: '🤠', subgenres: ['Country', 'Bluegrass'] },
-  'Ambient & Chill':   { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting'] },
-  'Dark & Suspense':   { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
-  'Playful & Mood':    { icon: '🎭', subgenres: ['Playful', 'Sad'] }
+  'Rock': { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock'] },
+  'Jazz': { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
+  'Hip-Hop': { icon: '🎤', subgenres: ['Hiphop'] },
+  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop'] },
+  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic'] },
+  'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic'] },
+  'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass'] },
+  'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting'] },
+  'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
+  'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad'] }
 };
 
 // Map each music folder name to its parent genre
 const FOLDER_TO_PARENT = {};
-Object.entries(GENRES).forEach(function(entry) {
-  entry[1].subgenres.forEach(function(sub) { FOLDER_TO_PARENT[sub] = entry[0]; });
+Object.entries(GENRES).forEach(function (entry) {
+  entry[1].subgenres.forEach(function (sub) { FOLDER_TO_PARENT[sub] = entry[0]; });
 });
 
 // --- Storage Keys ---
-const THEME_KEY   = 'pm_theme';
-const RECENT_KEY  = 'pm_recent';
-const FAV_KEY     = 'pm_favorites'; // sessionStorage — clears on tab close
+const THEME_KEY = 'pm_theme';
+const RECENT_KEY = 'pm_recent';
+const FAV_KEY = 'pm_favorites'; // sessionStorage — clears on tab close
 
 // ============================================
 // THEME SYSTEM
@@ -47,12 +47,12 @@ function initTheme() {
 // ============================================
 const audio = new Audio();
 let currentSong = null;
-let isPlaying   = false;
+let isPlaying = false;
 
 function playSong(song) {
   currentSong = song;
   audio.src = song.file;
-  audio.play().catch(() => {}); // gracefully handle autoplay policy
+  audio.play().catch(() => { }); // gracefully handle autoplay policy
   isPlaying = true;
   _updatePlayerUI(song);
   addToRecent(song);
@@ -64,16 +64,16 @@ function togglePlay() {
   if (isPlaying) {
     audio.pause();
   } else {
-    audio.play().catch(() => {});
+    audio.play().catch(() => { });
   }
 }
 
-audio.addEventListener('play',  () => { isPlaying = true;  _updatePlayPauseBtn(); _updateAllPlayBtns(currentSong?.id); });
+audio.addEventListener('play', () => { isPlaying = true; _updatePlayPauseBtn(); _updateAllPlayBtns(currentSong?.id); });
 audio.addEventListener('pause', () => { isPlaying = false; _updatePlayPauseBtn(); _updateAllPlayBtns(currentSong?.id); });
 audio.addEventListener('ended', () => { isPlaying = false; _updatePlayPauseBtn(); _updateAllPlayBtns(null); });
 
 audio.addEventListener('timeupdate', () => {
-  const fill   = document.getElementById('progress-fill');
+  const fill = document.getElementById('progress-fill');
   const timeEl = document.getElementById('player-time');
   if (!fill) return;
   const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
@@ -92,10 +92,10 @@ function _updatePlayerUI(song) {
   const bar = document.getElementById('player-bar');
   if (!bar) return;
   bar.classList.add('visible');
-  const titleEl  = document.getElementById('player-title');
+  const titleEl = document.getElementById('player-title');
   const artistEl = document.getElementById('player-artist');
-  const artEl    = document.getElementById('player-art');
-  if (titleEl)  titleEl.textContent  = song.title;
+  const artEl = document.getElementById('player-art');
+  if (titleEl) titleEl.textContent = song.title;
   if (artistEl) artistEl.textContent = song.artist || song.subgenre || song.genre || '';
   if (artEl) {
     if (song.cover) {
@@ -199,31 +199,31 @@ function _levenshtein(a, b) {
 }
 
 function _scoreSong(song, query) {
-  const q       = query.toLowerCase().trim();
-  const title   = song.title.toLowerCase();
-  const genre   = (song.genre    || '').toLowerCase();
-  const sub     = (song.subgenre || '').toLowerCase();
-  const artist  = (song.artist   || '').toLowerCase();
-  const tags    = (song.tags     || []).map(t => t.toLowerCase());
+  const q = query.toLowerCase().trim();
+  const title = song.title.toLowerCase();
+  const genre = (song.genre || '').toLowerCase();
+  const sub = (song.subgenre || '').toLowerCase();
+  const artist = (song.artist || '').toLowerCase();
+  const tags = (song.tags || []).map(t => t.toLowerCase());
 
   let score = 0;
 
   // — Exact / near-exact matches (highest priority) —
-  if (title === q)                            score += 100;
-  else if (title.startsWith(q))              score += 85;
-  else if (title.includes(q))                score += 70;
+  if (title === q) score += 100;
+  else if (title.startsWith(q)) score += 85;
+  else if (title.includes(q)) score += 70;
 
   // — Artist match —
-  if (artist === q)                           score += 95;
-  else if (artist.includes(q))               score += 60;
+  if (artist === q) score += 95;
+  else if (artist.includes(q)) score += 60;
 
   // — Genre / sub-genre match —
-  if (genre === q || genre.includes(q))       score += 70;
-  if (sub   === q || sub.includes(q))         score += 65;
+  if (genre === q || genre.includes(q)) score += 70;
+  if (sub === q || sub.includes(q)) score += 65;
 
   // — Tag match —
-  if (tags.some(t => t === q))               score += 60;
-  if (tags.some(t => t.includes(q)))         score += 40;
+  if (tags.some(t => t === q)) score += 60;
+  if (tags.some(t => t.includes(q))) score += 40;
 
   // — Multi-word: score each query word separately —
   const qWords = q.split(/\s+/).filter(w => w.length >= 2);
@@ -233,9 +233,9 @@ function _scoreSong(song, query) {
     for (const tgt of targets) {
       const tWords = tgt.split(/\s+/);
       for (const tw of tWords) {
-        if (tw === qw)             { score += 30; break; }
-        if (tw.startsWith(qw))    { score += 20; break; }
-        if (tw.includes(qw))      { score += 12; break; }
+        if (tw === qw) { score += 30; break; }
+        if (tw.startsWith(qw)) { score += 20; break; }
+        if (tw.includes(qw)) { score += 12; break; }
         // Fuzzy: Levenshtein for longer words
         if (qw.length >= 4 && tw.length >= 4) {
           const dist = _levenshtein(qw, tw);
@@ -263,9 +263,9 @@ function fuzzySearch(songs, query) {
 // TRACK CARD RENDERER
 // ============================================
 function createTrackCard(song) {
-  const faved    = isFavorited(song.id);
-  const icon     = GENRES[song.genre]?.icon || '🎵';
-  const tagsStr  = (song.tags || []).slice(0, 3).join(', ');
+  const faved = isFavorited(song.id);
+  const icon = GENRES[song.genre]?.icon || '🎵';
+  const tagsStr = (song.tags || []).slice(0, 3).join(', ');
   const artistEl = song.artist
     ? '<div class="artist-name">' + _esc(song.artist) + '</div>'
     : '';
@@ -282,31 +282,31 @@ function createTrackCard(song) {
 
   return (
     '<div class="music-card" data-id="' + song.id + '">' +
-      '<div class="music-card-cover">' +
-        artContent +
-        '<button class="fav-btn ' + (faved ? 'active' : '') + '" ' +
-          'data-song-id="' + song.id + '" ' +
-          'onclick="event.stopPropagation();toggleFavorite(\'' + song.id + '\')" ' +
-          'title="' + (faved ? 'Remove from favorites' : 'Add to favorites') + '">' +
-          (faved ? '❤️' : '🤍') +
-        '</button>' +
-      '</div>' +
-      '<div class="music-card-body">' +
-        '<h3>' + _esc(song.title) + '</h3>' +
-        artistEl +
-        '<div class="meta">' +
-          '<span class="badge">' + _esc(song.genre || '') + '</span>' +
-          subEl +
-        '</div>' +
-        (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
-      '</div>' +
-      '<div class="card-actions">' +
-        '<button class="btn-play" data-song-id="' + song.id + '" ' +
-          'onclick=\'playSong(' + songJson + ')\'>▶ Play</button>' +
-        '<a class="btn-dl" ' +
-          'href="download.html?file=' + encodeURIComponent(song.file) +
-          '&title=' + encodeURIComponent(song.title) + '">Download</a>' +
-      '</div>' +
+    '<div class="music-card-cover">' +
+    artContent +
+    '<button class="fav-btn ' + (faved ? 'active' : '') + '" ' +
+    'data-song-id="' + song.id + '" ' +
+    'onclick="event.stopPropagation();toggleFavorite(\'' + song.id + '\')" ' +
+    'title="' + (faved ? 'Remove from favorites' : 'Add to favorites') + '">' +
+    (faved ? '❤️' : '🤍') +
+    '</button>' +
+    '</div>' +
+    '<div class="music-card-body">' +
+    '<h3>' + _esc(song.title) + '</h3>' +
+    artistEl +
+    '<div class="meta">' +
+    '<span class="badge">' + _esc(song.genre || '') + '</span>' +
+    subEl +
+    '</div>' +
+    (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
+    '</div>' +
+    '<div class="card-actions">' +
+    '<button class="btn-play" data-song-id="' + song.id + '" ' +
+    'onclick=\'playSong(' + songJson + ')\'>▶ Play</button>' +
+    '<a class="btn-dl" ' +
+    'href="download.html?file=' + encodeURIComponent(song.file) +
+    '&title=' + encodeURIComponent(song.title) + '">Download</a>' +
+    '</div>' +
     '</div>'
   );
 }
@@ -380,9 +380,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Highlight active nav link
   const path = window.location.pathname.split('/').pop() || 'index.html';
+  const fullHref = path + window.location.search;
+
   document.querySelectorAll('.nav-links a').forEach(a => {
     const href = a.getAttribute('href') || '';
-    if (href.startsWith(path) || (path === '' && href === 'index.html')) {
+    // Special case for Index
+    if ((path === 'index.html' || path === '') && href === 'index.html') {
+      a.classList.add('active');
+    } else if (href === fullHref) {
+      a.classList.add('active');
+    } else if (href === path && !window.location.search) {
       a.classList.add('active');
     }
   });

@@ -1,19 +1,30 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>License — Portal Music</title>
-  <meta name="description" content="Portal Music license terms. Free for commercial use, advertising, YouTube, and more. We never copyright strike.">
+  <meta name="description"
+    content="Portal Music license terms. Free for commercial use, advertising, YouTube, and more. We never copyright strike.">
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
-          crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 </head>
+
 <body>
 
+  <!-- Splash Overlay -->
+  <div id="splash-overlay" class="splash-overlay">
+    <div class="splash-content">
+      <img src="images/portal.png" alt="Portal Music" class="splash-logo">
+      <h1 class="splash-title">Portal Music</h1>
+    </div>
+  </div>
+
   <header>
-    <a href="index.html" class="logo"><img src="images/portal-logo.svg" alt="" class="logo-img"> Portal Music</a>
+    <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
     <nav class="nav-links">
       <a href="index.html">Home</a>
       <a href="browse.html">Browse</a>
@@ -21,7 +32,7 @@
       <a href="license.html">License</a>
     </nav>
     <div class="theme-btns">
-      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
       <button class="theme-btn" data-theme="light" title="Light">☀️</button>
       <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
     </div>
@@ -29,8 +40,8 @@
 
   <div class="page-with-side-ads">
     <aside class="side-ad left-ad">
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="7580709442" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="7580709442"
+        data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
@@ -40,7 +51,8 @@
 
       <div class="license-section highlight-section">
         <h2>🛡️ Our Promise: We Will NEVER Copyright Strike Your Content</h2>
-        <p>This is the core of what we do. We know how frustrating copyright claims and strikes are for creators. That's why we make this guarantee:</p>
+        <p>This is the core of what we do. We know how frustrating copyright claims and strikes are for creators. That's
+          why we make this guarantee:</p>
         <ul>
           <li><strong>No copyright claims</strong> — we will never file a Content ID claim on any platform</li>
           <li><strong>No copyright strikes</strong> — your YouTube, Twitch, TikTok, or any other channel is safe</li>
@@ -56,7 +68,8 @@
           <li>Use in YouTube, Twitch, TikTok, Instagram, and all other social media platforms</li>
           <li>Use in podcasts, radio shows, and audio productions</li>
           <li>Use in <strong>commercial projects</strong> — client work, business presentations, corporate videos</li>
-          <li>Use in <strong>advertising</strong> — TV ads, online ads, radio ads, social media ads, promotional content</li>
+          <li>Use in <strong>advertising</strong> — TV ads, online ads, radio ads, social media ads, promotional content
+          </li>
           <li>Use in films, short films, documentaries, and video productions</li>
           <li>Use in games, apps, and interactive media</li>
           <li>Use in live streams, events, and public performances</li>
@@ -97,7 +110,8 @@
 
       <div class="license-section">
         <h2>❓ Questions</h2>
-        <p>Have a specific licensing question? Reach out through our social channels or email us. We're happy to provide written confirmation for any use case.</p>
+        <p>Have a specific licensing question? Reach out through our social channels or email us. We're happy to provide
+          written confirmation for any use case.</p>
       </div>
 
       <a href="index.html" class="chip" style="display:inline-flex;margin-top:1.5rem;">← Return Home</a>
@@ -105,15 +119,15 @@
       <!-- Bottom Ad Slot -->
       <div class="ad-slot" style="margin-top:2rem;">
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
-             data-ad-slot="4439540784" data-ad-format="auto" data-full-width-responsive="true"></ins>
+          data-ad-slot="4439540784" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
     </div>
 
     <aside class="side-ad right-ad">
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="6659198373" data-ad-format="vertical" data-full-width-responsive="false"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="6659198373"
+        data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
   </div>
@@ -130,7 +144,24 @@
   </footer>
 
   <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var splash = document.getElementById('splash-overlay');
+      if (splash) {
+        if (sessionStorage.getItem('pm_splash_seen')) {
+          splash.style.display = 'none';
+        } else {
+          setTimeout(function () {
+            splash.classList.add('fade-out');
+            setTimeout(function () {
+              splash.style.display = 'none';
+              sessionStorage.setItem('pm_splash_seen', '1');
+            }, 800);
+          }, 2000);
+        }
+      }
+    })();
+  </script>
 </body>
+
 </html>
-
-

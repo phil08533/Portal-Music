@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,28 @@
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
-          crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 </head>
+
 <body>
 
+  <!-- Splash Overlay -->
+  <div id="splash-overlay" class="splash-overlay">
+    <div class="splash-content">
+      <img src="images/portal.png" alt="Portal Music" class="splash-logo">
+      <h1 class="splash-title">Portal Music</h1>
+    </div>
+  </div>
+
   <header>
-    <a href="index.html" class="logo"><img src="images/portal-logo.svg" alt="" class="logo-img"> Portal Music</a>
+    <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
     <nav class="nav-links">
       <a href="browse.html">Browse</a>
       <a href="browse.html?filter=favorites">Favorites</a>
       <a href="license.html">License</a>
     </nav>
     <div class="theme-btns">
-      <button class="theme-btn" data-theme="dark"  title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
       <button class="theme-btn" data-theme="light" title="Light">☀️</button>
       <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
     </div>
@@ -37,10 +47,8 @@
          in AdSense → Ads → By ad unit, then replace XXXXXXXXXX below.
          ============================================ -->
     <div class="ad-slot tall" style="margin:2rem 0;">
-      <ins class="adsbygoogle"
-           style="display:inline-block;width:300px;height:250px"
-           data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="7972280041"></ins>
+      <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
+        data-ad-client="ca-pub-5642457707478801" data-ad-slot="7972280041"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
@@ -65,16 +73,16 @@
   <script src="js/app.js"></script>
   <script>
     var params = new URLSearchParams(window.location.search);
-    var file   = params.get('file');
-    var title  = params.get('title') || 'Track';
+    var file = params.get('file');
+    var title = params.get('title') || 'Track';
 
     document.getElementById('dl-title').textContent = title;
 
-    var timeLeft  = 5;
-    var countEl   = document.getElementById('countdown');
-    var dlLink    = document.getElementById('dl-link');
+    var timeLeft = 5;
+    var countEl = document.getElementById('countdown');
+    var dlLink = document.getElementById('dl-link');
 
-    var tick = setInterval(function() {
+    var tick = setInterval(function () {
       timeLeft--;
       countEl.textContent = timeLeft;
       if (timeLeft <= 0) {
@@ -95,6 +103,25 @@
       }
     }, 1000);
   </script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var splash = document.getElementById('splash-overlay');
+      if (splash) {
+        if (sessionStorage.getItem('pm_splash_seen')) {
+          splash.style.display = 'none';
+        } else {
+          setTimeout(function () {
+            splash.classList.add('fade-out');
+            setTimeout(function () {
+              splash.style.display = 'none';
+              sessionStorage.setItem('pm_splash_seen', '1');
+            }, 800);
+          }, 2000);
+        }
+      }
+    })();
+  </script>
 </body>
-</html>
 
+</html>

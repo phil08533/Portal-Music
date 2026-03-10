@@ -1,29 +1,27 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal Music — Free Music for Creators</title>
-  <meta name="description" content="Download free royalty-free music for your videos, podcasts, and creative projects. We never copyright strike YouTube videos. Commercial use allowed.">
-  <meta name="keywords" content="free music, royalty free, no copyright, youtube music, background music, creator music">
+  <meta name="description"
+    content="Download free royalty-free music for your videos, podcasts, and creative projects. We never copyright strike YouTube videos. Commercial use allowed.">
+  <meta name="keywords"
+    content="free music, royalty free, no copyright, youtube music, background music, creator music">
   <link rel="canonical" href="https://portal-music.com/">
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
-          crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 </head>
+
 <body>
 
   <!-- Splash Overlay -->
   <div id="splash-overlay" class="splash-overlay">
     <div class="splash-content">
-      <div class="portal-vortex">
-        <div class="vortex-ring r1"></div>
-        <div class="vortex-ring r2"></div>
-        <div class="vortex-ring r3"></div>
-        <div class="vortex-ring r4"></div>
-        <div class="portal-core"></div>
-      </div>
+      <img src="images/portal.png" alt="Portal Music" class="splash-logo">
       <h1 class="splash-title">Portal Music</h1>
     </div>
   </div>
@@ -44,7 +42,7 @@
       <a href="license.html">License</a>
     </nav>
     <div class="theme-btns">
-      <button class="theme-btn" data-theme="dark"  title="Dark mode">🌙</button>
+      <button class="theme-btn" data-theme="dark" title="Dark mode">🌙</button>
       <button class="theme-btn" data-theme="light" title="Light mode">☀️</button>
       <button class="theme-btn" data-theme="sepia" title="Sepia mode">📜</button>
     </div>
@@ -53,12 +51,8 @@
   <div class="page-with-side-ads">
     <!-- Left Ad Rail -->
     <aside class="side-ad left-ad">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="2716083931"
-           data-ad-format="vertical"
-           data-full-width-responsive="false"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="2716083931"
+        data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
@@ -99,12 +93,8 @@
 
       <!-- Top Ad Slot -->
       <div class="ad-slot" id="ad-top">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-5642457707478801"
-             data-ad-slot="4644718630"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+          data-ad-slot="4644718630" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
@@ -131,7 +121,10 @@
         <a href="browse.html">See all →</a>
       </div>
       <div class="grid" id="featured-grid">
-        <div class="empty-state"><div class="empty-icon">🎵</div><p>Loading tracks…</p></div>
+        <div class="empty-state">
+          <div class="empty-icon">🎵</div>
+          <p>Loading tracks…</p>
+        </div>
       </div>
 
       <!-- Recently Played (hidden until there is history) -->
@@ -145,12 +138,8 @@
 
       <!-- Bottom Ad Slot -->
       <div class="ad-slot" style="margin-top:2.5rem;">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-5642457707478801"
-             data-ad-slot="2519954459"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801"
+          data-ad-slot="2519954459" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
 
@@ -158,12 +147,8 @@
 
     <!-- Right Ad Rail -->
     <aside class="side-ad right-ad">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-5642457707478801"
-           data-ad-slot="1206872787"
-           data-ad-format="vertical"
-           data-full-width-responsive="false"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="1206872787"
+        data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
   </div>
@@ -183,7 +168,7 @@
   <div id="player-bar">
     <div class="player-art" id="player-art">🎵</div>
     <div class="player-info">
-      <div class="player-title"  id="player-title">Select a track</div>
+      <div class="player-title" id="player-title">Select a track</div>
       <div class="player-artist" id="player-artist"></div>
     </div>
     <div class="player-controls">
@@ -201,16 +186,16 @@
   <script src="js/app.js"></script>
   <script>
     // --- Splash animation ---
-    (function() {
+    (function () {
       var splash = document.getElementById('splash-overlay');
       if (splash) {
         // Check if already seen this session
         if (sessionStorage.getItem('pm_splash_seen')) {
           splash.style.display = 'none';
         } else {
-          setTimeout(function() {
+          setTimeout(function () {
             splash.classList.add('fade-out');
-            setTimeout(function() {
+            setTimeout(function () {
               splash.style.display = 'none';
               sessionStorage.setItem('pm_splash_seen', '1');
             }, 800);
@@ -223,45 +208,45 @@
     function renderGenreGrid(songs) {
       // Count tracks per parent genre
       var counts = {};
-      songs.forEach(function(s) {
+      songs.forEach(function (s) {
         // Find parent genre for this song
         var parent = s.genre;
-        Object.entries(GENRES).forEach(function(entry) {
+        Object.entries(GENRES).forEach(function (entry) {
           if (entry[1].subgenres.indexOf(s.subgenre) !== -1) parent = entry[0];
         });
         counts[parent] = (counts[parent] || 0) + 1;
       });
 
-      document.getElementById('genre-grid').innerHTML = Object.entries(GENRES).map(function(entry) {
+      document.getElementById('genre-grid').innerHTML = Object.entries(GENRES).map(function (entry) {
         var genre = entry[0], info = entry[1];
         return '<a href="browse.html?genre=' + encodeURIComponent(genre) + '" class="genre-card">' +
           '<span class="genre-icon">' + info.icon + '</span>' +
           '<span class="genre-name">' + genre + '</span>' +
           '<span class="genre-count">' + (counts[genre] || 0) + ' tracks</span>' +
-        '</a>';
+          '</a>';
       }).join('');
     }
 
     // --- Artists ---
     function renderArtists() {
       fetch('data/artists.json')
-        .then(function(r) { return r.json(); })
-        .then(function(artists) {
-          document.getElementById('artists-grid').innerHTML = artists.map(function(a) {
+        .then(function (r) { return r.json(); })
+        .then(function (artists) {
+          document.getElementById('artists-grid').innerHTML = artists.map(function (a) {
             return '<a class="artist-card" href="browse.html?artist=' + encodeURIComponent(a.name) + '">' +
               '<div class="artist-card-img">' +
-                (a.hasImage
-                  ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'
-                  : '🎤') +
+              (a.hasImage
+                ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'
+                : '🎤') +
               '</div>' +
               '<div class="artist-card-info">' +
-                '<h3>' + a.name + '</h3>' +
-                '<div class="artist-genre-tag">' + a.genre + '</div>' +
-                '<p>' + a.bio + '</p>' +
+              '<h3>' + a.name + '</h3>' +
+              '<div class="artist-genre-tag">' + a.genre + '</div>' +
+              '<p>' + a.bio + '</p>' +
               '</div>' +
-            '</a>';
+              '</a>';
           }).join('');
-        }).catch(function() {
+        }).catch(function () {
           document.getElementById('artists-grid').innerHTML = '';
         });
     }
@@ -275,16 +260,16 @@
       }
     }
 
-    document.getElementById('clear-recent-btn').addEventListener('click', function() {
+    document.getElementById('clear-recent-btn').addEventListener('click', function () {
       localStorage.removeItem('pm_recent');
       document.getElementById('recent-section').style.display = 'none';
     });
 
     // --- Main load ---
-    loadSongs().then(function(songs) {
+    loadSongs().then(function (songs) {
       renderGenreGrid(songs);
 
-      var featured = songs.filter(function(s) { return s.featured; });
+      var featured = songs.filter(function (s) { return s.featured; });
       document.getElementById('featured-grid').innerHTML = featured.length
         ? featured.map(createTrackCard).join('')
         : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No featured tracks yet.</p></div>';
@@ -295,16 +280,5 @@
     renderArtists();
   </script>
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
