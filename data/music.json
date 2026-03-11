@@ -1018,11 +1018,8 @@
     "featured": false
   },
   {
-<<<<<<< HEAD
     "id": "mmlgdq036a8z",
-=======
     "id": "mmlg8fl9cne6",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Long Walks",
     "artist": null,
     "genre": "Country & Folk",
@@ -1030,18 +1027,15 @@
     "tags": [],
     "file": "music/Country/Long Walks.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq036a8z.jpg"
   },
   {
     "id": "mmlgdq0367rp",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fl9yjiz",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Monte Carlo",
     "artist": null,
     "genre": "Country & Folk",
@@ -1049,18 +1043,15 @@
     "tags": [],
     "file": "music/Country/Monte Carlo.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0367rp.jpg"
   },
   {
     "id": "mmlgdq03zlyw",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fl9a482",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Old Times",
     "artist": null,
     "genre": "Country & Folk",
@@ -1068,12 +1059,9 @@
     "tags": [],
     "file": "music/Country/Old Times.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq03zlyw.jpg"
-=======
     "featured": false
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
   },
   {
     "id": "mmg0y5r4i02pc",
@@ -1098,11 +1086,8 @@
     "featured": false
   },
   {
-<<<<<<< HEAD
     "id": "mmlgdq048eje",
-=======
     "id": "mmlg8fl9qqky",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Rust",
     "artist": null,
     "genre": "Country & Folk",
@@ -1110,18 +1095,15 @@
     "tags": [],
     "file": "music/Country/Rust.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq048eje.jpg"
   },
   {
     "id": "mmlgdq04mo62",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fl980e1",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "The Time Has Come",
     "artist": null,
     "genre": "Country & Folk",
@@ -1129,12 +1111,9 @@
     "tags": [],
     "file": "music/Country/The Time Has Come.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq04mo62.jpg"
-=======
     "featured": false
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
   },
   {
     "id": "mmg0y5r40sz08",
@@ -3406,17 +3385,14 @@
     "file": "music/Uplifting/Gentle Gears.mp3",
     "duration": "",
     "featured": false,
-<<<<<<< HEAD
     "cover": "covers\\mmg0y5r6d2aj1.jpg"
   },
   {
     "id": "mmlgdq0pudpi",
-=======
     "cover": "covers/mmg0y5r6d2aj1.jpg"
   },
   {
     "id": "mmlg8fld111u",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Gold Around My Neck",
     "artist": null,
     "genre": "Ambient & Chill",
@@ -3424,18 +3400,15 @@
     "tags": [],
     "file": "music/Uplifting/Gold Around My Neck.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0pudpi.jpg"
   },
   {
     "id": "mmlgdq0plrvz",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flde5kw",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Higher Than Before",
     "artist": null,
     "genre": "Ambient & Chill",
@@ -3443,18 +3416,15 @@
     "tags": [],
     "file": "music/Uplifting/Higher Than Before.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0plrvz.jpg"
   },
   {
     "id": "mmlgdq0pc6v0",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldn1o7",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Lets Do It!",
     "artist": null,
     "genre": "Ambient & Chill",
@@ -3462,18 +3432,15 @@
     "tags": [],
     "file": "music/Uplifting/Lets Do It!.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0pc6v0.jpg"
   },
   {
     "id": "mmlgdq0pmtsz",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldiwhx",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "To The Top",
     "artist": null,
     "genre": "Ambient & Chill",
@@ -3481,18 +3448,15 @@
     "tags": [],
     "file": "music/Uplifting/To The Top.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0pmtsz.jpg"
   },
   {
     "id": "mmlgdq0prydq",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fld2yid",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Cowboy Killer",
     "artist": null,
     "genre": "Country & Folk",
@@ -3500,18 +3464,15 @@
     "tags": [],
     "file": "music/Western/Cowboy Killer.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0prydq.jpg"
   },
   {
     "id": "mmlgdq0pj0rk",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldf7ow",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Dark Rider",
     "artist": null,
     "genre": "Country & Folk",
@@ -3519,18 +3480,15 @@
     "tags": [],
     "file": "music/Western/Dark Rider.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0pj0rk.jpg"
   },
   {
     "id": "mmlgdq0pe2k1",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fld2o6h",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Draw",
     "artist": null,
     "genre": "Country & Folk",
@@ -3538,18 +3496,15 @@
     "tags": [],
     "file": "music/Western/Draw.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0pe2k1.jpg"
   },
   {
     "id": "mmlgdq0qrfum",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldpfug",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Dust And Distance",
     "artist": null,
     "genre": "Country & Folk",
@@ -3557,18 +3512,15 @@
     "tags": [],
     "file": "music/Western/Dust and Distance.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qrfum.jpg"
   },
   {
     "id": "mmlgdq0qo6u1",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldvimo",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Dust And Trumpets",
     "artist": null,
     "genre": "Country & Folk",
@@ -3576,18 +3528,15 @@
     "tags": [],
     "file": "music/Western/Dust and Trumpets.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qo6u1.jpg"
   },
   {
     "id": "mmlgdq0q78t3",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldyzxw",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Dust On The Horizon",
     "artist": null,
     "genre": "Country & Folk",
@@ -3595,18 +3544,15 @@
     "tags": [],
     "file": "music/Western/Dust on the Horizon.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q78t3.jpg"
   },
   {
     "id": "mmlgdq0q0rh5",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fldryk2",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Dust On The Silver Screen",
     "artist": null,
     "genre": "Country & Folk",
@@ -3614,18 +3560,15 @@
     "tags": [],
     "file": "music/Western/Dust on the Silver Screen.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q0rh5.jpg"
   },
   {
     "id": "mmlgdq0q8q16",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flehsy1",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Horizons Mystery",
     "artist": null,
     "genre": "Country & Folk",
@@ -3633,18 +3576,15 @@
     "tags": [],
     "file": "music/Western/Horizons Mystery.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q8q16.jpg"
   },
   {
     "id": "mmlgdq0q72y5",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flezpkz",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Horse Named Taco",
     "artist": null,
     "genre": "Country & Folk",
@@ -3652,18 +3592,15 @@
     "tags": [],
     "file": "music/Western/Horse Named Taco.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q72y5.jpg"
   },
   {
     "id": "mmlgdq0q34gf",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fleigv4",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Midnight Run",
     "artist": null,
     "genre": "Country & Folk",
@@ -3671,18 +3608,15 @@
     "tags": [],
     "file": "music/Western/Midnight Run.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q34gf.jpg"
   },
   {
     "id": "mmlgdq0qon8d",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fleieol",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Nights Embrace",
     "artist": null,
     "genre": "Country & Folk",
@@ -3690,18 +3624,15 @@
     "tags": [],
     "file": "music/Western/Nights Embrace.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qon8d.jpg"
   },
   {
     "id": "mmlgdq0qnigu",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flem1pb",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Robers",
     "artist": null,
     "genre": "Country & Folk",
@@ -3709,18 +3640,15 @@
     "tags": [],
     "file": "music/Western/Robers.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qnigu.jpg"
   },
   {
     "id": "mmlgdq0qex5b",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fleufvr",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Still Water Spirits",
     "artist": null,
     "genre": "Country & Folk",
@@ -3728,18 +3656,15 @@
     "tags": [],
     "file": "music/Western/Still Water Spirits.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qex5b.jpg"
   },
   {
     "id": "mmlgdq0qh1gh",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flemr8f",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Torn Between Women",
     "artist": null,
     "genre": "Country & Folk",
@@ -3747,18 +3672,15 @@
     "tags": [],
     "file": "music/Western/Torn Between Women.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qh1gh.jpg"
   },
   {
     "id": "mmlgdq0q04an",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fle10rk",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Trails Of Tears",
     "artist": null,
     "genre": "Country & Folk",
@@ -3766,18 +3688,15 @@
     "tags": [],
     "file": "music/Western/Trails Of Tears.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q04an.jpg"
   },
   {
     "id": "mmlgdq0q2g5j",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flehooq",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Travel Light",
     "artist": null,
     "genre": "Country & Folk",
@@ -3785,18 +3704,15 @@
     "tags": [],
     "file": "music/Western/Travel Light.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0q2g5j.jpg"
   },
   {
     "id": "mmlgdq0qn3i8",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fle4u1p",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Walk Alone",
     "artist": null,
     "genre": "Country & Folk",
@@ -3804,18 +3720,15 @@
     "tags": [],
     "file": "music/Western/Walk Alone.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0qn3i8.jpg"
   },
   {
     "id": "mmlgdq0rad2u",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fle3yqt",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Western",
     "artist": null,
     "genre": "Country & Folk",
@@ -3823,18 +3736,15 @@
     "tags": [],
     "file": "music/Western/Western.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0rad2u.jpg"
   },
   {
     "id": "mmlgdq0rw4mk",
-=======
     "featured": false
   },
   {
     "id": "mmlg8fle6p31",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Already Gone When I Said Goodbye (1)",
     "artist": null,
     "genre": "Whiskey Pines",
@@ -3842,18 +3752,15 @@
     "tags": [],
     "file": "music/Whiskey Pines/Already Gone When I Said Goodbye (1).mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0rw4mk.jpg"
   },
   {
     "id": "mmlgdq0ri5gy",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flevxbh",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Watching You",
     "artist": null,
     "genre": "Whiskey Pines",
@@ -3861,18 +3768,15 @@
     "tags": [],
     "file": "music/Whiskey Pines/watching you.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0ri5gy.jpg"
   },
   {
     "id": "mmlgdq0scwtw",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfmlbi",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "But Somehow.. Somehow I Miss You..",
     "artist": null,
     "genre": "Electronic",
@@ -3880,18 +3784,15 @@
     "tags": [],
     "file": "music/dream-pop/But Somehow.. Somehow I miss you...mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0scwtw.jpg"
   },
   {
     "id": "mmlgdq0svl4d",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfvxxd",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Fright Night Fridays",
     "artist": null,
     "genre": "Electronic",
@@ -3899,18 +3800,15 @@
     "tags": [],
     "file": "music/dream-pop/Fright Night Fridays.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0svl4d.jpg"
   },
   {
     "id": "mmlgdq0ss8gb",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flffc8o",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "I'M Lost",
     "artist": null,
     "genre": "Electronic",
@@ -3918,18 +3816,15 @@
     "tags": [],
     "file": "music/dream-pop/I'm Lost.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0ss8gb.jpg"
   },
   {
     "id": "mmlgdq0sh8ew",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfhr6n",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "It'S The Seas That Teach Us..",
     "artist": null,
     "genre": "Electronic",
@@ -3937,18 +3832,15 @@
     "tags": [],
     "file": "music/dream-pop/It's the seas that teach us...mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0sh8ew.jpg"
   },
   {
     "id": "mmlgdq0svjov",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfcnw7",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "You Dont Even Know Who I Am",
     "artist": null,
     "genre": "Electronic",
@@ -3956,18 +3848,15 @@
     "tags": [],
     "file": "music/dream-pop/You Dont Even Know Who I am.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0svjov.jpg"
   },
   {
     "id": "mmlgdq0sd08b",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flf8fub",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Crown Of Thorns And Clover",
     "artist": null,
     "genre": "Classical",
@@ -3975,18 +3864,15 @@
     "tags": [],
     "file": "music/medieval/Crown of Thorns and Clover.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0sd08b.jpg"
   },
   {
     "id": "mmlgdq0tbu8z",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flf2ndt",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Crown Of Thorns And Thread",
     "artist": null,
     "genre": "Classical",
@@ -3994,18 +3880,15 @@
     "tags": [],
     "file": "music/medieval/Crown of Thorns and Thread.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tbu8z.jpg"
   },
   {
     "id": "mmlgdq0tmt1p",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfk2bi",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Losen",
     "artist": null,
     "genre": "Classical",
@@ -4013,18 +3896,15 @@
     "tags": [],
     "file": "music/medieval/Losen.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tmt1p.jpg"
   },
   {
     "id": "mmlgdq0tlgu0",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfnjfm",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Times And Places",
     "artist": null,
     "genre": "Classical",
@@ -4032,18 +3912,15 @@
     "tags": [],
     "file": "music/medieval/Times and Places.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tlgu0.jpg"
   },
   {
     "id": "mmlgdq0tfxmw",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfng76",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Travelers",
     "artist": null,
     "genre": "Classical",
@@ -4051,18 +3928,15 @@
     "tags": [],
     "file": "music/medieval/Travelers.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tfxmw.jpg"
   },
   {
     "id": "mmlgdq0tknlm",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfdpzr",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Walk Slowly",
     "artist": null,
     "genre": "Classical",
@@ -4070,18 +3944,15 @@
     "tags": [],
     "file": "music/medieval/Walk Slowly.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tknlm.jpg"
   },
   {
     "id": "mmlgdq0t6j51",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flflw1u",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Break Me",
     "artist": null,
     "genre": "Playful & Mood",
@@ -4089,18 +3960,15 @@
     "tags": [],
     "file": "music/melancholy/Break Me.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0t6j51.jpg"
   },
   {
     "id": "mmlgdq0tp2ph",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfsr3m",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Carry Me Away",
     "artist": null,
     "genre": "Playful & Mood",
@@ -4108,18 +3976,15 @@
     "tags": [],
     "file": "music/melancholy/Carry Me Away.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tp2ph.jpg"
   },
   {
     "id": "mmlgdq0t9olo",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flff89g",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Find Me",
     "artist": null,
     "genre": "Playful & Mood",
@@ -4127,18 +3992,15 @@
     "tags": [],
     "file": "music/melancholy/Find Me.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0t9olo.jpg"
   },
   {
     "id": "mmlgdq0tvzke",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flfcd9b",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "I  3 You",
     "artist": null,
     "genre": "Playful & Mood",
@@ -4146,18 +4008,15 @@
     "tags": [],
     "file": "music/melancholy/I _3 You.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0tvzke.jpg"
   },
   {
     "id": "mmlgdq0t19ys",
-=======
     "featured": false
   },
   {
     "id": "mmlg8flf3qq6",
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
     "title": "Im Going To Miss You",
     "artist": null,
     "genre": "Playful & Mood",
@@ -4165,11 +4024,8 @@
     "tags": [],
     "file": "music/melancholy/Im Going To Miss You.mp3",
     "duration": "",
-<<<<<<< HEAD
     "featured": false,
     "cover": "covers\\mmlgdq0t19ys.jpg"
-=======
     "featured": false
->>>>>>> 249f82e6bd6e3580a9522814fa6031fa00b6a620
   }
 ]
