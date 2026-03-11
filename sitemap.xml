@@ -33,18 +33,4 @@
     <changefreq>yearly</changefreq>
   </url>
 
-  <!-- Data-driven pages (JS-rendered) -->
-  <!-- These pages exist as HTML shells and are valid to index -->
-  <url>
-    <loc>https://portal-music.com/artists/</loc>
-    <priority>0.7</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/genre/</loc>
-    <priority>0.7</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
 </urlset>

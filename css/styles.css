@@ -5,8 +5,8 @@
 /* --- Theme Variables --- */
 :root {
   --bg: #0a0a1a;
-  --surface: #111128;
-  --card: #16162e;
+  --surface: #281121;
+  --card: #1d102c;
   --card-hover: #1c1c3e;
   --accent: #a6ff00;
   /* Acid Green Portal */
@@ -29,6 +29,11 @@
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-hover: 0 8px 32px var(--accent-glow);
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --btn-bg: var(--accent);
+  --btn-text: #0a0a1a;
+  --btn-hover-bg: var(--accent-2);
+  --btn-hover-text: #000;
+  --btn-border: var(--border);
 }
 
 [data-theme="light"] {
@@ -38,7 +43,7 @@
   --card-hover: #fafff5;
   --accent: #49b300;
   --accent-2: #2d6b00;
-  --accent-light: #a6ff00;
+  --accent-light: #689c08;
   --accent-glow: rgba(73, 179, 0, 0.12);
   --text: #0f172a;
   --text-muted: #64748b;
@@ -51,6 +56,11 @@
   --fav-banner-border: rgba(239, 68, 68, 0.18);
   --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.06);
   --shadow-hover: 0 8px 32px var(--accent-glow);
+    --btn-bg: var(--accent-light);
+  --btn-text: #0f172a;
+  --btn-hover-bg: var(--accent);
+  --btn-hover-text: #fff;
+  --btn-border: var(--border);
 }
 
 [data-theme="sepia"] {
@@ -340,6 +350,22 @@ header {
 .section-header a:hover,
 .section-header button:hover {
   color: var(--accent);
+}
+button,
+.btn {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+button:hover,
+.btn:hover {
+  background: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
 }
 
 /* --- Trust Banner --- */
