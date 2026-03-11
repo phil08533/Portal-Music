@@ -25,6 +25,7 @@
     <nav class="nav-links">
       <a href="index.html">Home</a>
       <a href="browse.html">Browse</a>
+      <a href="radio.html">Radio</a>
       <a href="browse.html?filter=favorites">Favorites</a>
       <a href="license.html">License</a>
     </nav>
@@ -101,7 +102,9 @@
       <div class="player-artist" id="player-artist"></div>
     </div>
     <div class="player-controls">
-      <button class="player-btn" id="play-pause-btn">▶</button>
+      <button class="skip-btn" id="play-prev-btn" title="Previous Track">⏮</button>
+      <button class="player-btn" id="play-pause-btn" title="Play / Pause">▶</button>
+      <button class="skip-btn" id="play-next-btn" title="Next Track">⏭</button>
     </div>
     <div class="player-progress">
       <div class="progress-track" id="progress-track">
@@ -214,6 +217,7 @@
         ' in ' + activeFilters.length + ' filter' + (activeFilters.length !== 1 ? 's' : '');
 
       gridEl.style.display = '';
+      window.currentSongsView = filtered;
       gridEl.innerHTML = filtered.length
         ? filtered.map(createTrackCard).join('')
         : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
@@ -221,6 +225,7 @@
 
     // --- Render simple grid (for genre/artist/favorites views) ---
     function renderSimpleGrid(songs) {
+      window.currentSongsView = songs;
       var gridEl = document.getElementById('music-grid');
       gridEl.style.display = '';
       gridEl.innerHTML = songs.length

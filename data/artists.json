@@ -14,6 +14,14 @@
     "genre": "Hip-Hop",
     "image": "images/artists/dembois.png",
     "hasImage": true
+  },
+  {
+    "id": "whiskey-pines",
+    "name": "Whiskey Pines",
+    "bio": "Whiskey Pines brings the authentic sound of the backroads to life. Their brand of Country & Folk blends storytelling with acoustic grit, perfect for late night drives and campfire nights.",
+    "genre": "Country & Folk",
+    "image": "images/artists/whiskey-pines.png",
+    "hasImage": false
   }
 ]
 

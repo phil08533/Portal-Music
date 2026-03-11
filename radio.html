@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Radio — Continuous Free Music</title>
+  <meta name="description" content="Listen to continuous royalty-free music stations by genre, mood, or your favorites.">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Radio Specific Styles */
+    .radio-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 5%;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .radio-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .radio-header h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+    .radio-header h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .station-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 3rem;
+    }
+    
+    .station-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+    
+    .station-card:hover, .station-card.active {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-4px);
+      background: var(--card-hover);
+    }
+    
+    .station-icon {
+      font-size: 2.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 10px var(--accent-glow));
+    }
+    
+    .station-name {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    
+    .station-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .radio-player-large {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 10px 40px var(--accent-glow);
+      display: none; /* hidden until station selected */
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .rp-art {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 1.5rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .rp-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rp-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .rp-artist {
+      font-size: 0.95rem;
+      color: var(--accent-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .rp-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .rp-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rp-btn:hover {
+      color: var(--accent);
+    }
+
+    .rp-play {
+      background: var(--accent);
+      color: var(--btn-on-accent);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .rp-play:hover {
+      background: var(--accent-light);
+      transform: scale(1.05);
+      color: var(--btn-on-accent);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="browse.html">Browse</a>
+      <a href="radio.html" class="active">Radio</a>
+      <a href="browse.html?filter=favorites">Favorites</a>
+    </nav>
+    <div class="theme-btns">
+      <button class="theme-btn" data-theme="dark" title="Dark mode">🌙</button>
+      <button class="theme-btn" data-theme="light" title="Light mode">☀️</button>
+      <button class="theme-btn" data-theme="sepia" title="Sepia mode">📜</button>
+    </div>
+  </header>
+
+  <div class="page-with-side-ads">
+    <div class="radio-container">
+      <div class="radio-header">
+        <h1>Portal <span>Radio</span></h1>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto;">Select a station for continuous, randomized playback of totally free music.</p>
+      </div>
+
+      <div class="station-grid" id="station-grid">
+        <!-- Stations generated by JS -->
+      </div>
+
+      <div class="radio-player-large" id="radio-large-player">
+        <div class="rp-art" id="rp-art">📻</div>
+        <div class="rp-title" id="rp-title">Select a Station</div>
+        <div class="rp-artist" id="rp-artist">To begin listening</div>
+        <div class="rp-controls">
+          <button class="rp-btn" id="rp-prev" title="Previous Track">⏮</button>
+          <button class="rp-btn rp-play" id="rp-play" title="Play/Pause">▶</button>
+          <button class="rp-btn" id="rp-next" title="Skip Track">⏭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Bar (Global) -->
+  <div id="player-bar">
+    <div class="player-art" id="player-art">🎵</div>
+    <div class="player-info">
+      <div class="player-title" id="player-title">Select a track</div>
+      <div class="player-artist" id="player-artist"></div>
+    </div>
+    <div class="player-controls">
+      <button class="skip-btn" id="play-prev-btn" title="Previous Track">⏮</button>
+      <button class="player-btn" id="play-pause-btn" title="Play / Pause">▶</button>
+      <button class="skip-btn" id="play-next-btn" title="Next Track">⏭</button>
+    </div>
+    <div class="player-progress">
+      <div class="progress-track" id="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="player-time" id="player-time">0:00 / 0:00</div>
+    </div>
+    <button class="player-fav" id="player-fav-btn" title="Toggle favorite">🤍</button>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    const STATIONS = [
+      { id: 'all', name: 'Everything', icon: '🌌', desc: 'Shuffle the entire catalog' },
+      { id: 'favorites', name: 'My Favorites', icon: '❤️', desc: 'Your saved tracks' },
+      { id: 'focus', name: 'Deep Focus', icon: '🧠', desc: 'Electronic, Ambient, Lo-fi' },
+      { id: 'energy', name: 'High Energy', icon: '⚡', desc: 'Rock, Pop, Hip-Hop' },
+      { id: 'chill', name: 'Late Night Chill', icon: '🍷', desc: 'Jazz, R&B, Acoustic' },
+      { id: 'epic', name: 'Epic Adventures', icon: '🐉', desc: 'Cinematic, Fantasy' },
+      { id: 'country', name: 'Backroads', icon: '🤠', desc: 'Country & Folk' }
+    ];
+
+    let currentStation = null;
+    let stationSongs = [];
+
+    function shuffleArray(array) {
+      const arr = array.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function renderStations() {
+      const grid = document.getElementById('station-grid');
+      grid.innerHTML = STATIONS.map(s => `
+        <div class="station-card" data-station="${s.id}">
+          <div class="station-icon">${s.icon}</div>
+          <div class="station-name">${s.name}</div>
+          <div class="station-desc">${s.desc}</div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.station-card').forEach(card => {
+        card.addEventListener('click', () => startStation(card.dataset.station));
+      });
+    }
+
+    function startStation(stationId) {
+      document.querySelectorAll('.station-card').forEach(c => c.classList.remove('active'));
+      const activeCard = document.querySelector(`.station-card[data-station="${stationId}"]`);
+      if (activeCard) activeCard.classList.add('active');
+
+      currentStation = stationId;
+      document.getElementById('radio-large-player').style.display = 'block';
+      
+      let pool = [];
+      const all = window.allSongsRaw || [];
+
+      switch (stationId) {
+        case 'all':
+          pool = all; break;
+        case 'favorites':
+          const favs = getFavorites();
+          pool = all.filter(s => favs.includes(String(s.id)));
+          break;
+        case 'focus':
+          pool = all.filter(s => ['Electronic', 'Ambient & Chill', 'Classical'].includes(s.genre) || ['lo-fi', 'ambient'].includes(s.subgenre));
+          break;
+        case 'energy':
+          pool = all.filter(s => ['Rock', 'Hip-Hop', 'Pop'].includes(s.genre));
+          break;
+        case 'chill':
+          pool = all.filter(s => ['Jazz', 'R&B / Soul', 'Acoustic'].includes(s.genre));
+          break;
+        case 'epic':
+          pool = all.filter(s => ['Cinematic'].includes(s.genre));
+          break;
+        case 'country':
+          pool = all.filter(s => ['Country & Folk'].includes(s.genre));
+          break;
+      }
+
+      if (pool.length === 0) {
+        document.getElementById('rp-title').textContent = 'No tracks found in station';
+        document.getElementById('rp-artist').textContent = '';
+        return;
+      }
+
+      // Shuffle the pool to create an endless-feeling radio queue
+      stationSongs = shuffleArray(pool);
+      
+      // Load the large player UI but delegate actual audio logic to app.js
+      playSong(stationSongs[0], stationSongs);
+    }
+
+    // Hook into global player events to update the large UI
+    audio.addEventListener('play', syncLargePlayer);
+    audio.addEventListener('pause', syncLargePlayer);
+    
+    // We also need to sync when a new song starts (which app.js handles via playSong)
+    // To do this simply, we will override _updatePlayerUI locally or poll. Polling is safer here.
+    setInterval(() => {
+        if (currentStation && currentSong) {
+            syncLargePlayer();
+        }
+    }, 500);
+
+    function syncLargePlayer() {
+      if (!currentSong) return;
+      document.getElementById('rp-title').textContent = currentSong.title;
+      document.getElementById('rp-artist').textContent = currentSong.artist || currentSong.genre;
+      
+      const artEl = document.getElementById('rp-art');
+      if (currentSong.cover) {
+        artEl.innerHTML = `<img src="${currentSong.cover}" alt="">`;
+      } else {
+        artEl.textContent = '🎵';
+      }
+
+      const btn = document.getElementById('rp-play');
+      btn.textContent = isPlaying ? '⏸' : '▶';
+    }
+
+    document.getElementById('rp-play').addEventListener('click', togglePlay);
+    document.getElementById('rp-next').addEventListener('click', playNext);
+    document.getElementById('rp-prev').addEventListener('click', playPrev);
+
+    loadSongs().then(songs => {
+      window.allSongsRaw = songs;
+      renderStations();
+    });
+  </script>
+</body>
+</html>

@@ -29,15 +29,12 @@
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-hover: 0 8px 32px var(--accent-glow);
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-<<<<<<< HEAD
   --btn-bg: var(--accent);
   --btn-text: #0a0a1a;
   --btn-hover-bg: var(--accent-2);
   --btn-hover-text: #000;
   --btn-border: var(--border);
-=======
   --btn-on-accent: #0a0a1a;
->>>>>>> e4fb9db5c6d0d5c3cabe36cc4aa812bc21b783ef
 }
 
 [data-theme="light"] {
@@ -60,15 +57,12 @@
   --fav-banner-border: rgba(239, 68, 68, 0.18);
   --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.06);
   --shadow-hover: 0 8px 32px var(--accent-glow);
-<<<<<<< HEAD
-    --btn-bg: var(--accent-light);
+  --btn-bg: var(--accent-light);
   --btn-text: #0f172a;
   --btn-hover-bg: var(--accent);
   --btn-hover-text: #fff;
   --btn-border: var(--border);
-=======
   --btn-on-accent: #ffffff;
->>>>>>> e4fb9db5c6d0d5c3cabe36cc4aa812bc21b783ef
 }
 
 [data-theme="sepia"] {
@@ -944,6 +938,22 @@ button:hover,
 
 #play-pause-btn:hover {
   background: var(--accent-light);
+}
+
+.skip-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 1.2rem;
+  padding: 5px;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+}
+
+.skip-btn:hover {
+  color: var(--accent);
 }
 
 .player-progress {

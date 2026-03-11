@@ -50,10 +50,22 @@ function initTheme() {
 // ============================================
 const audio = new Audio();
 let currentSong = null;
+let currentQueue = [];
+let currentIndex = -1;
 let isPlaying = false;
 
-function playSong(song) {
+function playSong(song, forceQueue = null) {
   currentSong = song;
+  
+  // Set the current queue. If not provided, we just play this song.
+  if (forceQueue) {
+    currentQueue = forceQueue;
+    currentIndex = currentQueue.findIndex(s => s.id === song.id);
+  } else if (currentQueue.length === 0) {
+     currentQueue = [song];
+     currentIndex = 0;
+  }
+
   audio.src = song.file;
   audio.play().catch(() => { }); // gracefully handle autoplay policy
   isPlaying = true;
@@ -71,9 +83,30 @@ function togglePlay() {
   }
 }
 
+function playNext() {
+  if (currentQueue.length === 0 || currentIndex === -1) return;
+  currentIndex = (currentIndex + 1) % currentQueue.length;
+  playSong(currentQueue[currentIndex], currentQueue);
+}
+
+function playPrev() {
+  if (currentQueue.length === 0 || currentIndex === -1) return;
+  currentIndex = (currentIndex - 1 + currentQueue.length) % currentQueue.length;
+  playSong(currentQueue[currentIndex], currentQueue);
+}
+
 audio.addEventListener('play', () => { isPlaying = true; _updatePlayPauseBtn(); _updateAllPlayBtns(currentSong?.id); });
 audio.addEventListener('pause', () => { isPlaying = false; _updatePlayPauseBtn(); _updateAllPlayBtns(currentSong?.id); });
-audio.addEventListener('ended', () => { isPlaying = false; _updatePlayPauseBtn(); _updateAllPlayBtns(null); });
+audio.addEventListener('ended', () => { 
+  isPlaying = false; 
+  _updatePlayPauseBtn(); 
+  _updateAllPlayBtns(null); 
+  
+  // Auto-play the next song if there is a queue
+  if (currentQueue.length > 1) {
+    playNext();
+  }
+});
 
 audio.addEventListener('timeupdate', () => {
   const fill = document.getElementById('progress-fill');
@@ -304,11 +337,10 @@ function createTrackCard(song) {
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
-    '<button class="btn-play" data-song-id="' + song.id + '" ' +
-    'onclick=\'playSong(' + songJson + ')\'>▶ Play</button>' +
-    '<a class="btn-dl" ' +
-    'href="download.html?file=' + encodeURIComponent(song.file) +
-    '&title=' + encodeURIComponent(song.title) + '">Download</a>' +
+    '<button class="btn-play" data-song-id="' + song.id + '" onclick="playSong(' + songJson + ', window.currentSongsView)">' +
+    (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
+    '</button>' +
+    '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
     '</div>' +
     '</div>'
   );
@@ -340,7 +372,7 @@ async function loadSongs() {
 }
 
 // ============================================
-// INIT — runs on every page
+// PAGE SETUP & INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -350,19 +382,50 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => setTheme(btn.dataset.theme));
   });
 
-  // Player seek bar
+  // Setup seek bar
   const track = document.getElementById('progress-track');
-  if (track) track.addEventListener('click', seekTo);
+  if (track) {
+    let _isDragging = false;
+    track.addEventListener('mousedown', e => { _isDragging = true; seekTo(e); });
+    document.addEventListener('mousemove', e => { if (_isDragging) seekTo(e); });
+    document.addEventListener('mouseup', () => { _isDragging = false; });
+  }
 
-  // Player play/pause
+  // Bind play/pause and skip buttons
   const ppBtn = document.getElementById('play-pause-btn');
   if (ppBtn) ppBtn.addEventListener('click', togglePlay);
+  
+  const prevBtn = document.getElementById('play-prev-btn');
+  if (prevBtn) prevBtn.addEventListener('click', playPrev);
+  
+  const nextBtn = document.getElementById('play-next-btn');
+  if (nextBtn) nextBtn.addEventListener('click', playNext);
+  
 
   // Player favorite button
   const playerFav = document.getElementById('player-fav-btn');
   if (playerFav) {
     playerFav.addEventListener('click', () => {
       if (currentSong) toggleFavorite(currentSong.id);
+    });
+  }
+
+  // Setup search input
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', e => {
+      // Small debounce
+      clearTimeout(searchInput._searchTimer);
+      searchInput._searchTimer = setTimeout(() => {
+        const query = e.target.value;
+        if (query) {
+          const results = fuzzySearch(window.allSongsRaw || [], query);
+          renderSimpleGrid(results);
+        } else {
+          // Empty query -> show all that match current filters (or everything)
+          renderBrowseFilters(window.allSongsRaw || []);
+        }
+      }, 300);
     });
   }
 
