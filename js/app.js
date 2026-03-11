@@ -4,16 +4,16 @@
 
 // --- Genre Config (main genres + sub-genres mapped from music folders) ---
 const GENRES = {
-  'Rock': { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock'] },
+  'Rock': { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock', 'Punk Rock'] },
   'Jazz': { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
   'Hip-Hop': { icon: '🎤', subgenres: ['Hiphop'] },
-  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop'] },
-  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic'] },
-  'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic'] },
-  'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass'] },
+  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'dream-pop'] },
+  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space'] },
+  'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'medieval'] },
+  'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western'] },
   'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting'] },
   'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
-  'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad'] }
+  'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad', 'melancholy'] }
 };
 
 // Map each music folder name to its parent genre

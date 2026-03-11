@@ -28,17 +28,23 @@ const FOLDER_TO_PARENT = {
   'Hard Rock':      'Rock',
   'Hair Metal':     'Rock',
   'Cinematic Rock': 'Rock',
+  'Punk Rock':      'Rock',
   'Calm Jazz':      'Jazz',
   'Fast Jazz':      'Jazz',
   'Hiphop':         'Hip-Hop',
   'Techno-Wave':    'Electronic',
   'Chillhop':       'Electronic',
+  'dream-pop':      'Electronic',
   'Cinematic':      'Cinematic',
   'Dramatic':       'Cinematic',
+  'Fantasy':        'Cinematic',
+  'Space':          'Cinematic',
   'Classical':      'Classical',
   'Romantic':       'Classical',
+  'medieval':       'Classical',
   'Country':        'Country & Folk',
   'Bluegrass':      'Country & Folk',
+  'Western':        'Country & Folk',
   'Peaceful':       'Ambient & Chill',
   'Meditative':     'Ambient & Chill',
   'Uplifting':      'Ambient & Chill',
@@ -46,7 +52,8 @@ const FOLDER_TO_PARENT = {
   'Suspenseful':    'Dark & Suspense',
   'Unsettling':     'Dark & Suspense',
   'Playful':        'Playful & Mood',
-  'Sad':            'Playful & Mood'
+  'Sad':            'Playful & Mood',
+  'melancholy':     'Playful & Mood'
 };
 
 // Artist folders (not genre folders)
