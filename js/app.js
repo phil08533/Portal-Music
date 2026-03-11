@@ -394,7 +394,6 @@ async function loadSongs() {
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  initHeaderElements();
 
   // Setup seek bar
   const track = document.getElementById('progress-track');
@@ -485,6 +484,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (banner) banner.style.display = 'none';
       sessionStorage.setItem('pm_banner_ok', '1');
     });
+  }
+
+  // Splash animation
+  var splash = document.getElementById('splash-overlay');
+  if (splash) {
+    if (sessionStorage.getItem('pm_splash_seen')) {
+      splash.style.display = 'none';
+    } else {
+      setTimeout(function () {
+        splash.classList.add('fade-out');
+        setTimeout(function () {
+          splash.style.display = 'none';
+          sessionStorage.setItem('pm_splash_seen', '1');
+        }, 800);
+      }, 2200);
+    }
   }
 
   // Highlight active nav link
