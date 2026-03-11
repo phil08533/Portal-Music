@@ -45,6 +45,7 @@ const FOLDER_TO_PARENT = {
   'Country':        'Country & Folk',
   'Bluegrass':      'Country & Folk',
   'Western':        'Country & Folk',
+  'Whiskey Pines':  'Country & Folk',
   'Peaceful':       'Ambient & Chill',
   'Meditative':     'Ambient & Chill',
   'Uplifting':      'Ambient & Chill',
