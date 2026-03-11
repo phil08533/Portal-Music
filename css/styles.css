@@ -1661,7 +1661,43 @@ button:hover,
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .grid .music-card-body {
+    padding: 0.6rem 0.7rem 0;
+  }
+
+  .grid .music-card h3 {
+    font-size: 0.82rem;
+  }
+
+  .grid .artist-name {
+    font-size: 0.72rem;
+  }
+
+  .grid .meta {
+    display: none;
+  }
+
+  .grid .tags {
+    display: none;
+  }
+
+  .grid .card-actions {
+    padding: 0 0.7rem 0.7rem;
+    gap: 4px;
+  }
+
+  .grid .btn-play {
+    padding: 8px 8px;
+    font-size: 0.78rem;
+  }
+
+  .grid .btn-dl {
+    padding: 8px 10px;
+    font-size: 0.78rem;
   }
 
   .artists-grid {
