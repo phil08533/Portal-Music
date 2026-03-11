@@ -305,6 +305,7 @@ header {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  color:black;
   margin-top: 1.8rem;
   padding: 14px 32px;
   background: var(--accent);
@@ -1678,4 +1679,5 @@ button:hover,
     padding: 16px 36px;
     font-size: 1.05rem;
   }
+
 }
