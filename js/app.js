@@ -10,7 +10,7 @@ const GENRES = {
   'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'dream-pop'] },
   'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space'] },
   'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'medieval'] },
-  'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western'] },
+  'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western', 'Whiskey Pines'] },
   'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting'] },
   'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
   'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad', 'melancholy'] }
