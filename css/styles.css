@@ -1691,3 +1691,167 @@ button:hover,
   }
 
 }
+
+/* Radio Specific Styles */
+    .radio-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 5%;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .radio-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .radio-header h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+    .radio-header h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .station-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 3rem;
+    }
+    
+    .station-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+    
+    .station-card:hover, .station-card.active {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-4px);
+      background: var(--card-hover);
+    }
+    
+    .station-icon {
+      font-size: 2.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 10px var(--accent-glow));
+    }
+    
+    .station-name {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    
+    .station-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .radio-player-large {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 10px 40px var(--accent-glow);
+      display: none; /* hidden until station selected */
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .rp-art {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 1.5rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .rp-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rp-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .rp-artist {
+      font-size: 0.95rem;
+      color: var(--accent-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .rp-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .rp-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rp-btn:hover {
+      color: var(--accent);
+    }
+
+    .rp-play {
+      background: var(--accent);
+      color: var(--btn-on-accent);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .rp-play:hover {
+      background: var(--accent-light);
+      transform: scale(1.05);
+      color: var(--btn-on-accent);
+    }
