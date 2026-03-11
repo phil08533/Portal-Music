@@ -7,7 +7,9 @@
   <title>Browse Music — Portal Music</title>
   <meta name="description"
     content="Browse free royalty-free music by genre. Rock, Jazz, Hip-Hop, Electronic, Cinematic, Classical, Country, and more.">
+  <link rel="icon" href="images/portal.png" type="image/png">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
     crossorigin="anonymous"></script>
@@ -36,7 +38,7 @@
     </div>
   </header>
 
-  <div class="page-with-side-ads">
+  <main id="main-content" class="page-with-side-ads">
     <aside class="side-ad left-ad">
       <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5642457707478801" data-ad-slot="XXXXXXXXXX"
         data-ad-format="vertical" data-full-width-responsive="false"></ins>
@@ -81,41 +83,6 @@
         data-ad-format="vertical" data-full-width-responsive="false"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
-  </div>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <p>&copy; 2025 Portal Music. All tracks are free to use.</p>
-      <div class="footer-links">
-        <a href="license.html">License</a>
-        <a href="privacy.html">Privacy Policy</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Player Bar -->
-  <div id="player-bar">
-    <div class="player-art" id="player-art">🎵</div>
-    <div class="player-info">
-      <div class="player-title" id="player-title">Select a track</div>
-      <div class="player-artist" id="player-artist"></div>
-    </div>
-    <div class="player-controls">
-      <button class="skip-btn" id="play-prev-btn" title="Previous Track">⏮</button>
-      <button class="player-btn" id="play-pause-btn" title="Play / Pause">▶</button>
-      <button class="skip-btn" id="play-next-btn" title="Next Track">⏭</button>
-    </div>
-    <div class="player-progress">
-      <div class="progress-track" id="progress-track">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="player-time" id="player-time">0:00 / 0:00</div>
-    </div>
-    <button class="player-fav" id="player-fav-btn">🤍</button>
-  </div>
-
-  <script src="js/app.js"></script>
   <script>
     var params = new URLSearchParams(window.location.search);
     var genre = params.get('genre');
@@ -286,6 +253,38 @@
       }
     });
   </script>
-</body>
+</main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2025 Portal Music. All tracks are free to use.</p>
+      <div class="footer-links">
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Player Bar -->
+  <div id="player-bar">
+    <div class="player-art" id="player-art">🎵</div>
+    <div class="player-info">
+      <div class="player-title" id="player-title">Select a track</div>
+      <div class="player-artist" id="player-artist"></div>
+    </div>
+    <div class="player-controls">
+      <button class="skip-btn" id="play-prev-btn" title="Previous Track">⏮</button>
+      <button class="player-btn" id="play-pause-btn" title="Play / Pause">▶</button>
+      <button class="skip-btn" id="play-next-btn" title="Next Track">⏭</button>
+    </div>
+    <div class="player-progress">
+      <div class="progress-track" id="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="player-time" id="player-time">0:00 / 0:00</div>
+    </div>
+    <button class="player-fav" id="player-fav-btn" title="Toggle favorite">🤍</button>
+  </div>
 
 </html>

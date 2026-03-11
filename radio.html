@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal Radio — Continuous Free Music</title>
   <meta name="description" content="Listen to continuous royalty-free music stations by genre, mood, or your favorites.">
+  <link rel="icon" href="images/portal.png" type="image/png">
   <link rel="stylesheet" href="css/styles.css">
   <style>
     /* Radio Specific Styles */
@@ -191,7 +192,7 @@
     </div>
   </header>
 
-  <div class="page-with-side-ads">
+  <main id="main-content" class="page-with-side-ads">
     <div class="radio-container">
       <div class="radio-header">
         <h1>Portal <span>Radio</span></h1>
@@ -213,30 +214,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Player Bar (Global) -->
-  <div id="player-bar">
-    <div class="player-art" id="player-art">🎵</div>
-    <div class="player-info">
-      <div class="player-title" id="player-title">Select a track</div>
-      <div class="player-artist" id="player-artist"></div>
-    </div>
-    <div class="player-controls">
-      <button class="skip-btn" id="play-prev-btn" title="Previous Track">⏮</button>
-      <button class="player-btn" id="play-pause-btn" title="Play / Pause">▶</button>
-      <button class="skip-btn" id="play-next-btn" title="Next Track">⏭</button>
-    </div>
-    <div class="player-progress">
-      <div class="progress-track" id="progress-track">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="player-time" id="player-time">0:00 / 0:00</div>
-    </div>
-    <button class="player-fav" id="player-fav-btn" title="Toggle favorite">🤍</button>
-  </div>
-
-  <script src="js/app.js"></script>
   <script>
     const STATIONS = [
       { id: 'all', name: 'Everything', icon: '🌌', desc: 'Shuffle the entire catalog' },
@@ -360,5 +337,28 @@
       renderStations();
     });
   </script>
+  </main>
+
+  <!-- Player Bar (Global) -->
+  <div id="player-bar">
+    <div class="player-art" id="player-art">🎵</div>
+    <div class="player-info">
+      <div class="player-title" id="player-title">Select a track</div>
+      <div class="player-artist" id="player-artist"></div>
+    </div>
+    <div class="player-controls">
+      <button class="skip-btn" id="play-prev-btn" title="Previous Track">⏮</button>
+      <button class="player-btn" id="play-pause-btn" title="Play / Pause">▶</button>
+      <button class="skip-btn" id="play-next-btn" title="Next Track">⏭</button>
+    </div>
+    <div class="player-progress">
+      <div class="progress-track" id="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="player-time" id="player-time">0:00 / 0:00</div>
+    </div>
+    <button class="player-fav" id="player-fav-btn" title="Toggle favorite">🤍</button>
+  </div>
+
 </body>
 </html>

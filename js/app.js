@@ -72,6 +72,7 @@ function playSong(song, forceQueue = null) {
   _updatePlayerUI(song);
   addToRecent(song);
   _updateAllPlayBtns(song.id);
+  _setupMediaSession(song);
 }
 
 function togglePlay() {
@@ -142,6 +143,23 @@ function _updatePlayerUI(song) {
   }
   _updatePlayPauseBtn();
   _updatePlayerFavBtn(song.id);
+}
+
+function _setupMediaSession(song) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: song.artist || song.genre || 'Portal Music',
+      artwork: [
+        { src: song.cover || 'images/portal.png', sizes: '512x512', type: 'image/png' }
+      ]
+    });
+
+    navigator.mediaSession.setActionHandler('play', () => { audio.play().catch(()=>{}); });
+    navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); });
+    navigator.mediaSession.setActionHandler('previoustrack', playPrev);
+    navigator.mediaSession.setActionHandler('nexttrack', playNext);
+  }
 }
 
 function _updatePlayPauseBtn() {
@@ -376,11 +394,7 @@ async function loadSongs() {
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-
-  // Theme toggle buttons
-  document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.addEventListener('click', () => setTheme(btn.dataset.theme));
-  });
+  initHeaderElements();
 
   // Setup seek bar
   const track = document.getElementById('progress-track');
@@ -401,6 +415,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextBtn = document.getElementById('play-next-btn');
   if (nextBtn) nextBtn.addEventListener('click', playNext);
   
+  // Keyboard shortcuts (Spacebar, Arrows)
+  document.addEventListener('keydown', e => {
+    // Ignore if typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.code === 'Space') {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.code === 'ArrowLeft') {
+      e.preventDefault();
+      if (audio.currentTime > 5) audio.currentTime -= 5;
+      else audio.currentTime = 0;
+    } else if (e.code === 'ArrowRight') {
+      e.preventDefault();
+      if (audio.duration && audio.currentTime < audio.duration - 5) audio.currentTime += 5;
+    }
+  });
 
   // Player favorite button
   const playerFav = document.getElementById('player-fav-btn');
@@ -409,25 +440,37 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentSong) toggleFavorite(currentSong.id);
     });
   }
-
-  // Setup search input
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', e => {
-      // Small debounce
-      clearTimeout(searchInput._searchTimer);
-      searchInput._searchTimer = setTimeout(() => {
-        const query = e.target.value;
-        if (query) {
-          const results = fuzzySearch(window.allSongsRaw || [], query);
-          renderSimpleGrid(results);
-        } else {
-          // Empty query -> show all that match current filters (or everything)
-          renderBrowseFilters(window.allSongsRaw || []);
-        }
-      }, 300);
+  
+  // Define header init function so SPA router can call it
+  window.initHeaderElements = function() {
+    // Theme toggle buttons
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => setTheme(btn.dataset.theme));
     });
-  }
+
+    // Setup search input
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        // Small debounce
+        clearTimeout(searchInput._searchTimer);
+        searchInput._searchTimer = setTimeout(() => {
+          const query = e.target.value;
+          const pool = window.allSongsRaw || window.allSongsPage || [];
+          if (query) {
+            const results = fuzzySearch(pool, query);
+            if (typeof renderSimpleGrid === 'function') renderSimpleGrid(results);
+          } else {
+            // Empty query -> show all that match current filters (or everything)
+            if (typeof renderBrowseFilters === 'function') renderBrowseFilters(pool);
+          }
+        }, 300);
+      });
+    }
+  };
+  
+  // Run once immediately
+  window.initHeaderElements();
 
   // Favorites banner dismiss
   const dismissBtn = document.getElementById('fav-banner-dismiss');
@@ -460,3 +503,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ============================================
+// SPA ROUTER
+// ============================================
+
+document.addEventListener('click', e => {
+  const link = e.target.closest('a');
+  if (!link || !link.href) return;
+
+  // Let browser handle external links, new tabs, special protocols, or downloads
+  if (link.target === '_blank' || link.hasAttribute('download') || link.host !== window.location.host) return;
+  if (!link.href.startsWith('http')) return;
+
+  e.preventDefault();
+  const url = link.href;
+
+  // Don't fetch if we click the current active page exactly
+  if (url === window.location.href) return;
+
+  navigateTo(url);
+});
+
+window.addEventListener('popstate', () => {
+  navigateTo(window.location.href, false);
+});
+
+async function navigateTo(url, pushState = true) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to load page');
+    const html = await res.text();
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const newMain = doc.querySelector('#main-content');
+    if (!newMain) throw new Error('No #main-content found');
+
+    const currentMain = document.getElementById('main-content');
+    if (currentMain) {
+      currentMain.innerHTML = newMain.innerHTML;
+      
+      // Update Title
+      document.title = doc.title;
+
+      // Update Header (Nav active states, search bar value, etc)
+      const headerNav = doc.querySelector('header');
+      if (headerNav) {
+          const currentHeader = document.querySelector('header');
+          if (currentHeader) currentHeader.innerHTML = headerNav.innerHTML;
+      }
+      
+      // Execute Scripts manually inside main-content
+      const scripts = currentMain.querySelectorAll('script');
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+      });
+
+      if (pushState) {
+        window.history.pushState(null, '', url);
+      }
+      
+      // Re-init header elements (Theme bind, search bind) since header was replaced
+      if (typeof window.initHeaderElements === 'function') {
+        window.initHeaderElements();
+      }
+
+      window.scrollTo(0, 0);
+    } else {
+        window.location.href = url; // fallback
+    }
+
+  } catch (err) {
+    console.error('SPA Error:', err);
+    window.location.href = url; // Fallback to normal navigation
+  }
+}
