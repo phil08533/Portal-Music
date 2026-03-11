@@ -248,7 +248,7 @@
       } else if (artist) {
         titleEl.textContent = artist;
         subtitleEl.textContent = 'All tracks by ' + artist;
-        var artistSongs = songs.filter(function (s) { return s.artist === artist; });
+        var artistSongs = songs.filter(function (s) { return s.artist === artist || s.subgenre === artist; });
         renderSimpleGrid(artistSongs);
 
       } else {
