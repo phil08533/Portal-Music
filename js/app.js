@@ -6,12 +6,15 @@
 const GENRES = {
   'Rock': { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock', 'Punk Rock'] },
   'Jazz': { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
-  'Hip-Hop': { icon: '🎤', subgenres: ['Hiphop'] },
-  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'dream-pop'] },
-  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space'] },
+  'Hip-Hop': { icon: '🎤', subgenres: ['Hiphop', 'hip-hop'] },
+  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'dream-pop', 'lo-fi', 'electronic'] },
+  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space', 'cinematic'] },
   'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'medieval'] },
   'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western', 'Whiskey Pines'] },
-  'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting'] },
+  'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting', 'ambient'] },
+  'Pop': { icon: '🍭', subgenres: ['pop', 'Avilyn Grace', 'Dem Bois', 'Newest Release!'] },
+  'Acoustic': { icon: '🪕', subgenres: ['acoustic'] },
+  'R&B / Soul': { icon: '🍷', subgenres: ['rb-soul'] },
   'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
   'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad', 'melancholy'] }
 };

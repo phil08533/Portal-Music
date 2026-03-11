@@ -6,27 +6,39 @@ import os
 import hashlib
 from mutagen.id3 import ID3
 
-MUSIC_JSON = "data/music.json"
-COVERS_DIR = "covers"
+# Determine script directory and project root
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+MUSIC_JSON = os.path.join(PROJECT_ROOT, "data", "music.json")
+COVERS_DIR = os.path.join(PROJECT_ROOT, "covers")
 
 os.makedirs(COVERS_DIR, exist_ok=True)
 
-with open(MUSIC_JSON, "r") as f:
+with open(MUSIC_JSON, "r", encoding="utf-8") as f:
     songs = json.load(f)
 
 updated = 0
 for song in songs:
-    mp3_path = song.get("file", "")
-    if not mp3_path or not os.path.exists(mp3_path):
+    rel_mp3_path = song.get("file", "")
+    if not rel_mp3_path:
+        print(f"Skipping: No file path defined for ID: {song['id']} ({song['title']})")
+        continue
+    
+    mp3_path = os.path.join(PROJECT_ROOT, rel_mp3_path)
+    if not os.path.exists(mp3_path):
+        print(f"Skipping: File not found: {mp3_path} (ID: {song['id']})")
         continue
 
     try:
         tags = ID3(mp3_path)
-    except Exception:
+    except Exception as e:
+        print(f"Skipping: Could not read ID3 tags for {mp3_path}. Error: {e}")
         continue
 
     apic_keys = [k for k in tags.keys() if k.startswith("APIC")]
     if not apic_keys:
+        print(f"Skipping: No album art found in {mp3_path}")
         continue
 
     apic = tags[apic_keys[0]]
@@ -45,7 +57,7 @@ for song in songs:
     song["cover"] = cover_path
     updated += 1
 
-with open(MUSIC_JSON, "w") as f:
-    json.dump(songs, f, indent=2)
+with open(MUSIC_JSON, "w", encoding="utf-8") as f:
+    json.dump(songs, f, indent=2, ensure_ascii=False)
 
 print(f"Extracted {updated} covers out of {len(songs)} tracks")
