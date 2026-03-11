@@ -191,7 +191,7 @@
         .then(function (r) { return r.json(); })
         .then(function (artists) {
           document.getElementById('artists-grid').innerHTML = artists.map(function (a) {
-            return '<a class="artist-card" href="browse.html?artist=' + encodeURIComponent(a.name) + '">' +
+            return '<a class="artist-card" href="browse.html?subgenre=' + encodeURIComponent(a.name) + '">' +
               '<div class="artist-card-img">' +
               (a.hasImage
                 ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'

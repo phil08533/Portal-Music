@@ -372,6 +372,16 @@ button:hover,
   color: var(--btn-hover-text);
 }
 
+button.chip:hover {
+  background: var(--chip-hover);
+  color: var(--text);
+}
+
+button.chip.active {
+  background: var(--accent);
+  color: var(--btn-on-accent);
+}
+
 /* --- Trust Banner --- */
 .trust-banner {
   display: grid;
@@ -483,7 +493,12 @@ button:hover,
   font-family: inherit;
 }
 
-.chip:hover,
+.chip:hover {
+  background: var(--chip-hover);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
 .chip.active {
   background: var(--accent);
   border-color: var(--accent);
@@ -1701,7 +1716,28 @@ button:hover,
   }
 
   .artists-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .artist-card-img {
+    height: 100px;
+  }
+
+  .artist-card-info {
+    padding: 0.6rem;
+  }
+
+  .artist-card-info h3 {
+    font-size: 0.82rem;
+  }
+
+  .artist-card-info p {
+    display: none;
+  }
+
+  .artist-genre-tag {
+    font-size: 0.68rem;
   }
 
   .hero h1 {

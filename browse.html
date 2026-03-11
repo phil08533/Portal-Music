@@ -252,8 +252,10 @@
         renderSimpleGrid(artistSongs);
 
       } else {
-        titleEl.textContent = 'Browse Music';
-        subtitleEl.textContent = songs.length + ' tracks available. Select genres to filter.';
+        titleEl.textContent = subgenreParam ? subgenreParam : 'Browse Music';
+        subtitleEl.textContent = subgenreParam
+          ? 'Showing tracks for ' + subgenreParam + '. Select more genres to add.'
+          : songs.length + ' tracks available. Select genres to filter.';
         renderBrowseFilters(songs);
         renderFilteredGrid();
       }

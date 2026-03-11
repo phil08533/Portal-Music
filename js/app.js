@@ -570,6 +570,11 @@ async function navigateTo(url, pushState = true) {
           if (currentHeader) currentHeader.innerHTML = headerNav.innerHTML;
       }
       
+      // Update URL BEFORE executing scripts so they read correct params
+      if (pushState) {
+        window.history.pushState(null, '', url);
+      }
+
       // Execute Scripts manually inside main-content
       const scripts = currentMain.querySelectorAll('script');
       scripts.forEach(oldScript => {
@@ -578,10 +583,6 @@ async function navigateTo(url, pushState = true) {
         newScript.appendChild(document.createTextNode(oldScript.innerHTML));
         oldScript.parentNode.replaceChild(newScript, oldScript);
       });
-
-      if (pushState) {
-        window.history.pushState(null, '', url);
-      }
       
       // Re-init header elements (Theme bind, search bind) since header was replaced
       if (typeof window.initHeaderElements === 'function') {
