@@ -54,7 +54,7 @@ for song in songs:
     with open(cover_path, "wb") as img_file:
         img_file.write(img_data)
 
-    song["cover"] = cover_path
+    song["cover"] = f"covers/{cover_filename}"
     updated += 1
 
 with open(MUSIC_JSON, "w", encoding="utf-8") as f:
