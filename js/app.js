@@ -84,9 +84,20 @@ function togglePlay() {
   }
 }
 
-// Called by track card play buttons — toggles if already active, otherwise starts
+// Called by track card play buttons — looks up song by ID to avoid JSON-in-onclick issues
+function handleCardPlay(songId) {
+  const song = allSongs.find(function(s) { return String(s.id) === String(songId); });
+  if (!song) return;
+  if (currentSong && String(currentSong.id) === String(songId)) {
+    togglePlay();
+  } else {
+    playSong(song, window.currentSongsView || null);
+  }
+}
+
+// Legacy wrapper kept for compatibility
 function handlePlayBtn(song, queue) {
-  if (currentSong && currentSong.id === song.id) {
+  if (currentSong && String(currentSong.id) === String(song.id)) {
     togglePlay();
   } else {
     playSong(song, queue);
@@ -337,9 +348,6 @@ function createTrackCard(song) {
   const subEl = song.subgenre
     ? '<span class="badge subgenre">' + _esc(song.subgenre) + '</span>'
     : '';
-  // Safely encode song data for inline onclick
-  const songJson = _esc(JSON.stringify(song));
-
   // Album art: use cover image if available, else gradient with icon
   const artContent = song.cover
     ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy">'
@@ -366,7 +374,7 @@ function createTrackCard(song) {
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
-    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(' + songJson + ', window.currentSongsView)">' +
+    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handleCardPlay(\'' + song.id + '\')">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
