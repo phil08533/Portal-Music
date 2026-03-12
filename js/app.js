@@ -327,7 +327,24 @@ function fuzzySearch(songs, query) {
 // ============================================
 // TRACK CARD RENDERER
 // ============================================
+
+// Global song registry — lets btn-play look up songs by ID without embedding full JSON
+const _songRegistry = {};
+
+function handlePlayBtnById(songId) {
+  const song = _songRegistry[songId];
+  if (!song) return;
+  if (currentSong && currentSong.id === songId) {
+    togglePlay();
+  } else {
+    playSong(song, window.currentSongsView || [song]);
+  }
+}
+
 function createTrackCard(song) {
+  // Register song so handlePlayBtnById can look it up
+  _songRegistry[song.id] = song;
+
   const faved = isFavorited(song.id);
   const icon = GENRES[song.genre]?.icon || '🎵';
   const tagsStr = (song.tags || []).slice(0, 3).join(', ');
@@ -337,8 +354,6 @@ function createTrackCard(song) {
   const subEl = song.subgenre
     ? '<span class="badge subgenre">' + _esc(song.subgenre) + '</span>'
     : '';
-  // Safely encode song data for inline onclick
-  const songJson = _esc(JSON.stringify(song));
 
   // Album art: use cover image if available, else gradient with icon
   const artContent = song.cover
@@ -366,7 +381,7 @@ function createTrackCard(song) {
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
-    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(' + songJson + ', window.currentSongsView)">' +
+    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtnById(\'' + song.id + '\')">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
@@ -410,13 +425,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const track = document.getElementById('progress-track');
   if (track) {
     let _isDragging = false;
-    track.addEventListener('mousedown', e => { _isDragging = true; seekTo(e); });
+    track.addEventListener('mousedown', e => {
+      _isDragging = true;
+      track.classList.add('dragging');
+      seekTo(e);
+    });
     document.addEventListener('mousemove', e => { if (_isDragging) seekTo(e); });
-    document.addEventListener('mouseup', () => { _isDragging = false; });
+    document.addEventListener('mouseup', () => {
+      _isDragging = false;
+      track.classList.remove('dragging');
+    });
     // Touch support
-    track.addEventListener('touchstart', e => { e.preventDefault(); _isDragging = true; seekTo(e); }, { passive: false });
+    track.addEventListener('touchstart', e => {
+      e.preventDefault();
+      _isDragging = true;
+      track.classList.add('dragging');
+      seekTo(e);
+    }, { passive: false });
     document.addEventListener('touchmove', e => { if (_isDragging) { e.preventDefault(); seekTo(e); } }, { passive: false });
-    document.addEventListener('touchend', () => { _isDragging = false; });
+    document.addEventListener('touchend', () => {
+      _isDragging = false;
+      track.classList.remove('dragging');
+    });
   }
 
   // Bind play/pause and skip buttons

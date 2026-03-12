@@ -1041,44 +1041,50 @@ button.chip.active {
 
 .progress-track {
   flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
   cursor: pointer;
   position: relative;
   /* Larger invisible hit area so it's easy to click/tap */
-  padding: 10px 0;
-  margin: -10px 0;
+  padding: 12px 0;
+  margin: -12px 0;
   box-sizing: content-box;
+  transition: background 0.15s ease;
+}
+
+.progress-track:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .progress-track:hover .progress-fill::after,
-.progress-track:active .progress-fill::after {
-  transform: scale(1);
+.progress-track:active .progress-fill::after,
+.progress-track.dragging .progress-fill::after {
+  transform: translateY(-50%) scale(1);
 }
 
 .progress-fill {
-  height: 4px;
+  height: 6px;
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 6px;
   width: 0%;
   pointer-events: none;
   transition: width 0.1s linear;
   position: relative;
 }
 
-/* Scrub thumb — only visible on hover/drag */
+/* Scrub thumb — visible on hover/drag */
 .progress-fill::after {
   content: '';
   position: absolute;
-  right: -5px;
+  right: -7px;
   top: 50%;
   transform: translateY(-50%) scale(0);
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
   transition: transform 0.15s ease;
 }
 

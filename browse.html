@@ -58,6 +58,11 @@
         <p class="browse-subtitle" id="page-subtitle"></p>
       </div>
 
+      <!-- Featured Artists Box (shown on main browse page only) -->
+      <div id="browse-artists-section">
+        <div class="artists-grid" id="browse-artists-grid"></div>
+      </div>
+
       <!-- Genre filter chips (multi-select) -->
       <div class="browse-filters" id="browse-filters"></div>
 
@@ -97,6 +102,39 @@
     var filterMode = params.get('filter');
     var allSongsPage = [];
     var activeFilters = []; // array of subgenre strings
+
+    // --- Featured Artists Box (only on main browse, not filtered views) ---
+    function renderBrowseArtists() {
+      var section = document.getElementById('browse-artists-section');
+      if (!section) return;
+      // Hide for filtered/genre/artist/favorites/subgenre views
+      if (genre || artist || filterMode || subgenreParam) {
+        section.style.display = 'none';
+        return;
+      }
+      fetch('data/artists.json')
+        .then(function (r) { return r.json(); })
+        .then(function (artists) {
+          var names = artists.map(function(a) { return a.name; }).join(', ');
+          var portraits = artists.map(function(a) {
+            return '<a class="featured-artist-portrait" href="browse.html?subgenre=' + encodeURIComponent(a.name) + '" title="Browse ' + a.name + '">' +
+              '<div class="featured-artist-portrait-img">' +
+              (a.hasImage
+                ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'
+                : '<span>🎤</span>') +
+              '</div>' +
+              '<span class="featured-artist-portrait-name">' + a.name + '</span>' +
+              '</a>';
+          }).join('');
+          document.getElementById('browse-artists-grid').innerHTML =
+            '<div class="featured-artists-box">' +
+              '<div class="featured-artists-byline">' + names + '</div>' +
+              '<div class="featured-artists-portraits">' + portraits + '</div>' +
+            '</div>';
+        }).catch(function () {
+          if (section) section.style.display = 'none';
+        });
+    }
 
     // --- Build genre/subgenre chip grid (multi-select) ---
     function renderBrowseFilters(songs) {
@@ -207,6 +245,7 @@
     }
 
     // --- Main load ---
+    renderBrowseArtists();
     loadSongs().then(function (songs) {
       var titleEl = document.getElementById('page-title');
       var subtitleEl = document.getElementById('page-subtitle');
