@@ -726,9 +726,7 @@ button.chip.active {
 
 /* --- Artist Cards --- */
 .artists-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  display: block;
 }
 
 .artist-card {
@@ -790,6 +788,68 @@ button.chip.active {
   font-size: 0.82rem;
   color: var(--text-muted);
   line-height: 1.5;
+}
+
+/* --- Featured Artists Box (single large card) --- */
+.featured-artists-box {
+  background: linear-gradient(135deg, var(--card) 0%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.featured-artists-byline {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.featured-artists-portraits {
+  display: flex;
+  gap: 16px;
+}
+
+.featured-artist-portrait {
+  flex: 1;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform var(--transition);
+}
+
+.featured-artist-portrait:hover {
+  transform: translateY(-3px);
+  color: var(--accent);
+}
+
+.featured-artist-portrait-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: calc(var(--radius) - 2px);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.featured-artist-portrait-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.featured-artist-portrait-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 /* --- Ad Slots --- */
@@ -982,19 +1042,48 @@ button.chip.active {
 .progress-track {
   flex: 1;
   height: 4px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   cursor: pointer;
   position: relative;
+  /* Larger invisible hit area so it's easy to click/tap */
+  padding: 10px 0;
+  margin: -10px 0;
+  box-sizing: content-box;
+}
+
+.progress-track:hover .progress-fill::after,
+.progress-track:active .progress-fill::after {
+  transform: scale(1);
 }
 
 .progress-fill {
-  height: 100%;
+  height: 4px;
   background: var(--accent);
   border-radius: 4px;
   width: 0%;
   pointer-events: none;
   transition: width 0.1s linear;
+  position: relative;
+}
+
+/* Scrub thumb — only visible on hover/drag */
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease;
+}
+
+.progress-track:hover .progress-fill::after {
+  transform: translateY(-50%) scale(1);
 }
 
 .player-time {
