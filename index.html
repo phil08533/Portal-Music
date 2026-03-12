@@ -185,25 +185,27 @@
       }).join('');
     }
 
-    // --- Artists ---
+    // --- Artists — single featured box listing all three ---
     function renderArtists() {
       fetch('data/artists.json')
         .then(function (r) { return r.json(); })
         .then(function (artists) {
-          document.getElementById('artists-grid').innerHTML = artists.map(function (a) {
-            return '<a class="artist-card" href="browse.html?subgenre=' + encodeURIComponent(a.name) + '">' +
-              '<div class="artist-card-img">' +
+          var names = artists.map(function(a) { return a.name; }).join(', ');
+          var portraits = artists.map(function(a) {
+            return '<a class="featured-artist-portrait" href="browse.html?subgenre=' + encodeURIComponent(a.name) + '" title="Browse ' + a.name + '">' +
+              '<div class="featured-artist-portrait-img">' +
               (a.hasImage
                 ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'
-                : '🎤') +
+                : '<span>🎤</span>') +
               '</div>' +
-              '<div class="artist-card-info">' +
-              '<h3>' + a.name + '</h3>' +
-              '<div class="artist-genre-tag">' + a.genre + '</div>' +
-              '<p>' + a.bio + '</p>' +
-              '</div>' +
+              '<span class="featured-artist-portrait-name">' + a.name + '</span>' +
               '</a>';
           }).join('');
+          document.getElementById('artists-grid').innerHTML =
+            '<div class="featured-artists-box">' +
+              '<div class="featured-artists-byline">' + names + '</div>' +
+              '<div class="featured-artists-portraits">' + portraits + '</div>' +
+            '</div>';
         }).catch(function () {
           document.getElementById('artists-grid').innerHTML = '';
         });

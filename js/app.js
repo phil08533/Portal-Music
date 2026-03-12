@@ -12,7 +12,7 @@ const GENRES = {
   'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'medieval'] },
   'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western', 'Whiskey Pines'] },
   'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting', 'ambient'] },
-  'Pop': { icon: '🍭', subgenres: ['pop', 'Avilyn Grace', 'Dem Bois', 'Newest Release!'] },
+  'Pop': { icon: '🍭', subgenres: ['pop', 'Avilyn Grace', 'Dem Bois'] },
   'Acoustic': { icon: '🪕', subgenres: ['acoustic'] },
   'R&B / Soul': { icon: '🍷', subgenres: ['rb-soul'] },
   'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
@@ -84,6 +84,15 @@ function togglePlay() {
   }
 }
 
+// Called by track card play buttons — toggles if already active, otherwise starts
+function handlePlayBtn(song, queue) {
+  if (currentSong && currentSong.id === song.id) {
+    togglePlay();
+  } else {
+    playSong(song, queue);
+  }
+}
+
 function playNext() {
   if (currentQueue.length === 0 || currentIndex === -1) return;
   currentIndex = (currentIndex + 1) % currentQueue.length;
@@ -122,7 +131,9 @@ function seekTo(e) {
   const track = document.getElementById('progress-track');
   if (!track || !audio.duration) return;
   const rect = track.getBoundingClientRect();
-  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  audio.currentTime = pct * audio.duration;
 }
 
 function _updatePlayerUI(song) {
@@ -355,7 +366,7 @@ function createTrackCard(song) {
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
-    '<button class="btn-play" data-song-id="' + song.id + '" onclick="playSong(' + songJson + ', window.currentSongsView)">' +
+    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(' + songJson + ', window.currentSongsView)">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
@@ -395,13 +406,17 @@ async function loadSongs() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
 
-  // Setup seek bar
+  // Setup seek bar (mouse + touch)
   const track = document.getElementById('progress-track');
   if (track) {
     let _isDragging = false;
     track.addEventListener('mousedown', e => { _isDragging = true; seekTo(e); });
     document.addEventListener('mousemove', e => { if (_isDragging) seekTo(e); });
     document.addEventListener('mouseup', () => { _isDragging = false; });
+    // Touch support
+    track.addEventListener('touchstart', e => { e.preventDefault(); _isDragging = true; seekTo(e); }, { passive: false });
+    document.addEventListener('touchmove', e => { if (_isDragging) { e.preventDefault(); seekTo(e); } }, { passive: false });
+    document.addEventListener('touchend', () => { _isDragging = false; });
   }
 
   // Bind play/pause and skip buttons
