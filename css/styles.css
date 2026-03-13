@@ -1041,10 +1041,11 @@ button.chip.active {
 
 .progress-track {
   flex: 1;
-  height: 4px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  touch-action: none;
   position: relative;
   /* Larger invisible hit area so it's easy to click/tap */
   padding: 10px 0;
@@ -1058,9 +1059,9 @@ button.chip.active {
 }
 
 .progress-fill {
-  height: 4px;
+  height: 6px;
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 6px;
   width: 0%;
   pointer-events: none;
   transition: width 0.1s linear;
@@ -1710,8 +1711,16 @@ button.chip.active {
     grid-template-columns: 1fr 1fr;
   }
 
+  #player-bar {
+    flex-wrap: wrap;
+    padding: 6px 3% 10px;
+  }
+
   .player-progress {
-    display: none;
+    order: 10;
+    flex-basis: 100%;
+    min-width: 100%;
+    margin-top: 2px;
   }
 
   .trust-banner {
