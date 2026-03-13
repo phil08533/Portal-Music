@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Portal Music</title>
+  <meta name="description" content="Contact Portal Music with licensing questions, business inquiries, or general feedback.">
+  <link rel="canonical" href="https://portal-music.com/contact.html">
+  <link rel="icon" href="images/portal.png" type="image/png">
+  <meta property="og:title" content="Contact — Portal Music">
+  <meta property="og:description" content="Contact Portal Music with licensing questions, business inquiries, or general feedback.">
+  <meta property="og:image" content="https://portal-music.com/images/portal.png">
+  <meta property="og:url" content="https://portal-music.com/contact.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Portal Music">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
+    crossorigin="anonymous"></script>
+  <style>
+    .contact-wrap {
+      max-width: 640px;
+      margin: 3rem auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .contact-wrap h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-wrap .contact-sub {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .contact-form label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .contact-form input,
+    .contact-form select,
+    .contact-form textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+
+    .contact-form input:focus,
+    .contact-form select:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .contact-form textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    .contact-form select {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .contact-submit {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      padding: 12px 28px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 0.4rem;
+      transition: opacity 0.15s;
+    }
+
+    .contact-submit:hover {
+      opacity: 0.85;
+    }
+
+    .contact-note {
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .contact-note a {
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="browse.html">Browse</a>
+      <a href="radio.html">Radio</a>
+      <a href="browse.html?filter=favorites">Favorites</a>
+      <div class="nav-more">
+        <button class="nav-more-btn">More ▾</button>
+        <div class="nav-more-dropdown">
+          <a href="about.html">About</a>
+          <a href="contact.html" class="active">Contact</a>
+          <a href="license.html">License</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+        </div>
+      </div>
+    </nav>
+    <div class="theme-btns">
+      <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
+      <button class="theme-btn" data-theme="light" title="Light">☀️</button>
+      <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
+    </div>
+  </header>
+
+  <div class="contact-wrap">
+
+    <h1>Contact Us</h1>
+    <p class="contact-sub">Have a question about licensing, a specific project, or just want to say hello? Fill out the form below and we'll get back to you.</p>
+
+    <form class="contact-form" id="contact-form">
+      <div>
+        <label for="contact-name">Your Name</label>
+        <input type="text" id="contact-name" name="name" placeholder="Jane Smith" required>
+      </div>
+      <div>
+        <label for="contact-email">Your Email</label>
+        <input type="email" id="contact-email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div>
+        <label for="contact-subject">Subject</label>
+        <select id="contact-subject" name="subject">
+          <option value="Licensing Question">Licensing Question</option>
+          <option value="Business Inquiry">Business Inquiry</option>
+          <option value="Music Submission">Music Submission</option>
+          <option value="Feedback">Feedback</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label for="contact-message">Message</label>
+        <textarea id="contact-message" name="message" placeholder="Describe your question or project..." required></textarea>
+      </div>
+      <button type="submit" class="contact-submit">Send Message</button>
+    </form>
+
+    <p class="contact-note">
+      You can also reach us directly at
+      <a href="mailto:philip0533gonzales@gmail.com">philip0533gonzales@gmail.com</a>
+    </p>
+
+  </div>
+
+  <!-- Cookie Consent -->
+  <div id="cookie-banner" class="cookie-banner" style="display:none;">
+    <p>This site uses cookies from Google AdSense to serve ads. <a href="privacy.html" style="color:var(--accent);">Learn more</a></p>
+    <button id="cookie-accept" class="cookie-accept-btn">Got it</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2025–2026 Portal Music. All tracks are free to use.</p>
+      <div class="footer-links">
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Use</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('contact-name').value.trim();
+      var email = document.getElementById('contact-email').value.trim();
+      var subject = document.getElementById('contact-subject').value;
+      var message = document.getElementById('contact-message').value.trim();
+
+      var body = 'Name: ' + name + '\nEmail: ' + email + '\n\n' + message;
+      var mailto = 'mailto:philip0533gonzales@gmail.com'
+        + '?subject=' + encodeURIComponent('[Portal Music] ' + subject)
+        + '&body=' + encodeURIComponent(body);
+
+      window.location.href = mailto;
+    });
+  </script>
+
+</body>
+
+</html>

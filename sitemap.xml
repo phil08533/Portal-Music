@@ -51,4 +51,10 @@
     <changefreq>yearly</changefreq>
   </url>
 
+  <url>
+    <loc>https://portal-music.com/contact.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
 </urlset>
