@@ -53,6 +53,9 @@
 
     <div class="container">
 
+      <!-- Featured Artists -->
+      <div class="artists-grid" id="browse-artists-grid"></div>
+
       <div class="browse-header">
         <h1 id="page-title">All Music</h1>
         <p class="browse-subtitle" id="page-subtitle"></p>
@@ -260,6 +263,30 @@
         renderFilteredGrid();
       }
     });
+
+    // Featured Artists box (only show on main browse, not filtered views)
+    if (!genre && !artist && !filterMode) {
+      fetch('data/artists.json')
+        .then(function (r) { return r.json(); })
+        .then(function (artists) {
+          var names = artists.map(function(a) { return a.name; }).join(', ');
+          var portraits = artists.map(function(a) {
+            return '<a class="featured-artist-portrait" href="browse.html?artist=' + encodeURIComponent(a.name) + '" title="Browse ' + a.name + '">' +
+              '<div class="featured-artist-portrait-img">' +
+              (a.hasImage
+                ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'
+                : '<span>🎤</span>') +
+              '</div>' +
+              '<span class="featured-artist-portrait-name">' + a.name + '</span>' +
+              '</a>';
+          }).join('');
+          document.getElementById('browse-artists-grid').innerHTML =
+            '<div class="featured-artists-box">' +
+              '<div class="featured-artists-byline">Featured Artists — ' + names + '</div>' +
+              '<div class="featured-artists-portraits">' + portraits + '</div>' +
+            '</div>';
+        }).catch(function () {});
+    }
   </script>
 </main>
 
