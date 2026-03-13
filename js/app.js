@@ -85,12 +85,20 @@ function togglePlay() {
 }
 
 // Called by track card play buttons — toggles if already active, otherwise starts
-function handlePlayBtn(song, queue) {
-  if (currentSong && currentSong.id === song.id) {
+function handlePlayBtn(songOrId, queue) {
+  // Support being called with just a song ID string (from event delegation)
+  var songId = typeof songOrId === 'string' ? songOrId : songOrId.id;
+  if (currentSong && String(currentSong.id) === String(songId)) {
     togglePlay();
-  } else {
-    playSong(song, queue);
+    return;
   }
+  // Find the song object from the queue or global view
+  var song = typeof songOrId === 'object' ? songOrId : null;
+  if (!song) {
+    var pool = queue || window.currentSongsView || allSongs || [];
+    song = pool.find(function(s) { return String(s.id) === String(songId); });
+  }
+  if (song) playSong(song, queue);
 }
 
 function playNext() {
@@ -337,9 +345,6 @@ function createTrackCard(song) {
   const subEl = song.subgenre
     ? '<span class="badge subgenre">' + _esc(song.subgenre) + '</span>'
     : '';
-  // Safely encode song data for inline onclick
-  const songJson = _esc(JSON.stringify(song));
-
   // Album art: use cover image if available, else gradient with icon
   const artContent = song.cover
     ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy">'
@@ -366,7 +371,7 @@ function createTrackCard(song) {
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
-    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(' + songJson + ', window.currentSongsView)">' +
+    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(\'' + song.id + '\', window.currentSongsView)">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
