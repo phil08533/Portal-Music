@@ -39,4 +39,16 @@
     <changefreq>yearly</changefreq>
   </url>
 
+  <url>
+    <loc>https://portal-music.com/about.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/terms.html</loc>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
 </urlset>

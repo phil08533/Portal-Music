@@ -7,6 +7,7 @@
   <title>License — Portal Music</title>
   <meta name="description"
     content="Portal Music license terms. Free for commercial use, advertising, YouTube, and more. We never copyright strike.">
+  <link rel="canonical" href="https://portal-music.com/license.html">
   <link rel="icon" href="images/portal.png" type="image/png">
   <meta property="og:title" content="License — Portal Music">
   <meta property="og:description" content="Portal Music license terms. Free for commercial use, advertising, YouTube, and more. We never copyright strike.">
@@ -23,14 +24,6 @@
 
 <body>
 
-  <!-- Splash Overlay -->
-  <div id="splash-overlay" class="splash-overlay">
-    <div class="splash-content">
-      <img src="images/portal.png" alt="Portal Music" class="splash-logo">
-      <h1 class="splash-title">Portal Music</h1>
-    </div>
-  </div>
-
   <header>
     <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
     <nav class="nav-links">
@@ -38,7 +31,15 @@
       <a href="browse.html">Browse</a>
       <a href="radio.html">Radio</a>
       <a href="browse.html?filter=favorites">Favorites</a>
-      <a href="license.html">License</a>
+      <div class="nav-more">
+        <button class="nav-more-btn">More ▾</button>
+        <div class="nav-more-dropdown">
+          <a href="about.html">About</a>
+          <a href="license.html" class="active">License</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+        </div>
+      </div>
     </nav>
     <div class="theme-btns">
       <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
@@ -141,13 +142,21 @@
     </aside>
   </div>
 
+  <!-- Cookie Consent -->
+  <div id="cookie-banner" class="cookie-banner" style="display:none;">
+    <p>This site uses cookies from Google AdSense to serve ads. <a href="privacy.html" style="color:var(--accent);">Learn more</a></p>
+    <button id="cookie-accept" class="cookie-accept-btn">Got it</button>
+  </div>
+
   <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
       <p>&copy; 2025–2026 Portal Music. All tracks are free to use.</p>
       <div class="footer-links">
+        <a href="about.html">About</a>
         <a href="license.html">License</a>
         <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Use</a>
       </div>
     </div>
   </footer>

@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal Radio — Continuous Free Music</title>
   <meta name="description" content="Listen to continuous royalty-free music stations by genre, mood, or your favorites.">
+  <link rel="canonical" href="https://portal-music.com/radio.html">
   <link rel="icon" href="images/portal.png" type="image/png">
   <meta property="og:title" content="Portal Radio — Continuous Free Music">
   <meta property="og:description" content="Listen to continuous royalty-free music stations by genre, mood, or your favorites.">
@@ -26,7 +27,15 @@
       <a href="browse.html">Browse</a>
       <a href="radio.html" class="active">Radio</a>
       <a href="browse.html?filter=favorites">Favorites</a>
-      <a href="license.html">License</a>
+      <div class="nav-more">
+        <button class="nav-more-btn">More ▾</button>
+        <div class="nav-more-dropdown">
+          <a href="about.html">About</a>
+          <a href="license.html">License</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+        </div>
+      </div>
     </nav>
     <div class="theme-btns">
       <button class="theme-btn" data-theme="dark" title="Dark mode">🌙</button>
@@ -193,13 +202,21 @@
 </script>
   </main>
 
+  <!-- Cookie Consent -->
+  <div id="cookie-banner" class="cookie-banner" style="display:none;">
+    <p>This site uses cookies from Google AdSense to serve ads. <a href="privacy.html" style="color:var(--accent);">Learn more</a></p>
+    <button id="cookie-accept" class="cookie-accept-btn">Got it</button>
+  </div>
+
   <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
       <p>&copy; 2025–2026 Portal Music. All tracks are free to use.</p>
       <div class="footer-links">
+        <a href="about.html">About</a>
         <a href="license.html">License</a>
         <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Use</a>
       </div>
     </div>
   </footer>
