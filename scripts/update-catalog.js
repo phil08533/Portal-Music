@@ -85,6 +85,22 @@ const ARTIST_FOLDERS = ['Avilyn Grace', 'Dem Bois'];
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac']);
 const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
 
+// Normalize raw folder names to clean display names used in music.json and app.js chips.
+// Any folder name listed here will be stored with the normalized value instead.
+const SUBGENRE_NORMALIZE = {
+  'acoustic':   'Acoustic',
+  'ambient':    'Ambient',
+  'cinematic':  'Cinematic',   // merges lowercase folder with capitalised one
+  'dream-pop':  'Dream Pop',
+  'electronic': 'Electronic',
+  'Hiphop':     'Hip-Hop',
+  'lo-fi':      'Lo-Fi',
+  'medieval':   'Medieval',
+  'melancholy': 'Melancholy',
+  'pop':        'Pop',
+  'rb-soul':    'R&B / Soul',
+};
+
 // No folders are skipped — all subfolders under music/ are scanned
 const SKIP_FOLDERS = new Set();
 
@@ -224,7 +240,7 @@ for (const folder of folders) {
   // Determine genre and subgenre — folder name is always the subgenre;
   // artist folders use the same FOLDER_TO_PARENT lookup as genre folders.
   const genre    = FOLDER_TO_PARENT[folder] || folder;
-  const subgenre = folder;
+  const subgenre = SUBGENRE_NORMALIZE[folder] || folder;
 
   // Scan files in this folder
   const files = scanDir(folderPath);
@@ -234,9 +250,11 @@ for (const folder of folders) {
 
     if (existing[filePath]) {
       const entry = Object.assign({}, existing[filePath]);
-      // Repair: fill in missing genre/subgenre without overwriting manual edits
+      // Repair: fill in missing genre/subgenre without overwriting manual edits,
+      // and always normalize subgenre display names (e.g. 'Hiphop' → 'Hip-Hop').
       if (!entry.genre)    entry.genre    = genre;
       if (!entry.subgenre) entry.subgenre = subgenre;
+      entry.subgenre = SUBGENRE_NORMALIZE[entry.subgenre] ?? entry.subgenre;
       // Assign cover from MP3 tag or music folder if not already set
       if (!entry.cover) {
         const absPath = path.join(folderPath, file);
