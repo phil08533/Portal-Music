@@ -68,7 +68,15 @@ const FOLDER_TO_PARENT = {
   'melancholy':     'Playful & Mood',
   // Artist folders — genre matches app.js GENRES subgenre mappings
   'Avilyn Grace':   'Pop',
-  'Dem Bois':       'Pop'
+  'Dem Bois':       'Pop',
+  // Lowercase / hyphenated genre folders
+  'acoustic':       'Acoustic',
+  'ambient':        'Ambient & Chill',
+  'cinematic':      'Cinematic',
+  'electronic':     'Electronic',
+  'lo-fi':          'Electronic',
+  'pop':            'Pop',
+  'rb-soul':        'R&B / Soul'
 };
 
 // Artist folders — still used to set the artist field on track entries
@@ -77,8 +85,8 @@ const ARTIST_FOLDERS = ['Avilyn Grace', 'Dem Bois'];
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac']);
 const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
 
-// Skip empty placeholder folders
-const SKIP_FOLDERS = new Set(['acoustic', 'ambient', 'cinematic', 'electronic', 'hip-hop', 'lo-fi', 'pop', 'rb-soul']);
+// No folders are skipped — all subfolders under music/ are scanned
+const SKIP_FOLDERS = new Set();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
