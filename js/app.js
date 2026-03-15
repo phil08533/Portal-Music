@@ -499,6 +499,21 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
       });
     }
+
+    // Highlight active nav link
+    const navPath = window.location.pathname.split('/').pop() || 'index.html';
+    const fullHref = navPath + window.location.search;
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.remove('active');
+      const href = a.getAttribute('href') || '';
+      if ((navPath === 'index.html' || navPath === '') && href === 'index.html') {
+        a.classList.add('active');
+      } else if (href === fullHref) {
+        a.classList.add('active');
+      } else if (href === navPath && !window.location.search) {
+        a.classList.add('active');
+      }
+    });
   };
   
   // Run once immediately
@@ -518,22 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
       sessionStorage.setItem('pm_banner_ok', '1');
     });
   }
-
-  // Highlight active nav link
-  const path = window.location.pathname.split('/').pop() || 'index.html';
-  const fullHref = path + window.location.search;
-
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    const href = a.getAttribute('href') || '';
-    // Special case for Index
-    if ((path === 'index.html' || path === '') && href === 'index.html') {
-      a.classList.add('active');
-    } else if (href === fullHref) {
-      a.classList.add('active');
-    } else if (href === path && !window.location.search) {
-      a.classList.add('active');
-    }
-  });
 
   // Close More dropdown when clicking anywhere outside it
   document.addEventListener('click', function () {
