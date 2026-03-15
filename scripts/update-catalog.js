@@ -54,10 +54,13 @@ const FOLDER_TO_PARENT = {
   'Unsettling':     'Dark & Suspense',
   'Playful':        'Playful & Mood',
   'Sad':            'Playful & Mood',
-  'melancholy':     'Playful & Mood'
+  'melancholy':     'Playful & Mood',
+  // Artist folders — genre matches app.js GENRES subgenre mappings
+  'Avilyn Grace':   'Pop',
+  'Dem Bois':       'Pop'
 };
 
-// Artist folders (not genre folders)
+// Artist folders — still used to set the artist field on track entries
 const ARTIST_FOLDERS = ['Avilyn Grace', 'Dem Bois'];
 
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac']);
@@ -138,15 +141,10 @@ for (const folder of folders) {
   const folderPath = path.join(MUSIC_DIR, folder);
   const isArtist = ARTIST_FOLDERS.includes(folder);
 
-  // Determine genre and subgenre
-  let genre, subgenre;
-  if (isArtist) {
-    genre = null; // Will be set per-track if existing, or left for manual edit
-    subgenre = '';
-  } else {
-    genre = FOLDER_TO_PARENT[folder] || folder;
-    subgenre = folder; // The folder name IS the subgenre
-  }
+  // Determine genre and subgenre — folder name is always the subgenre;
+  // artist folders use the same FOLDER_TO_PARENT lookup as genre folders.
+  const genre    = FOLDER_TO_PARENT[folder] || folder;
+  const subgenre = folder;
 
   // Scan files in this folder
   const files = scanDir(folderPath);
@@ -154,7 +152,11 @@ for (const folder of folders) {
     const filePath = `music/${folder}/${file}`;
 
     if (existing[filePath]) {
-      catalog.push(existing[filePath]);
+      const entry = Object.assign({}, existing[filePath]);
+      // Repair: fill in missing genre/subgenre without overwriting manual edits
+      if (!entry.genre)    entry.genre    = genre;
+      if (!entry.subgenre) entry.subgenre = subgenre;
+      catalog.push(entry);
       kept++;
     } else {
       const title = toTitleCase(path.parse(file).name);
@@ -162,7 +164,7 @@ for (const folder of folders) {
         id:       uid(),
         title:    title,
         artist:   isArtist ? folder : null,
-        genre:    genre || '',
+        genre:    genre,
         subgenre: subgenre,
         tags:     [],
         file:     filePath,
@@ -183,7 +185,10 @@ for (const folder of folders) {
       const filePath = `music/${folder}/${subdir}/${file}`;
 
       if (existing[filePath]) {
-        catalog.push(existing[filePath]);
+        const entry = Object.assign({}, existing[filePath]);
+        // Repair: fill in missing genre without overwriting manual edits
+        if (!entry.genre) entry.genre = genre;
+        catalog.push(entry);
         kept++;
       } else {
         const title = toTitleCase(path.parse(file).name);
@@ -191,7 +196,7 @@ for (const folder of folders) {
           id:       uid(),
           title:    title,
           artist:   isArtist ? folder : null,
-          genre:    genre || '',
+          genre:    genre,
           subgenre: subdir,
           tags:     [],
           file:     filePath,
