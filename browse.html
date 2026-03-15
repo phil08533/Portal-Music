@@ -171,8 +171,11 @@
 
       if (activeFilters.length === 0) {
         bar.style.display = 'none';
-        gridEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎵</div>' +
-          '<p>Select one or more genres above to browse tracks.</p></div>';
+        gridEl.style.display = '';
+        window.currentSongsView = allSongsPage;
+        gridEl.innerHTML = allSongsPage.length
+          ? allSongsPage.map(createTrackCard).join('')
+          : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No tracks found.</p></div>';
         return;
       }
 
@@ -250,7 +253,7 @@
         titleEl.textContent = subgenreParam ? subgenreParam : 'Browse Music';
         subtitleEl.textContent = subgenreParam
           ? 'Showing tracks for ' + subgenreParam + '. Select more genres to add.'
-          : songs.length + ' tracks available. Select genres to filter.';
+          : songs.length + ' tracks available. Filter by genre below.';
         renderBrowseFilters(songs);
         renderFilteredGrid();
       }
