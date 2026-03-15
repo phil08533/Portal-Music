@@ -6,17 +6,17 @@
 const GENRES = {
   'Rock': { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock', 'Punk Rock'] },
   'Jazz': { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
-  'Hip-Hop': { icon: '🎤', subgenres: ['Hiphop', 'hip-hop'] },
-  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'dream-pop', 'lo-fi', 'electronic'] },
-  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space', 'cinematic'] },
-  'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'medieval'] },
+  'Hip-Hop': { icon: '🎤', subgenres: ['Hip-Hop'] },
+  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'Dream Pop', 'Lo-Fi', 'Electronic'] },
+  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space'] },
+  'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'Medieval'] },
   'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western', 'Whiskey Pines'] },
-  'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting', 'ambient'] },
-  'Pop': { icon: '🍭', subgenres: ['pop', 'Avilyn Grace', 'Dem Bois'] },
-  'Acoustic': { icon: '🪕', subgenres: ['acoustic'] },
-  'R&B / Soul': { icon: '🍷', subgenres: ['rb-soul'] },
+  'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting', 'Ambient'] },
+  'Pop': { icon: '🍭', subgenres: ['Pop', 'Avilyn Grace', 'Dem Bois'] },
+  'Acoustic': { icon: '🪕', subgenres: ['Acoustic'] },
+  'R&B / Soul': { icon: '🍷', subgenres: ['R&B / Soul'] },
   'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
-  'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad', 'melancholy'] }
+  'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad', 'Melancholy'] }
 };
 
 // Map each music folder name to its parent genre
