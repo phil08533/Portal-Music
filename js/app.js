@@ -486,6 +486,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
       });
     }
+
+    // More dropdown toggle
+    const navMore = document.querySelector('.nav-more');
+    if (navMore) {
+      const moreBtn = navMore.querySelector('.nav-more-btn');
+      moreBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        navMore.classList.toggle('open');
+      });
+      navMore.querySelector('.nav-more-dropdown').addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+    }
   };
   
   // Run once immediately
@@ -522,21 +535,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // More dropdown toggle
-  const navMore = document.querySelector('.nav-more');
-  if (navMore) {
-    const moreBtn = navMore.querySelector('.nav-more-btn');
-    moreBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      navMore.classList.toggle('open');
-    });
-    document.addEventListener('click', function () {
-      navMore.classList.remove('open');
-    });
-    navMore.querySelector('.nav-more-dropdown').addEventListener('click', function (e) {
-      e.stopPropagation();
-    });
-  }
+  // Close More dropdown when clicking anywhere outside it
+  document.addEventListener('click', function () {
+    const navMore = document.querySelector('.nav-more');
+    if (navMore) navMore.classList.remove('open');
+  });
 
   // Cookie consent banner
   var cookieBanner = document.getElementById('cookie-banner');
