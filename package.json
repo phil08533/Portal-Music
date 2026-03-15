@@ -1,0 +1,19 @@
+{
+  "name": "portal-music",
+  "version": "1.0.0",
+  "description": "Free AI-generated music for creators. Hosted on GitHub Pages at [portal-music.com](https://portal-music.com).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:42661/git/phil08533/Portal-Music"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-id3": "^0.2.9"
+  }
+}

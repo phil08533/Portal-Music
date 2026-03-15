@@ -23,8 +23,9 @@
  *   node scripts/update-catalog.js
  */
 
-const fs   = require('fs');
-const path = require('path');
+const fs     = require('fs');
+const path   = require('path');
+const NodeID3 = require('node-id3');
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,27 @@ function importCover(srcPath, songId) {
   return 'covers/' + destName;
 }
 
+/**
+ * Extract embedded cover art from an MP3's ID3 tag and save it to covers/.
+ * Returns the relative cover path (e.g. "covers/abc123.jpg"), or null if none.
+ */
+function extractCoverFromMp3(absFilePath, songId) {
+  try {
+    const tags = NodeID3.read(absFilePath);
+    const img  = tags && tags.image;
+    if (!img || !img.imageBuffer) return null;
+    const ext  = img.mime === 'image/png' ? '.png' : '.jpg';
+    const dest = path.join(COVERS_DIR, songId + ext);
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(COVERS_DIR, { recursive: true });
+      fs.writeFileSync(dest, img.imageBuffer);
+    }
+    return 'covers/' + songId + ext;
+  } catch {
+    return null;
+  }
+}
+
 // ── Load existing catalog ─────────────────────────────────────────────────────
 
 let existing = {};
@@ -207,15 +229,19 @@ for (const folder of folders) {
       // Repair: fill in missing genre/subgenre without overwriting manual edits
       if (!entry.genre)    entry.genre    = genre;
       if (!entry.subgenre) entry.subgenre = subgenre;
-      // Assign cover from music folder if not already set
+      // Assign cover from MP3 tag or music folder if not already set
       if (!entry.cover) {
-        const imgSrc = findImageInDir(folderPath, baseName);
-        if (imgSrc) {
-          const cacheKey = imgSrc;
-          if (!folderCoverCache[cacheKey]) {
-            folderCoverCache[cacheKey] = importCover(imgSrc, entry.id);
+        const absPath = path.join(folderPath, file);
+        entry.cover = extractCoverFromMp3(absPath, entry.id);
+        if (!entry.cover) {
+          const imgSrc = findImageInDir(folderPath, baseName);
+          if (imgSrc) {
+            const cacheKey = imgSrc;
+            if (!folderCoverCache[cacheKey]) {
+              folderCoverCache[cacheKey] = importCover(imgSrc, entry.id);
+            }
+            entry.cover = folderCoverCache[cacheKey];
           }
-          entry.cover = folderCoverCache[cacheKey];
         }
       }
       catalog.push(entry);
@@ -234,14 +260,18 @@ for (const folder of folders) {
         duration: '',
         featured: false
       };
-      // Look for cover in the music folder
-      const imgSrc = findImageInDir(folderPath, baseName);
-      if (imgSrc) {
-        const cacheKey = imgSrc;
-        if (!folderCoverCache[cacheKey]) {
-          folderCoverCache[cacheKey] = importCover(imgSrc, id);
+      // Look for cover in MP3 tag first, then music folder
+      const absPath = path.join(folderPath, file);
+      newEntry.cover = extractCoverFromMp3(absPath, id);
+      if (!newEntry.cover) {
+        const imgSrc = findImageInDir(folderPath, baseName);
+        if (imgSrc) {
+          const cacheKey = imgSrc;
+          if (!folderCoverCache[cacheKey]) {
+            folderCoverCache[cacheKey] = importCover(imgSrc, id);
+          }
+          newEntry.cover = folderCoverCache[cacheKey];
         }
-        newEntry.cover = folderCoverCache[cacheKey];
       }
       catalog.push(newEntry);
       console.log(`  + Added:   ${filePath}`);
@@ -262,15 +292,19 @@ for (const folder of folders) {
         const entry = Object.assign({}, existing[filePath]);
         // Repair: fill in missing genre without overwriting manual edits
         if (!entry.genre) entry.genre = genre;
-        // Assign cover from music folder if not already set
+        // Assign cover from MP3 tag or music folder if not already set
         if (!entry.cover) {
-          const imgSrc = findImageInDir(subPath, baseName) || findImageInDir(folderPath, baseName);
-          if (imgSrc) {
-            const cacheKey = imgSrc;
-            if (!folderCoverCache[cacheKey]) {
-              folderCoverCache[cacheKey] = importCover(imgSrc, entry.id);
+          const absPath = path.join(subPath, file);
+          entry.cover = extractCoverFromMp3(absPath, entry.id);
+          if (!entry.cover) {
+            const imgSrc = findImageInDir(subPath, baseName) || findImageInDir(folderPath, baseName);
+            if (imgSrc) {
+              const cacheKey = imgSrc;
+              if (!folderCoverCache[cacheKey]) {
+                folderCoverCache[cacheKey] = importCover(imgSrc, entry.id);
+              }
+              entry.cover = folderCoverCache[cacheKey];
             }
-            entry.cover = folderCoverCache[cacheKey];
           }
         }
         catalog.push(entry);
@@ -289,13 +323,17 @@ for (const folder of folders) {
           duration: '',
           featured: false
         };
-        const imgSrc = findImageInDir(subPath, baseName) || findImageInDir(folderPath, baseName);
-        if (imgSrc) {
-          const cacheKey = imgSrc;
-          if (!folderCoverCache[cacheKey]) {
-            folderCoverCache[cacheKey] = importCover(imgSrc, id);
+        const absPath = path.join(subPath, file);
+        newEntry.cover = extractCoverFromMp3(absPath, id);
+        if (!newEntry.cover) {
+          const imgSrc = findImageInDir(subPath, baseName) || findImageInDir(folderPath, baseName);
+          if (imgSrc) {
+            const cacheKey = imgSrc;
+            if (!folderCoverCache[cacheKey]) {
+              folderCoverCache[cacheKey] = importCover(imgSrc, id);
+            }
+            newEntry.cover = folderCoverCache[cacheKey];
           }
-          newEntry.cover = folderCoverCache[cacheKey];
         }
         catalog.push(newEntry);
         console.log(`  + Added:   ${filePath}`);
@@ -370,6 +408,7 @@ if (added > 0) {
   console.log('Tip: For each new entry you can optionally fill in subgenre, tags, artist, and featured.');
 }
 if (stillMissing > 0) {
-  console.log(`Tip: ${stillMissing} track(s) still have no cover. Add an image to the music folder`);
-  console.log('     (e.g. music/Cinematic/cover.jpg) and re-run to assign it.');
+  console.log(`Tip: ${stillMissing} track(s) still have no cover.`);
+  console.log('     Embed cover art in the MP3 file\'s ID3 tag, or place an image in the');
+  console.log('     music folder (e.g. music/Cinematic/cover.jpg), then re-run this script.');
 }
