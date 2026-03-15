@@ -399,6 +399,16 @@ async function loadSongs() {
     const res = await fetch('data/music.json');
     if (!res.ok) throw new Error('Not found');
     allSongs = await res.json();
+    // Derive subgenre/genre from file path if the JSON fields are missing
+    // (guards against scripts that wipe those fields when adding new tracks)
+    allSongs.forEach(function(s) {
+      if (!s.subgenre && s.file) {
+        s.subgenre = s.file.split('/')[1] || '';
+      }
+      if (!s.genre && s.subgenre) {
+        s.genre = FOLDER_TO_PARENT[s.subgenre] || '';
+      }
+    });
     return allSongs;
   } catch {
     return [];
