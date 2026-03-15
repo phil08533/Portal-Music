@@ -348,342 +348,6 @@
     "cover": "covers/mmg0y5r2s4e89.jpg"
   },
   {
-    "id": "mmlg8fl6ubjf",
-    "title": "Awaken The Sound",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Awaken the Sound.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl6ubjf.jpg"
-  },
-  {
-    "id": "mmlg8fl6uiq0",
-    "title": "Begin The Score",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Begin the Score.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl6uiq0.jpg"
-  },
-  {
-    "id": "mmlg8fl6u6ui",
-    "title": "Castle In The Skyline",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Castle in the Skyline.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl6u6ui.jpg"
-  },
-  {
-    "id": "mmlg8fl6axo5",
-    "title": "Countdown To The Stars",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Countdown to the Stars.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl6axo5.jpg"
-  },
-  {
-    "id": "mmlg8fl6y5hz",
-    "title": "Dark Knight Serenade",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Dark Knight Serenade.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl6y5hz.jpg"
-  },
-  {
-    "id": "mmlg8fl7mj5m",
-    "title": "Dream Again",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Dream Again.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7mj5m.jpg"
-  },
-  {
-    "id": "mmlg8fl7ybk0",
-    "title": "Drone",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Drone.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7ybk0.jpg"
-  },
-  {
-    "id": "mmlg8fl7qdkn",
-    "title": "Enter The Soundscape",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Enter the Soundscape.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7qdkn.jpg"
-  },
-  {
-    "id": "mmlg8fl7pnpj",
-    "title": "Equinox Of Fire And Frost",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Equinox of Fire and Frost.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7pnpj.jpg"
-  },
-  {
-    "id": "mmlg8fl7bid8",
-    "title": "Fortitude",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Fortitude.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7bid8.jpg"
-  },
-  {
-    "id": "mmlg8fl7sfpg",
-    "title": "Frozen Arcs",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Frozen Arcs.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7sfpg.jpg"
-  },
-  {
-    "id": "mmlg8fl7sv3t",
-    "title": "Galactic Horizon",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Galactic Horizon.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7sv3t.jpg"
-  },
-  {
-    "id": "mmlg8fl7n2ro",
-    "title": "Glory In The Whiteout",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Glory in the Whiteout.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7n2ro.jpg"
-  },
-  {
-    "id": "mmlg8fl77krk",
-    "title": "Man Of The Sky",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Man of the Sky.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl77krk.jpg"
-  },
-  {
-    "id": "mmlg8fl70llt",
-    "title": "Overture",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Overture.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl70llt.jpg"
-  },
-  {
-    "id": "mmlg8fl7dswk",
-    "title": "Play The Unknown",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Play the Unknown.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7dswk.jpg"
-  },
-  {
-    "id": "mmlg8fl7hij8",
-    "title": "Release The Music",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Release the Music.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl7hij8.jpg"
-  },
-  {
-    "id": "mmlg8fl8xk99",
-    "title": "Snow Against Steel",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Snow Against Steel.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8xk99.jpg"
-  },
-  {
-    "id": "mmlg8fl8ouj7",
-    "title": "Snow Titans",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Snow Titans.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8ouj7.jpg"
-  },
-  {
-    "id": "mmlg8fl8r78h",
-    "title": "Snow On The Wire",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Snow on the Wire.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8r78h.jpg"
-  },
-  {
-    "id": "mmlg8fl8ycha",
-    "title": "Start The Journey",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Start the Journey.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8ycha.jpg"
-  },
-  {
-    "id": "mmlg8fl8whya",
-    "title": "Straw Wars Space Score",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Straw Wars Space Score.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8whya.jpg"
-  },
-  {
-    "id": "mmlg8fl828q5",
-    "title": "String Dance",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/String Dance.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl828q5.jpg"
-  },
-  {
-    "id": "mmlg8fl8zwz7",
-    "title": "Summon Sound",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Summon Sound.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8zwz7.jpg"
-  },
-  {
-    "id": "mmlg8fl8rnhh",
-    "title": "Tidal Wave",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Tidal Wave.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8rnhh.jpg"
-  },
-  {
-    "id": "mmlg8fl8pan3",
-    "title": "Tracking The Ticket",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Tracking the Ticket.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl8pan3.jpg"
-  },
-  {
-    "id": "mmlg8fl86194",
-    "title": "Unveil The Track",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Unveil the Track.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl86194.jpg"
-  },
-  {
-    "id": "mmlg8fl85dc5",
-    "title": "Winter Reborn",
-    "artist": null,
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
-    "tags": [],
-    "file": "music/Cinematic/Winter Reborn.mp3",
-    "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fl85dc5.jpg"
-  },
-  {
     "id": "mmlgdq004yh4",
     "title": "Drift Beyond The Event Horizon",
     "artist": null,
@@ -2120,6 +1784,28 @@
     "cover": "covers/mmg0y5r5i85ph.jpg"
   },
   {
+    "id": "mmqzkg0vjmne",
+    "title": "Break The Cage",
+    "artist": null,
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "music/Rock/Break the Cage.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0v2zb1",
+    "title": "Burn It Clean",
+    "artist": null,
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "music/Rock/Burn It Clean.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r5nu6g8",
     "title": "Cherry Gasoline",
     "artist": null,
@@ -2180,6 +1866,17 @@
     "cover": "covers/mmg0y5r51dxbj.jpg"
   },
   {
+    "id": "mmqzkg0vjolb",
+    "title": "Listless",
+    "artist": null,
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "music/Rock/Listless.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r5n7w0m",
     "title": "Polaroids On The Floor",
     "artist": null,
@@ -2190,6 +1887,17 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmg0y5r5n7w0m.jpg"
+  },
+  {
+    "id": "mmqzkg0vb1f1",
+    "title": "Rock Race",
+    "artist": null,
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "music/Rock/Rock Race.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmg0y5r5hgocb",
@@ -2216,6 +1924,28 @@
     "cover": "covers/mmg0y5r5vfww5.jpg"
   },
   {
+    "id": "mmqzkg0vtbnb",
+    "title": "Tripped Again",
+    "artist": null,
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "music/Rock/Tripped Again.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0vqyxt",
+    "title": "War",
+    "artist": null,
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "music/Rock/War.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r5thvdn",
     "title": "Whiskey And Wine",
     "artist": null,
@@ -2228,6 +1958,28 @@
     "cover": "covers/mmg0y5r5thvdn.jpg"
   },
   {
+    "id": "mmqzkg0wajbl",
+    "title": "Cotton Clouds In Slow Motion",
+    "artist": null,
+    "genre": "Classical",
+    "subgenre": "Romantic",
+    "tags": [],
+    "file": "music/Romantic/Cotton Clouds in Slow Motion.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0wafqn",
+    "title": "Dreamlight",
+    "artist": null,
+    "genre": "Classical",
+    "subgenre": "Romantic",
+    "tags": [],
+    "file": "music/Romantic/Dreamlight.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmlgdq0i17bw",
     "title": "Falling Into You Again",
     "artist": null,
@@ -2238,6 +1990,17 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmlgdq0i17bw.jpg"
+  },
+  {
+    "id": "mmqzkg0w4dij",
+    "title": "Falling Slower",
+    "artist": null,
+    "genre": "Classical",
+    "subgenre": "Romantic",
+    "tags": [],
+    "file": "music/Romantic/Falling Slower.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmlgdq0i4hh9",
@@ -2300,6 +2063,39 @@
     "cover": "covers/mmg0y5r5vbqbl.jpg"
   },
   {
+    "id": "mmqzkg0w569v",
+    "title": "Slow Mo",
+    "artist": null,
+    "genre": "Classical",
+    "subgenre": "Romantic",
+    "tags": [],
+    "file": "music/Romantic/Slow Mo.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0wfdhq",
+    "title": "Soft Focus Dream",
+    "artist": null,
+    "genre": "Classical",
+    "subgenre": "Romantic",
+    "tags": [],
+    "file": "music/Romantic/Soft Focus Dream.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0wpvof",
+    "title": "Soft Gravity",
+    "artist": null,
+    "genre": "Classical",
+    "subgenre": "Romantic",
+    "tags": [],
+    "file": "music/Romantic/Soft Gravity.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmlgdq0jaq08",
     "title": "Whispers",
     "artist": null,
@@ -2324,6 +2120,17 @@
     "cover": "covers/mmg0y5r5m7hyd.jpg"
   },
   {
+    "id": "mmqzkg0x5c8k",
+    "title": "Alone Again",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Alone Again.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r53dk65",
     "title": "Backroom Lullaby",
     "artist": null,
@@ -2334,6 +2141,83 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmg0y5r53dk65.jpg"
+  },
+  {
+    "id": "mmqzkg0xu8cy",
+    "title": "Empty Frame",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Empty Frame.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0xyg0t",
+    "title": "Everything To Me",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Everything to me.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0xaj4s",
+    "title": "Glass On The Floor",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Glass on the Floor.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0xkhnx",
+    "title": "Goodbye",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Goodbye.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0xxkav",
+    "title": "Sounds Of You",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Sounds of You.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0x3beo",
+    "title": "Unsaid In My Throat",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/Unsaid In My Throat.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0xj8yr",
+    "title": "What We Left In The Kitchen",
+    "artist": null,
+    "genre": "Playful & Mood",
+    "subgenre": "Sad",
+    "tags": [],
+    "file": "music/Sad/What We Left In The Kitchen.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmlgdq0kmp70",
@@ -2552,6 +2436,39 @@
     "cover": "covers/mmg0y5r54bx58.jpg"
   },
   {
+    "id": "mmqzkg0yrszh",
+    "title": "Chromatic Tides",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Chromatic Tides.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0yj3kk",
+    "title": "Chrome Heart Circuit",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Chrome Heart Circuit.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0yi3yz",
+    "title": "Chrome",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Chrome.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r50qvil",
     "title": "Chromium",
     "artist": null,
@@ -2588,6 +2505,17 @@
     "cover": "covers/mmg0y5r5tkthz.jpg"
   },
   {
+    "id": "mmqzkg0zeijd",
+    "title": "Flicker",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Flicker.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r5byn7u",
     "title": "Keep Going",
     "artist": null,
@@ -2612,6 +2540,28 @@
     "cover": "covers/mmg0y5r5imqxg.jpg"
   },
   {
+    "id": "mmqzkg0zu4j7",
+    "title": "Midnight Circuit Rush (1)",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Midnight Circuit Rush (1).mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg0zuyks",
+    "title": "Midnight Circuit Rush",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Midnight Circuit Rush.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r5mndxk",
     "title": "Neon Sonata",
     "artist": null,
@@ -2622,6 +2572,17 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmg0y5r5mndxk.jpg"
+  },
+  {
+    "id": "mmqzkg0zx6rv",
+    "title": "Neon Tide",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Neon Tide.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmg0y5r5taivt",
@@ -2659,6 +2620,17 @@
     "featured": false
   },
   {
+    "id": "mmqzkg0zg5is",
+    "title": "Tideline",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "Techno-Wave",
+    "tags": [],
+    "file": "music/Techno-Wave/Tideline.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r5mkiao",
     "title": "Vivaldi In Neon Winter",
     "artist": null,
@@ -2682,6 +2654,39 @@
     "cover": "covers/mmg0y5r5vvggv.jpg"
   },
   {
+    "id": "mmqzkg0zaxt7",
+    "title": "Exit Sign Flicker",
+    "artist": null,
+    "genre": "Dark & Suspense",
+    "subgenre": "Unsettling",
+    "tags": [],
+    "file": "music/Unsettling/Exit Sign Flicker.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg10cl0a",
+    "title": "Glacial",
+    "artist": null,
+    "genre": "Dark & Suspense",
+    "subgenre": "Unsettling",
+    "tags": [],
+    "file": "music/Unsettling/Glacial.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg10boq9",
+    "title": "Liminal",
+    "artist": null,
+    "genre": "Dark & Suspense",
+    "subgenre": "Unsettling",
+    "tags": [],
+    "file": "music/Unsettling/Liminal.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmg0y5r6wtr1x",
     "title": "Smoke",
     "artist": null,
@@ -2692,6 +2697,17 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmg0y5r6wtr1x.jpg"
+  },
+  {
+    "id": "mmqzkg103pye",
+    "title": "Teeth In The Wallpaper",
+    "artist": null,
+    "genre": "Dark & Suspense",
+    "subgenre": "Unsettling",
+    "tags": [],
+    "file": "music/Unsettling/Teeth in the Wallpaper.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmg0y5r6agfsa",
@@ -2778,6 +2794,17 @@
     "cover": "covers/mmlg8fldn1o7.jpg"
   },
   {
+    "id": "mmqzkg10ehwb",
+    "title": "Never Lose",
+    "artist": null,
+    "genre": "Ambient & Chill",
+    "subgenre": "Uplifting",
+    "tags": [],
+    "file": "music/Uplifting/Never Lose.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmlg8fldiwhx",
     "title": "To The Top",
     "artist": null,
@@ -2788,6 +2815,17 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmlg8fldiwhx.jpg"
+  },
+  {
+    "id": "mmqzkg10q2h9",
+    "title": "Win On Purpose",
+    "artist": null,
+    "genre": "Ambient & Chill",
+    "subgenre": "Uplifting",
+    "tags": [],
+    "file": "music/Uplifting/Win On Purpose.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmlg8fld2yid",
@@ -3006,16 +3044,37 @@
     "cover": "covers/mmlg8fle3yqt.jpg"
   },
   {
-    "id": "mmlg8fle6p31",
-    "title": "Already Gone When I Said Goodbye (1)",
+    "id": "mmqzkg1209wh",
+    "title": "Already Gone When I Said Goodbye",
     "artist": null,
     "genre": "Country & Folk",
     "subgenre": "Whiskey Pines",
     "tags": [],
-    "file": "music/Whiskey Pines/Already Gone When I Said Goodbye (1).mp3",
+    "file": "music/Whiskey Pines/Already Gone When I Said Goodbye.mp3",
     "duration": "",
-    "featured": false,
-    "cover": "covers/mmlg8fle6p31.jpg"
+    "featured": false
+  },
+  {
+    "id": "mmqzkg12ibu0",
+    "title": "Rider From The Other Side",
+    "artist": null,
+    "genre": "Country & Folk",
+    "subgenre": "Whiskey Pines",
+    "tags": [],
+    "file": "music/Whiskey Pines/Rider From The Other Side.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg12jckt",
+    "title": "The Gun That Ended The Devil Of The Plains",
+    "artist": null,
+    "genre": "Country & Folk",
+    "subgenre": "Whiskey Pines",
+    "tags": [],
+    "file": "music/Whiskey Pines/The Gun That Ended the Devil of the Plains.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmlg8flevxbh",
@@ -3042,6 +3101,17 @@
     "cover": "covers/mmlg8flfmlbi.jpg"
   },
   {
+    "id": "mmqzkg13ca24",
+    "title": "Clouds In The Glow",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "dream-pop",
+    "tags": [],
+    "file": "music/dream-pop/Clouds In The Glow.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
     "id": "mmlg8flfvxxd",
     "title": "Fright Night Fridays",
     "artist": null,
@@ -3052,6 +3122,39 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmlg8flfvxxd.jpg"
+  },
+  {
+    "id": "mmqzkg13vmaw",
+    "title": "Glass Underwater",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "dream-pop",
+    "tags": [],
+    "file": "music/dream-pop/Glass Underwater.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg13ty90",
+    "title": "Glowlu",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "dream-pop",
+    "tags": [],
+    "file": "music/dream-pop/Glowlu.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg13718z",
+    "title": "Gravity In Slow Motion",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "dream-pop",
+    "tags": [],
+    "file": "music/dream-pop/Gravity In Slow Motion.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmlg8flffc8o",
@@ -3076,6 +3179,28 @@
     "duration": "",
     "featured": false,
     "cover": "covers/mmlg8flfhr6n.jpg"
+  },
+  {
+    "id": "mmqzkg13a1f3",
+    "title": "Rain",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "dream-pop",
+    "tags": [],
+    "file": "music/dream-pop/Rain.mp3",
+    "duration": "",
+    "featured": false
+  },
+  {
+    "id": "mmqzkg132jrg",
+    "title": "Twinkle",
+    "artist": null,
+    "genre": "Electronic",
+    "subgenre": "dream-pop",
+    "tags": [],
+    "file": "music/dream-pop/Twinkle.mp3",
+    "duration": "",
+    "featured": false
   },
   {
     "id": "mmlg8flfcnw7",
