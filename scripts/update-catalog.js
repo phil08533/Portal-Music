@@ -415,10 +415,55 @@ uncovered.forEach((song, i) => {
 });
 if (assigned > 0) console.log(`  🖼  Assigned ${assigned} orphaned cover(s) to songs without art.`);
 
-// ── Write ─────────────────────────────────────────────────────────────────────
+// ── Write catalog ─────────────────────────────────────────────────────────────
 
 fs.mkdirSync(path.dirname(CATALOG_PATH), { recursive: true });
 fs.writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2), 'utf8');
+
+// ── Write ID3 metadata to MP3 files ──────────────────────────────────────────
+//
+// Sets: title, artist, copyright, comment (website + usage note), and clears
+// encoder/encoded-by so no Suno markers remain.
+//
+// Only MP3 files are touched (node-id3 handles ID3 tags only).
+
+const SITE_URL   = 'https://portal-music.com';
+const CONTACT    = 'creatitproductions@gmail.com';
+const COPYRIGHT  = `\u00a9 ${new Date().getFullYear()} Portal Music. Free for public use.`;
+const COMMENT    = `Free for YouTube, TikTok, and more. No attribution required. ${SITE_URL}`;
+
+console.log('\nWriting ID3 metadata to MP3 files…');
+let metaUpdated = 0;
+let metaSkipped = 0;
+
+for (const entry of catalog) {
+  if (!entry.file.endsWith('.mp3')) { metaSkipped++; continue; }
+
+  const absPath = path.join(__dirname, '..', entry.file);
+  if (!fs.existsSync(absPath)) continue;
+
+  const artistName = entry.artist || 'Portal Music';
+
+  const tags = {
+    title:      entry.title  || '',
+    artist:     artistName,
+    album:      entry.genre  || 'Portal Music',
+    copyright:  COPYRIGHT,
+    comment:    { language: 'eng', text: COMMENT },
+    encodedBy:  '',        // clear any Suno encoder marker
+    fileOwner:  'Portal Music',
+    userDefinedUrl: [{ description: 'Website', url: SITE_URL }],
+  };
+
+  const result = NodeID3.write(tags, absPath);
+  if (result === true) {
+    metaUpdated++;
+  } else {
+    console.warn(`  ⚠  Could not write tags to ${entry.file}`);
+  }
+}
+
+console.log(`  ✓  ${metaUpdated} MP3(s) updated  |  ${metaSkipped} non-MP3(s) skipped`);
 
 const stillMissing = catalog.filter(s => !s.cover).length;
 console.log(`
@@ -438,3 +483,8 @@ if (stillMissing > 0) {
   console.log('     Embed cover art in the MP3 file\'s ID3 tag, or place an image in the');
   console.log('     music folder (e.g. music/Cinematic/cover.jpg), then re-run this script.');
 }
+
+// ── Generate license PDF ──────────────────────────────────────────────────────
+console.log('\nGenerating license PDF…');
+const { generate: generatePdf } = require('./generate-license-pdf');
+generatePdf().catch(err => console.warn('  ⚠  PDF generation failed:', err.message));
