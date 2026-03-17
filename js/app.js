@@ -375,9 +375,38 @@ function createTrackCard(song) {
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
+    '<button class="btn-share" title="Share" onclick="event.stopPropagation();shareTrack(\'' + song.id + '\',\'' + song.title.replace(/'/g, "\\'") + '\')">Share</button>' +
     '</div>' +
     '</div>'
   );
+}
+
+function shareTrack(id, title) {
+  const url = 'https://portal-music.com/browse.html';
+  const text = '"' + title + '" \u2013 free music from Portal Music';
+  if (navigator.share) {
+    navigator.share({ title: title, text: text, url: url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      _showToast('Link copied!');
+    }).catch(() => {
+      _showToast('portal-music.com');
+    });
+  }
+}
+
+function _showToast(msg) {
+  let toast = document.getElementById('pm-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'pm-toast';
+    toast.className = 'pm-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('pm-toast--show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.classList.remove('pm-toast--show'); }, 2300);
 }
 
 function _esc(str) {
