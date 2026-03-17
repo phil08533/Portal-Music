@@ -354,6 +354,7 @@ function createTrackCard(song) {
     '<div class="music-card" data-id="' + song.id + '">' +
     '<div class="music-card-cover">' +
     artContent +
+    '<button class="share-btn-cover" title="Share" onclick="event.stopPropagation();shareTrack(\'' + song.id + '\',\'' + song.title.replace(/'/g, "\\'") + '\')">&#x1F517;</button>' +
     '<button class="fav-btn ' + (faved ? 'active' : '') + '" ' +
     'data-song-id="' + song.id + '" ' +
     'onclick="event.stopPropagation();toggleFavorite(\'' + song.id + '\')" ' +
@@ -375,7 +376,6 @@ function createTrackCard(song) {
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
-    '<button class="btn-share" title="Share" onclick="event.stopPropagation();shareTrack(\'' + song.id + '\',\'' + song.title.replace(/'/g, "\\'") + '\')">Share</button>' +
     '</div>' +
     '</div>'
   );
