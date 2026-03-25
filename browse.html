@@ -98,6 +98,7 @@
     var subgenreParam = params.get('subgenre');
     var artist = params.get('artist');
     var filterMode = params.get('filter');
+    var trackParam = params.get('track');
     var allSongsPage = [];
     var activeFilters = []; // array of subgenre strings
 
@@ -109,17 +110,47 @@
         return;
       }
 
-      // Count per subgenre
+      // Count per subgenre. For artist-named chips, also count songs where artist matches.
       var subCounts = {};
       songs.forEach(function (s) {
         if (s.subgenre) subCounts[s.subgenre] = (subCounts[s.subgenre] || 0) + 1;
+        // If artist differs from subgenre (e.g. song is in a subfolder), count it under artist too
+        if (s.artist && s.artist !== s.subgenre) {
+          subCounts[s.artist] = (subCounts[s.artist] || 0) + 1;
+        }
+      });
+
+      // Collect all known subgenres from GENRES config
+      var coveredSubs = new Set();
+      Object.values(GENRES).forEach(function(info) {
+        info.subgenres.forEach(function(sub) { coveredSubs.add(sub); });
+      });
+
+      // Find dynamic subgenres (in data but not in GENRES, non-artist songs only)
+      var dynamicSubsByGenre = {};
+      songs.forEach(function(s) {
+        if (s.subgenre && !coveredSubs.has(s.subgenre) && !s.artist) {
+          var g = s.genre || 'Other';
+          if (!dynamicSubsByGenre[g]) dynamicSubsByGenre[g] = {};
+          dynamicSubsByGenre[g][s.subgenre] = (dynamicSubsByGenre[g][s.subgenre] || 0) + 1;
+        }
       });
 
       var html = '';
       Object.entries(GENRES).forEach(function (entry) {
         var g = entry[0], info = entry[1];
+
+        // Combine static subgenres with any dynamic ones for this genre
+        var allSubs = info.subgenres.slice();
+        if (dynamicSubsByGenre[g]) {
+          Object.keys(dynamicSubsByGenre[g]).forEach(function(sub) {
+            if (allSubs.indexOf(sub) === -1) allSubs.push(sub);
+          });
+        }
+
         var totalCount = 0;
-        info.subgenres.forEach(function (sub) { totalCount += (subCounts[sub] || 0); });
+        allSubs.forEach(function (sub) { totalCount += (subCounts[sub] || 0); });
+        if (totalCount === 0) return; // skip empty genre groups
 
         html += '<div class="filter-genre-group">';
         html += '<div class="filter-genre-header">';
@@ -128,8 +159,9 @@
         html += '<span class="filter-genre-count">' + totalCount + '</span>';
         html += '</div>';
         html += '<div class="filter-genre-chips">';
-        info.subgenres.forEach(function (sub) {
+        allSubs.forEach(function (sub) {
           var c = subCounts[sub] || 0;
+          if (c === 0) return; // skip empty chips
           html += '<button class="chip browse-chip" data-sub="' + sub.replace(/"/g, '') + '">' +
             sub + ' <span class="chip-count">' + c + '</span></button>';
         });
@@ -187,8 +219,10 @@
         return;
       }
 
+      // Match by subgenre OR artist (so artist chips include all their tracks)
       var filtered = allSongsPage.filter(function (s) {
-        return activeFilters.indexOf(s.subgenre) !== -1;
+        return activeFilters.indexOf(s.subgenre) !== -1 ||
+               (s.artist && activeFilters.indexOf(s.artist) !== -1);
       });
 
       bar.style.display = 'flex';
@@ -210,6 +244,18 @@
       gridEl.innerHTML = songs.length
         ? songs.map(createTrackCard).join('')
         : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
+    }
+
+    // --- Scroll to and highlight a shared track ---
+    function highlightTrack(id) {
+      setTimeout(function() {
+        var el = document.querySelector('.music-card[data-id="' + id + '"]');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('track-highlight');
+          setTimeout(function() { el.classList.remove('track-highlight'); }, 3000);
+        }
+      }, 200);
     }
 
     // --- Main load ---
@@ -265,6 +311,9 @@
         renderBrowseFilters(songs);
         renderFilteredGrid();
       }
+
+      // If a specific track was shared, highlight it
+      if (trackParam) highlightTrack(trackParam);
     });
 
     // Featured Artists box (only show on main browse, not filtered views)

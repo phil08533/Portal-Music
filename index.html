@@ -126,6 +126,15 @@
         <!-- Populated by JS -->
       </div>
 
+      <!-- New Releases -->
+      <div id="new-releases-section" style="display:none;">
+        <div class="section-header">
+          <h2>New Releases</h2>
+          <a href="browse.html">Browse all →</a>
+        </div>
+        <div id="new-releases-grid" class="new-releases-grid"></div>
+      </div>
+
       <!-- Featured Tracks -->
       <div class="section-header">
         <h2>Featured Tracks</h2>
@@ -194,7 +203,7 @@
         .then(function (artists) {
           var names = artists.map(function(a) { return a.name; }).join(', ');
           var portraits = artists.map(function(a) {
-            return '<a class="featured-artist-portrait" href="browse.html?subgenre=' + encodeURIComponent(a.name) + '" title="Browse ' + a.name + '">' +
+            return '<a class="featured-artist-portrait" href="browse.html?artist=' + encodeURIComponent(a.name) + '" title="Browse ' + a.name + '">' +
               '<div class="featured-artist-portrait-img">' +
               (a.hasImage
                 ? '<img src="' + a.image + '" alt="' + a.name + '" onerror="this.parentElement.innerHTML=\'🎤\'">'
@@ -211,6 +220,63 @@
         }).catch(function () {
           document.getElementById('artists-grid').innerHTML = '';
         });
+    }
+
+    // --- New Releases ---
+    function renderNewReleases(songs, artists) {
+      var newSongs = songs.filter(function(s) {
+        return s.file && s.file.indexOf('Newest Release') !== -1;
+      });
+      if (newSongs.length === 0) return;
+
+      // Group by artist
+      var byArtist = {};
+      newSongs.forEach(function(s) {
+        var name = s.artist || 'Portal Music';
+        if (!byArtist[name]) byArtist[name] = [];
+        byArtist[name].push(s);
+      });
+
+      // Build artist lookup map
+      var artistMap = {};
+      artists.forEach(function(a) { artistMap[a.name] = a; });
+
+      window.newReleaseSongs = newSongs;
+
+      var html = '';
+      Object.keys(byArtist).forEach(function(artistName) {
+        var tracks = byArtist[artistName].slice(0, 4);
+        var a = artistMap[artistName];
+        html += '<div class="new-release-card">';
+        html += '<div class="new-release-artist-header">';
+        html += '<div class="new-release-artist-img">';
+        if (a && a.hasImage) {
+          html += '<img src="' + a.image + '" alt="' + artistName + '" onerror="this.parentElement.innerHTML=\'🎤\'">';
+        } else {
+          html += '<span>🎤</span>';
+        }
+        html += '</div>';
+        html += '<div class="new-release-artist-info">';
+        html += '<div class="new-release-badge">New Release</div>';
+        html += '<div class="new-release-artist-name">' + artistName + '</div>';
+        if (a) html += '<div class="new-release-artist-genre">' + a.genre + '</div>';
+        html += '</div></div>';
+        html += '<div class="new-release-tracks">';
+        tracks.forEach(function(s) {
+          var isActive = isPlaying && currentSong && currentSong.id === s.id;
+          html += '<div class="new-release-track">' +
+            '<button class="new-release-play-btn btn-play" data-song-id="' + s.id + '" onclick="handlePlayBtn(\'' + s.id + '\', window.newReleaseSongs)">' +
+            (isActive ? '⏸' : '▶') + '</button>' +
+            '<span class="new-release-track-title">' + _esc(s.title) + '</span>' +
+            '</div>';
+        });
+        html += '</div>';
+        html += '<a href="browse.html?artist=' + encodeURIComponent(artistName) + '" class="new-release-view-all">View all by ' + artistName + ' \u2192</a>';
+        html += '</div>';
+      });
+
+      document.getElementById('new-releases-grid').innerHTML = html;
+      document.getElementById('new-releases-section').style.display = 'block';
     }
 
     // --- Recently played ---
@@ -238,6 +304,12 @@
         : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No featured tracks yet.</p></div>';
 
       renderRecent();
+
+      // New Releases — needs artist data for images
+      fetch('data/artists.json')
+        .then(function(r) { return r.json(); })
+        .then(function(artists) { renderNewReleases(songs, artists); })
+        .catch(function() { renderNewReleases(songs, []); });
     });
 
     renderArtists();

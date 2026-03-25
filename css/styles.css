@@ -2116,3 +2116,169 @@ button.chip.active {
       transform: scale(1.05);
       color: var(--btn-on-accent);
     }
+
+/* --- New Releases Section --- */
+.new-releases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 1rem;
+}
+
+.new-release-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.new-release-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.new-release-artist-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.new-release-artist-img {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  border: 2px solid var(--border);
+}
+
+.new-release-artist-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.new-release-artist-info {
+  min-width: 0;
+}
+
+.new-release-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+
+.new-release-artist-name {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.new-release-artist-genre {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.new-release-tracks {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.new-release-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0;
+}
+
+.new-release-play-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  border-radius: 50% !important;
+  background: var(--accent) !important;
+  color: var(--btn-on-accent) !important;
+  border: none !important;
+  cursor: pointer;
+  font-size: 0.68rem !important;
+  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all var(--transition) !important;
+  flex: none !important;
+}
+
+.new-release-play-btn:hover {
+  background: var(--accent-light) !important;
+  transform: scale(1.12);
+}
+
+.new-release-track-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  color: var(--text);
+}
+
+.new-release-view-all {
+  display: block;
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-align: right;
+  transition: color var(--transition);
+  text-decoration: none;
+}
+
+.new-release-view-all:hover {
+  color: var(--accent-light);
+}
+
+/* --- Track highlight animation (for shared track links) --- */
+@keyframes track-highlight-pulse {
+  0%   { box-shadow: 0 0 0 0 var(--accent-glow); border-color: var(--accent); }
+  40%  { box-shadow: 0 0 18px 6px var(--accent-glow); border-color: var(--accent); }
+  100% { box-shadow: var(--shadow-card); }
+}
+
+.track-highlight {
+  animation: track-highlight-pulse 1s ease 3;
+  border-color: var(--accent) !important;
+}
+
+@media (max-width: 540px) {
+  .new-releases-grid {
+    grid-template-columns: 1fr;
+  }
+}

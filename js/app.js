@@ -382,7 +382,7 @@ function createTrackCard(song) {
 }
 
 function shareTrack(id, title) {
-  const url = 'https://portal-music.com/browse.html';
+  const url = 'https://portal-music.com/browse.html?track=' + encodeURIComponent(id);
   const text = '"' + title + '" \u2013 free music from Portal Music';
   if (navigator.share) {
     navigator.share({ title: title, text: text, url: url }).catch(() => {});

@@ -343,7 +343,9 @@ for (const folder of folders) {
           title,
           artist:   isArtist ? folder : null,
           genre,
-          subgenre: subdir,
+          // For artist subfolders, use the artist name as subgenre (keeps chip filter working).
+          // For genre subfolders, use the subfolder name (it's a new album/subgenre).
+          subgenre: isArtist ? folder : subdir,
           tags:     [],
           file:     filePath,
           duration: '',
