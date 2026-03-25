@@ -32,74 +32,22 @@ const NodeID3 = require('node-id3');
 const MUSIC_DIR    = path.join(__dirname, '..', 'music');
 const CATALOG_PATH = path.join(__dirname, '..', 'data', 'music.json');
 const COVERS_DIR   = path.join(__dirname, '..', 'covers');
+const GENRES_PATH  = path.join(__dirname, '..', 'data', 'genres.json');
 
-// Map folder names to their parent genre (matches GENRES in app.js)
-const FOLDER_TO_PARENT = {
-  'Rock':           'Rock',
-  'Hard Rock':      'Rock',
-  'Hair Metal':     'Rock',
-  'Cinematic Rock': 'Rock',
-  'Punk Rock':      'Rock',
-  'Calm Jazz':      'Jazz',
-  'Fast Jazz':      'Jazz',
-  'Hiphop':         'Hip-Hop',
-  'Techno-Wave':    'Electronic',
-  'Chillhop':       'Electronic',
-  'dream-pop':      'Electronic',
-  'Cinematic':      'Cinematic',
-  'Dramatic':       'Cinematic',
-  'Fantasy':        'Cinematic',
-  'Space':          'Cinematic',
-  'Classical':      'Classical',
-  'Romantic':       'Classical',
-  'medieval':       'Classical',
-  'Country':        'Country & Folk',
-  'Bluegrass':      'Country & Folk',
-  'Western':        'Country & Folk',
-  'Whiskey Pines':  'Country & Folk',
-  'Peaceful':       'Ambient & Chill',
-  'Meditative':     'Ambient & Chill',
-  'Uplifting':      'Ambient & Chill',
-  'Horror':         'Dark & Suspense',
-  'Suspenseful':    'Dark & Suspense',
-  'Unsettling':     'Dark & Suspense',
-  'Playful':        'Playful & Mood',
-  'Sad':            'Playful & Mood',
-  'melancholy':     'Playful & Mood',
-  // Artist folders — genre matches app.js GENRES subgenre mappings
-  'Avilyn Grace':   'Pop',
-  'Dem Bois':       'Pop',
-  // Lowercase / hyphenated genre folders
-  'acoustic':       'Acoustic',
-  'ambient':        'Ambient & Chill',
-  'cinematic':      'Cinematic',
-  'electronic':     'Electronic',
-  'lo-fi':          'Electronic',
-  'pop':            'Pop',
-  'rb-soul':        'R&B / Soul'
-};
+// Load genre/folder mappings from the shared genres.json (single source of truth)
+let _genreData = {};
+try {
+  _genreData = JSON.parse(fs.readFileSync(GENRES_PATH, 'utf8'));
+} catch {
+  console.warn('WARNING: Could not load data/genres.json — using empty mappings.');
+}
 
-// Artist folders — still used to set the artist field on track entries
-const ARTIST_FOLDERS = ['Avilyn Grace', 'Dem Bois'];
+const FOLDER_TO_PARENT   = _genreData.folderToGenre      || {};
+const SUBGENRE_NORMALIZE = _genreData.subgenreNormalize   || {};
+const ARTIST_FOLDERS     = _genreData.artistFolders       || [];
 
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac']);
 const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
-
-// Normalize raw folder names to clean display names used in music.json and app.js chips.
-// Any folder name listed here will be stored with the normalized value instead.
-const SUBGENRE_NORMALIZE = {
-  'acoustic':   'Acoustic',
-  'ambient':    'Ambient',
-  'cinematic':  'Cinematic',   // merges lowercase folder with capitalised one
-  'dream-pop':  'Dream Pop',
-  'electronic': 'Electronic',
-  'Hiphop':     'Hip-Hop',
-  'lo-fi':      'Lo-Fi',
-  'medieval':   'Medieval',
-  'melancholy': 'Melancholy',
-  'pop':        'Pop',
-  'rb-soul':    'R&B / Soul',
-};
 
 // No folders are skipped — all subfolders under music/ are scanned
 const SKIP_FOLDERS = new Set();

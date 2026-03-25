@@ -2,28 +2,9 @@
 // Portal Music — Application JavaScript
 // ============================================
 
-// --- Genre Config (main genres + sub-genres mapped from music folders) ---
-const GENRES = {
-  'Rock': { icon: '🎸', subgenres: ['Rock', 'Hard Rock', 'Hair Metal', 'Cinematic Rock', 'Punk Rock'] },
-  'Jazz': { icon: '🎷', subgenres: ['Calm Jazz', 'Fast Jazz'] },
-  'Hip-Hop': { icon: '🎤', subgenres: ['Hip-Hop'] },
-  'Electronic': { icon: '🎛️', subgenres: ['Techno-Wave', 'Chillhop', 'Dream Pop', 'Lo-Fi', 'Electronic'] },
-  'Cinematic': { icon: '🎬', subgenres: ['Cinematic', 'Dramatic', 'Fantasy', 'Space'] },
-  'Classical': { icon: '🎻', subgenres: ['Classical', 'Romantic', 'Medieval'] },
-  'Country & Folk': { icon: '🤠', subgenres: ['Country', 'Bluegrass', 'Western', 'Whiskey Pines'] },
-  'Ambient & Chill': { icon: '🌊', subgenres: ['Peaceful', 'Meditative', 'Uplifting', 'Ambient'] },
-  'Pop': { icon: '🍭', subgenres: ['Pop', 'Avilyn Grace', 'Dem Bois'] },
-  'Acoustic': { icon: '🪕', subgenres: ['Acoustic'] },
-  'R&B / Soul': { icon: '🍷', subgenres: ['R&B / Soul'] },
-  'Dark & Suspense': { icon: '👻', subgenres: ['Horror', 'Suspenseful', 'Unsettling'] },
-  'Playful & Mood': { icon: '🎭', subgenres: ['Playful', 'Sad', 'Melancholy'] }
-};
-
-// Map each music folder name to its parent genre
-const FOLDER_TO_PARENT = {};
-Object.entries(GENRES).forEach(function (entry) {
-  entry[1].subgenres.forEach(function (sub) { FOLDER_TO_PARENT[sub] = entry[0]; });
-});
+// --- Genre Config — loaded from data/genres.json ---
+// Populated by loadGenres(); pages should await that before using GENRES.
+let GENRES = {};
 
 // --- Storage Keys ---
 const THEME_KEY = 'pm_theme';
@@ -422,6 +403,21 @@ function _esc(str) {
 // DATA LOADING
 // ============================================
 let allSongs = [];
+let _genresLoaded = false;
+
+async function loadGenres() {
+  if (_genresLoaded) return GENRES;
+  try {
+    const res = await fetch('data/genres.json');
+    if (!res.ok) throw new Error('Not found');
+    const data = await res.json();
+    GENRES = data.genres || {};
+    _genresLoaded = true;
+  } catch {
+    // fallback — GENRES stays as empty object
+  }
+  return GENRES;
+}
 
 async function loadSongs() {
   try {
