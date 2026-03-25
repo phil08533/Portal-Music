@@ -1,66 +1,66 @@
 /* ============================================
-   Portal Music — Stylesheet (Modern)
+   Portal Music — Stylesheet
    ============================================ */
 
 /* --- Theme Variables --- */
 :root {
-  --bg: #0a0a1a;
-  --surface: #281121;
-  --card: #1d102c;
-  --card-hover: #1c1c3e;
+  --bg: #080812;
+  --surface: #120d1f;
+  --card: #17102a;
+  --card-hover: #1e1638;
   --accent: #a6ff00;
-  /* Acid Green Portal */
   --accent-2: #49b300;
-  /* Toxic Green */
-  --accent-light: #d1ff46;
-  --accent-glow: rgba(166, 255, 0, 0.35);
-  --text: #e8eaf0;
-  --text-muted: #8892a8;
-  --border: rgba(166, 255, 0, 0.1);
-  --nav-bg: rgba(10, 10, 26, 0.9);
-  --player-bg: #0c0c1e;
-  --chip-bg: rgba(166, 255, 0, 0.1);
-  --chip-hover: rgba(166, 255, 0, 0.2);
-  --heart: #ff3e3e;
-  --fav-banner-bg: rgba(255, 62, 62, 0.06);
-  --fav-banner-border: rgba(255, 62, 62, 0.2);
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 8px 32px var(--accent-glow);
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --accent-light: #c8f542;
+  --accent-glow: rgba(166, 255, 0, 0.25);
+  --text: #eceef5;
+  --text-muted: #7a84a0;
+  --border: rgba(166, 255, 0, 0.08);
+  --border-strong: rgba(166, 255, 0, 0.18);
+  --nav-bg: rgba(8, 8, 18, 0.88);
+  --player-bg: #06060f;
+  --chip-bg: rgba(166, 255, 0, 0.07);
+  --chip-hover: rgba(166, 255, 0, 0.15);
+  --heart: #ff4d4d;
+  --fav-banner-bg: rgba(255, 62, 62, 0.05);
+  --fav-banner-border: rgba(255, 62, 62, 0.18);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 8px 28px var(--accent-glow);
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   --btn-bg: var(--accent);
-  --btn-text: #0a0a1a;
-  --btn-hover-bg: var(--accent-2);
-  --btn-hover-text: #000;
+  --btn-text: #080812;
+  --btn-hover-bg: var(--accent-light);
+  --btn-hover-text: #080812;
   --btn-border: var(--border);
-  --btn-on-accent: #0a0a1a;
+  --btn-on-accent: #080812;
 }
 
 [data-theme="light"] {
-  --bg: #f8fafc;
-  --surface: #f1f5f9;
+  --bg: #f5f7fa;
+  --surface: #eef1f6;
   --card: #ffffff;
-  --card-hover: #fafff5;
-  --accent: #49b300;
-  --accent-2: #2d6b00;
-  --accent-light: #689c08;
-  --accent-glow: rgba(73, 179, 0, 0.12);
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --border: rgba(73, 179, 0, 0.1);
-  --nav-bg: rgba(255, 255, 255, 0.9);
-  --player-bg: #0f172a;
-  --chip-bg: #f0fdf4;
-  --chip-hover: #dcfce7;
+  --card-hover: #f9fff4;
+  --accent: #3da800;
+  --accent-2: #2a7500;
+  --accent-light: #52c800;
+  --accent-glow: rgba(61, 168, 0, 0.12);
+  --text: #0d1520;
+  --text-muted: #5a6a80;
+  --border: rgba(61, 168, 0, 0.12);
+  --border-strong: rgba(61, 168, 0, 0.25);
+  --nav-bg: rgba(245, 247, 250, 0.92);
+  --player-bg: #0d1520;
+  --chip-bg: rgba(61, 168, 0, 0.07);
+  --chip-hover: rgba(61, 168, 0, 0.14);
   --fav-banner-bg: rgba(239, 68, 68, 0.04);
-  --fav-banner-border: rgba(239, 68, 68, 0.18);
-  --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 8px 32px var(--accent-glow);
-  --btn-bg: var(--accent-light);
-  --btn-text: #0f172a;
-  --btn-hover-bg: var(--accent);
-  --btn-hover-text: #fff;
+  --fav-banner-border: rgba(239, 68, 68, 0.15);
+  --shadow-card: 0 1px 6px rgba(0, 0, 0, 0.07), 0 2px 16px rgba(0,0,0,0.04);
+  --shadow-hover: 0 6px 24px var(--accent-glow);
+  --btn-bg: var(--accent);
+  --btn-text: #ffffff;
+  --btn-hover-bg: var(--accent-light);
+  --btn-hover-text: #ffffff;
   --btn-border: var(--border);
   --btn-on-accent: #ffffff;
 }
@@ -366,20 +366,32 @@ header {
 /* --- Hero Section --- */
 .hero {
   text-align: center;
-  padding: 3.5rem 0 2rem;
+  padding: 4rem 0 2.5rem;
+  position: relative;
 }
 
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-glow), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero > * { position: relative; z-index: 1; }
+
 .hero h1 {
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
   font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 1.08;
-  margin-bottom: 0.75rem;
+  letter-spacing: -0.05em;
+  line-height: 1.06;
+  margin-bottom: 0.8rem;
   color: var(--text);
 }
 
 .hero h1 span {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -387,9 +399,10 @@ header {
 
 .hero p {
   color: var(--text-muted);
-  font-size: 1.1rem;
-  max-width: 480px;
+  font-size: 1.05rem;
+  max-width: 460px;
   margin: 0 auto;
+  line-height: 1.65;
 }
 
 .hero .hero-cta {
@@ -428,13 +441,26 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 2.5rem 0 1rem;
+  margin: 2.8rem 0 1.1rem;
 }
 
 .section-header h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header h2::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 1.1em;
+  background: var(--accent);
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .section-header a,
@@ -527,8 +553,8 @@ button.chip.active {
 /* --- Genre Grid --- */
 .genre-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
   margin-bottom: 1rem;
 }
 
@@ -536,7 +562,7 @@ button.chip.active {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.1rem 0.8rem;
+  padding: 1.1rem 0.75rem;
   text-align: center;
   cursor: pointer;
   transition: all var(--transition);
@@ -545,31 +571,51 @@ button.chip.active {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.genre-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-glow), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition);
 }
 
 .genre-card:hover {
-  background: var(--card-hover);
-  border-color: var(--accent);
+  border-color: var(--border-strong);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   color: var(--text);
 }
 
+.genre-card:hover::after {
+  opacity: 1;
+}
+
 .genre-icon {
-  font-size: 1.7rem;
+  font-size: 1.8rem;
   line-height: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .genre-name {
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
+  position: relative;
+  z-index: 1;
 }
 
 .genre-count {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
+  position: relative;
+  z-index: 1;
 }
 
 /* --- Chips / Filters --- */
@@ -606,8 +652,8 @@ button.chip.active {
 /* --- Music Cards --- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
 }
 
 .music-card {
@@ -622,10 +668,26 @@ button.chip.active {
   box-shadow: var(--shadow-card);
 }
 
+.music-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+  z-index: 1;
+}
+
 .music-card:hover {
-  border-color: var(--accent);
+  border-color: var(--border-strong);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+}
+
+.music-card:hover::before {
+  transform: scaleX(1);
 }
 
 /* Cover image area */
@@ -938,18 +1000,30 @@ button.chip.active {
 
 /* --- Featured Artists Box (single large card) --- */
 .featured-artists-box {
-  background: linear-gradient(135deg, var(--card) 0%, var(--surface) 100%);
-  border: 1px solid var(--border);
+  background: var(--card);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 1.5rem;
   box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-artists-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 
 .featured-artists-byline {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-bottom: 1rem;
-  font-style: italic;
+  margin-bottom: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .featured-artists-portraits {
@@ -1070,14 +1144,14 @@ button.chip.active {
   right: 0;
   z-index: 200;
   background: var(--player-bg);
-  border-top: 1px solid rgba(124, 58, 237, 0.3);
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(166, 255, 0, 0.12);
+  box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.5);
   padding: 10px 5%;
   display: none;
   align-items: center;
   gap: 14px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
 }
 
 #player-bar.visible {
@@ -1259,19 +1333,23 @@ button.chip.active {
 
 /* --- Browse Page --- */
 .browse-header {
-  padding: 1.5rem 0 0.5rem;
+  padding: 1.8rem 0 0.6rem;
 }
 
 .browse-header h1 {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--text) 60%, var(--text-muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .browse-subtitle {
   color: var(--text-muted);
-  font-size: 0.88rem;
-  margin-top: 4px;
+  font-size: 0.85rem;
+  margin-top: 5px;
 }
 
 .subgenre-filters {
@@ -1287,7 +1365,7 @@ button.chip.active {
 .browse-filters {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   margin: 1rem 0;
 }
 
@@ -1295,33 +1373,39 @@ button.chip.active {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
+  padding: 12px 14px;
   box-shadow: var(--shadow-card);
+  transition: border-color var(--transition);
+}
+
+.filter-genre-group:has(.browse-chip.active) {
+  border-color: var(--border-strong);
 }
 
 .filter-genre-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 .filter-genre-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .filter-genre-name {
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   flex: 1;
 }
 
 .filter-genre-count {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   background: var(--chip-bg);
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 50px;
+  font-weight: 500;
 }
 
 .filter-genre-chips {
@@ -1672,10 +1756,11 @@ button.chip.active {
 /* --- Footer --- */
 .site-footer {
   border-top: 1px solid var(--border);
-  padding: 2rem 5%;
+  padding: 1.8rem 5%;
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
+  margin-top: 2rem;
 }
 
 .footer-inner {
@@ -2116,3 +2201,171 @@ button.chip.active {
       transform: scale(1.05);
       color: var(--btn-on-accent);
     }
+
+/* --- New Releases Section --- */
+.new-releases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 1rem;
+}
+
+.new-release-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.new-release-card:hover {
+  border-color: var(--border-strong);
+  border-left-color: var(--accent);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.new-release-artist-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.new-release-artist-img {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  border: 2px solid var(--border);
+}
+
+.new-release-artist-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.new-release-artist-info {
+  min-width: 0;
+}
+
+.new-release-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+
+.new-release-artist-name {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.new-release-artist-genre {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.new-release-tracks {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.new-release-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0;
+}
+
+.new-release-play-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  border-radius: 50% !important;
+  background: var(--accent) !important;
+  color: var(--btn-on-accent) !important;
+  border: none !important;
+  cursor: pointer;
+  font-size: 0.68rem !important;
+  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all var(--transition) !important;
+  flex: none !important;
+}
+
+.new-release-play-btn:hover {
+  background: var(--accent-light) !important;
+  transform: scale(1.12);
+}
+
+.new-release-track-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  color: var(--text);
+}
+
+.new-release-view-all {
+  display: block;
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-align: right;
+  transition: color var(--transition);
+  text-decoration: none;
+}
+
+.new-release-view-all:hover {
+  color: var(--accent-light);
+}
+
+/* --- Track highlight animation (for shared track links) --- */
+@keyframes track-highlight-pulse {
+  0%   { box-shadow: 0 0 0 0 var(--accent-glow); border-color: var(--accent); }
+  40%  { box-shadow: 0 0 18px 6px var(--accent-glow); border-color: var(--accent); }
+  100% { box-shadow: var(--shadow-card); }
+}
+
+.track-highlight {
+  animation: track-highlight-pulse 1s ease 3;
+  border-color: var(--accent) !important;
+}
+
+@media (max-width: 540px) {
+  .new-releases-grid {
+    grid-template-columns: 1fr;
+  }
+}
