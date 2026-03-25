@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Scan music folder and update catalog
         run: node scripts/update-catalog.js
 
