@@ -171,7 +171,9 @@ function _updateAllPlayBtns(activeSongId) {
   document.querySelectorAll('.btn-play').forEach(btn => {
     const sid = btn.dataset.songId;
     const isActive = sid === String(activeSongId) && isPlaying;
-    btn.innerHTML = isActive ? '⏸ Pause' : '▶ Play';
+    btn.innerHTML = isActive
+      ? (btn.dataset.iconOnly ? '⏸' : '⏸ Pause')
+      : (btn.dataset.iconOnly ? '▶' : '▶ Play');
     btn.classList.toggle('playing', isActive);
   });
 }

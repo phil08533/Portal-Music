@@ -90,7 +90,7 @@ function renderNewReleases(songs, artists) {
     tracks.forEach(function (s) {
       var isActive = isPlaying && currentSong && currentSong.id === s.id;
       html += '<div class="new-release-track">' +
-        '<button class="new-release-play-btn btn-play" data-song-id="' + s.id + '" onclick="handlePlayBtn(\'' + s.id + '\', window.newReleaseSongs)">' +
+        '<button class="new-release-play-btn btn-play" data-song-id="' + s.id + '" data-icon-only="1" onclick="handlePlayBtn(\'' + s.id + '\', window.newReleaseSongs)">' +
         (isActive ? '⏸' : '▶') + '</button>' +
         '<span class="new-release-track-title">' + _esc(s.title) + '</span>' +
         '</div>';
