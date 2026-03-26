@@ -13,6 +13,9 @@
 //          match /databases/{database}/documents {
 //            match /users/{uid} {
 //              allow read, write: if request.auth != null && request.auth.uid == uid;
+//              match /playlists/{playlistId} {
+//                allow read, write: if request.auth != null && request.auth.uid == uid;
+//              }
 //            }
 //          }
 //        }
@@ -22,10 +25,10 @@
 // Then replace the placeholder values in firebaseConfig below and commit.
 // ============================================
 
-import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
   from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc }
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, serverTimestamp, query, orderBy }
   from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // ── Replace with your Firebase project config ──────────────────────────────
@@ -41,15 +44,21 @@ const firebaseConfig = {
 
 const FAV_KEY = 'pm_favorites';
 
-// Guard: if config hasn't been filled in yet, expose safe no-op stubs
 const configReady = Object.values(firebaseConfig).every(v => !String(v).startsWith('REPLACE_'));
+
 if (!configReady) {
   console.info('[Portal Music] Firebase not yet configured — sign-in disabled. See CLAUDE.md.');
   window._fbUser          = null;
   window._fbSignIn        = () => { alert('Sign-in coming soon!'); };
   window._fbSignOut       = () => {};
   window._fbSaveFavorites = async () => {};
-  window._renderAuthBtn   = function () {
+  window._fbGetPlaylists  = async () => [];
+  window._fbCreatePlaylist  = async () => null;
+  window._fbDeletePlaylist  = async () => {};
+  window._fbRenamePlaylist  = async () => {};
+  window._fbAddToPlaylist   = async () => {};
+  window._fbRemoveFromPlaylist = async () => {};
+  window._renderAuthBtn = function () {
     const btn = document.getElementById('auth-btn');
     if (!btn) return;
     btn.textContent = 'Sign in';
@@ -65,19 +74,23 @@ if (!configReady) {
 
   window._fbUser = null;
 
-  // ── Auth state listener ─────────────────────────────────────────────────
+  // ── Auth state ─────────────────────────────────────────────────────────
   onAuthStateChanged(auth, async user => {
     window._fbUser = user;
 
     if (user) {
-      // Merge cloud favorites with any local session favorites
       try {
         const snap   = await getDoc(doc(db, 'users', user.uid));
         const cloud  = snap.exists() ? (snap.data().favorites || []) : [];
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
         const merged = [...new Set([...cloud, ...local])];
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
-        await setDoc(doc(db, 'users', user.uid), { favorites: merged }, { merge: true });
+        await setDoc(doc(db, 'users', user.uid), {
+          favorites:   merged,
+          displayName: user.displayName || '',
+          photoURL:    user.photoURL    || '',
+          email:       user.email       || '',
+        }, { merge: true });
       } catch (e) {
         console.warn('[Portal Music] Favorites sync failed:', e.message);
       }
@@ -86,36 +99,88 @@ if (!configReady) {
     window._renderAuthBtn();
   });
 
-  // ── Public API ─────────────────────────────────────────────────────────
-
+  // ── Auth actions ────────────────────────────────────────────────────────
   window._fbSignIn  = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(console.warn);
   window._fbSignOut = () => signOut(auth).catch(console.warn);
 
-  /** Called after every favorites toggle to persist to Firestore. */
+  // ── Favorites ──────────────────────────────────────────────────────────
   window._fbSaveFavorites = async favs => {
     if (!window._fbUser) return;
     try {
       await setDoc(doc(db, 'users', window._fbUser.uid), { favorites: favs }, { merge: true });
-    } catch {
-      // Local sessionStorage already updated — Firestore sync is best-effort
-    }
+    } catch { /* sessionStorage already updated */ }
   };
 
-  /**
-   * Render the Sign In / display-name button.
-   * Called by app.js initHeaderElements() on every SPA navigation so the
-   * header button always reflects current auth state.
-   */
+  // ── Playlists ──────────────────────────────────────────────────────────
+  window._fbGetPlaylists = async () => {
+    if (!window._fbUser) return [];
+    try {
+      const q    = query(collection(db, 'users', window._fbUser.uid, 'playlists'), orderBy('createdAt'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch { return []; }
+  };
+
+  window._fbCreatePlaylist = async name => {
+    if (!window._fbUser || !name.trim()) return null;
+    try {
+      const ref = await addDoc(collection(db, 'users', window._fbUser.uid, 'playlists'), {
+        name:      name.trim(),
+        songs:     [],
+        createdAt: serverTimestamp(),
+      });
+      return ref.id;
+    } catch { return null; }
+  };
+
+  window._fbDeletePlaylist = async playlistId => {
+    if (!window._fbUser) return;
+    try {
+      await deleteDoc(doc(db, 'users', window._fbUser.uid, 'playlists', playlistId));
+    } catch { /* ignore */ }
+  };
+
+  window._fbRenamePlaylist = async (playlistId, name) => {
+    if (!window._fbUser || !name.trim()) return;
+    try {
+      await updateDoc(doc(db, 'users', window._fbUser.uid, 'playlists', playlistId), { name: name.trim() });
+    } catch { /* ignore */ }
+  };
+
+  window._fbAddToPlaylist = async (playlistId, songId) => {
+    if (!window._fbUser) return;
+    try {
+      const ref  = doc(db, 'users', window._fbUser.uid, 'playlists', playlistId);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+      const songs = snap.data().songs || [];
+      if (!songs.includes(String(songId))) {
+        await updateDoc(ref, { songs: [...songs, String(songId)] });
+      }
+    } catch { /* ignore */ }
+  };
+
+  window._fbRemoveFromPlaylist = async (playlistId, songId) => {
+    if (!window._fbUser) return;
+    try {
+      const ref  = doc(db, 'users', window._fbUser.uid, 'playlists', playlistId);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+      const songs = (snap.data().songs || []).filter(id => id !== String(songId));
+      await updateDoc(ref, { songs });
+    } catch { /* ignore */ }
+  };
+
+  // ── Auth button ─────────────────────────────────────────────────────────
   window._renderAuthBtn = function () {
     const btn = document.getElementById('auth-btn');
     if (!btn) return;
     const user = window._fbUser;
     if (user) {
       btn.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
-      btn.title       = 'Click to sign out';
-      btn.onclick     = window._fbSignOut;
+      btn.title       = 'View your profile';
+      btn.onclick     = () => { window.location.href = 'profile.html'; };
       btn.classList.add('signed-in');
-      // Hide "session only" banner — favorites now persist across sessions
       const banner = document.getElementById('fav-banner');
       if (banner) banner.style.display = 'none';
     } else {
