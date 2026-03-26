@@ -30,12 +30,12 @@ import { getFirestore, doc, getDoc, setDoc }
 
 // ── Replace with your Firebase project config ──────────────────────────────
 const firebaseConfig = {
-  apiKey:            'REPLACE_WITH_YOUR_API_KEY',
-  authDomain:        'REPLACE_WITH_YOUR_AUTH_DOMAIN',
-  projectId:         'REPLACE_WITH_YOUR_PROJECT_ID',
-  storageBucket:     'REPLACE_WITH_YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'REPLACE_WITH_YOUR_MESSAGING_SENDER_ID',
-  appId:             'REPLACE_WITH_YOUR_APP_ID',
+  apiKey:            'AIzaSyATZysPXZM50CfB-AXdqhmTdei_4Y26DG8',
+  authDomain:        'portal-music-3b1a1.firebaseapp.com',
+  projectId:         'portal-music-3b1a1',
+  storageBucket:     'portal-music-3b1a1.firebasestorage.app',
+  messagingSenderId: '1080055930338',
+  appId:             '1:1080055930338:web:04d2323a288147394d6dbb',
 };
 // ───────────────────────────────────────────────────────────────────────────
 
