@@ -196,6 +196,7 @@ function toggleFavorite(songId) {
   if (idx >= 0) favs.splice(idx, 1);
   else favs.push(String(songId));
   sessionStorage.setItem(FAV_KEY, JSON.stringify(favs));
+  if (typeof window._fbSaveFavorites === 'function') window._fbSaveFavorites(favs);
   _updateFavBtnsFor(String(songId));
   _updatePlayerFavBtn(String(songId));
 }
@@ -524,6 +525,9 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
       });
     }
+
+    // Re-bind auth button state after header replacement
+    if (typeof window._renderAuthBtn === 'function') window._renderAuthBtn();
 
     // Highlight active nav link
     const navPath = window.location.pathname.split('/').pop() || 'index.html';

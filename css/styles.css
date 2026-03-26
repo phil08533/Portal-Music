@@ -355,6 +355,27 @@ header {
   border-color: var(--accent);
 }
 
+.auth-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 11px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all var(--transition);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.auth-btn:hover,
+.auth-btn.signed-in {
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  border-color: var(--accent);
+}
+
 /* --- Container --- */
 .container {
   width: 90%;
@@ -1086,18 +1107,13 @@ button.chip.active {
 
 /* Collapse empty ad slots */
 .ad-slot:empty,
+.side-ad:empty,
 .ad-slot:not(:has(ins[data-ad-status="filled"])) {
   min-height: 0;
   padding: 0;
   margin: 0.5rem 0;
   border: none;
   background: transparent;
-}
-
-.ad-slot ins.adsbygoogle {
-  display: block !important;
-  border-radius: var(--radius);
-  overflow: hidden;
 }
 
 .ad-slot .ad-label {
