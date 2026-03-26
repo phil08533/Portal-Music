@@ -345,6 +345,8 @@ function createTrackCard(song) {
     'title="' + (faved ? 'Remove from favorites' : 'Add to favorites') + '">' +
     (faved ? '❤️' : '🤍') +
     '</button>' +
+    '<button class="playlist-add-btn" title="Add to playlist" ' +
+    'onclick="event.stopPropagation();showPlaylistMenu(\'' + song.id + '\',\'' + song.title.replace(/'/g, "\\'") + '\')">＋</button>' +
     '</div>' +
     '<div class="music-card-body">' +
     '<h3>' + _esc(song.title) + '</h3>' +
@@ -376,6 +378,71 @@ function shareTrack(id, title) {
     }).catch(() => {
       _showToast('portal-music.com');
     });
+  }
+}
+
+// ============================================
+// PLAYLIST MENU
+// ============================================
+async function showPlaylistMenu(songId, songTitle) {
+  if (!window._fbUser) {
+    _showToast('Sign in to add to playlists');
+    return;
+  }
+
+  // Remove existing modal
+  const existing = document.getElementById('pm-playlist-modal');
+  if (existing) existing.remove();
+
+  const playlists = await (window._fbGetPlaylists ? window._fbGetPlaylists() : []);
+
+  const modal = document.createElement('div');
+  modal.id = 'pm-playlist-modal';
+  modal.className = 'pm-playlist-modal';
+  modal.innerHTML =
+    '<div class="pm-playlist-modal-box">' +
+    '<div class="pm-playlist-modal-header">' +
+    '<span>Add to playlist</span>' +
+    '<button class="pm-playlist-close" onclick="document.getElementById(\'pm-playlist-modal\').remove()">✕</button>' +
+    '</div>' +
+    '<div class="pm-playlist-modal-title">' + _esc(songTitle) + '</div>' +
+    '<div class="pm-playlist-list">' +
+    (playlists.length === 0 ? '<div class="pm-playlist-empty">No playlists yet</div>' : '') +
+    playlists.map(pl =>
+      '<button class="pm-playlist-item" onclick="addSongToPlaylist(\'' + pl.id + '\',\'' + songId + '\',this)">' +
+      (pl.songs && pl.songs.includes(String(songId)) ? '<span class="pm-pl-check">✓</span>' : '<span class="pm-pl-check"> </span>') +
+      _esc(pl.name) + ' <span class="pm-pl-count">(' + (pl.songs ? pl.songs.length : 0) + ')</span></button>'
+    ).join('') +
+    '</div>' +
+    '<button class="pm-playlist-new" onclick="createPlaylistAndAdd(\'' + songId + '\')">＋ New playlist</button>' +
+    '</div>';
+
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function addSongToPlaylist(playlistId, songId, btn) {
+  const checkEl = btn.querySelector('.pm-pl-check');
+  const alreadyIn = checkEl && checkEl.textContent.trim() === '✓';
+  if (alreadyIn) {
+    await window._fbRemoveFromPlaylist(playlistId, songId);
+    if (checkEl) checkEl.textContent = ' ';
+    _showToast('Removed from playlist');
+  } else {
+    await window._fbAddToPlaylist(playlistId, songId);
+    if (checkEl) checkEl.textContent = '✓';
+    _showToast('Added to playlist');
+  }
+}
+
+async function createPlaylistAndAdd(songId) {
+  const name = prompt('Playlist name:');
+  if (!name || !name.trim()) return;
+  const id = await window._fbCreatePlaylist(name);
+  if (id) {
+    await window._fbAddToPlaylist(id, songId);
+    _showToast('Playlist created!');
+    document.getElementById('pm-playlist-modal')?.remove();
   }
 }
 
