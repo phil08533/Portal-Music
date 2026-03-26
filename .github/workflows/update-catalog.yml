@@ -1,8 +1,7 @@
 name: Auto-Update Music Catalog
 
-# Runs whenever audio files are pushed to the music/ folder.
-# Scans for new tracks and adds skeleton entries to data/music.json.
-# You still need to edit the JSON to fill in title, tags, etc.
+# Runs whenever audio files are pushed to the music/ or covers/ folders.
+# Uploads new files to Cloudflare R2, then rebuilds data/music.json with CDN URLs.
 
 on:
   push:
@@ -11,6 +10,7 @@ on:
       - master
     paths:
       - 'music/**'
+      - 'covers/**'
 
 jobs:
   update-catalog:
@@ -32,16 +32,38 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install AWS CLI (for R2 uploads)
+        run: pip install awscli
+
+      - name: Upload music and covers to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+        run: |
+          aws s3 sync music/ s3://portal-music-assets/music/ \
+            --endpoint-url "$R2_ENDPOINT" \
+            --content-type "audio/mpeg" \
+            --metadata "Content-Disposition=attachment"
+          aws s3 sync covers/ s3://portal-music-assets/covers/ \
+            --endpoint-url "$R2_ENDPOINT"
+
       - name: Scan music folder and update catalog
+        env:
+          R2_BASE_URL: https://assets.portal-music.com
         run: node scripts/update-catalog.js
 
-      - name: Commit updated catalog (if changed)
+      - name: Remove music/covers from git tracking (files live on R2 now)
+        run: |
+          git rm -r --cached music/ covers/ 2>/dev/null || true
+
+      - name: Commit updated catalog
         run: |
           git config user.name  "Portal Music Bot"
           git config user.email "bot@portal-music.com"
-          git add data/music.json
+          git add data/music.json data/license.pdf .gitignore
           if git diff --staged --quiet; then
-            echo "No new tracks detected — catalog is up to date."
+            echo "No changes to commit."
           else
             git commit -m "🎵 Auto-update music catalog"
             git push

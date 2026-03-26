@@ -46,6 +46,15 @@ const FOLDER_TO_PARENT   = _genreData.folderToGenre      || {};
 const SUBGENRE_NORMALIZE = _genreData.subgenreNormalize   || {};
 const ARTIST_FOLDERS     = _genreData.artistFolders       || [];
 
+// When set, new file/cover paths are prefixed with this CDN base URL (Cloudflare R2).
+// Leave unset for local development — paths stay relative.
+const R2_BASE_URL = (process.env.R2_BASE_URL || '').replace(/\/$/, '');
+
+/** Return an asset path, prefixed with R2 CDN base when configured. */
+function assetPath(relPath) {
+  return R2_BASE_URL ? `${R2_BASE_URL}/${relPath}` : relPath;
+}
+
 const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac']);
 const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
 
@@ -122,7 +131,7 @@ function importCover(srcPath, songId) {
     fs.mkdirSync(COVERS_DIR, { recursive: true });
     fs.copyFileSync(srcPath, destPath);
   }
-  return 'covers/' + destName;
+  return assetPath('covers/' + destName);
 }
 
 /**
@@ -140,7 +149,7 @@ function extractCoverFromMp3(absFilePath, songId) {
       fs.mkdirSync(COVERS_DIR, { recursive: true });
       fs.writeFileSync(dest, img.imageBuffer);
     }
-    return 'covers/' + songId + ext;
+    return assetPath('covers/' + songId + ext);
   } catch {
     return null;
   }
@@ -230,7 +239,7 @@ for (const folder of folders) {
         genre,
         subgenre,
         tags:     [],
-        file:     filePath,
+        file:     assetPath(filePath),
         duration: '',
         featured: false
       };
@@ -295,7 +304,7 @@ for (const folder of folders) {
           // For genre subfolders, use the subfolder name (it's a new album/subgenre).
           subgenre: isArtist ? folder : subdir,
           tags:     [],
-          file:     filePath,
+          file:     assetPath(filePath),
           duration: '',
           featured: false
         };
@@ -336,7 +345,7 @@ catalog.forEach(entry => {
   for (const ext of IMAGE_EXTS) {
     const coverPath = path.join(COVERS_DIR, entry.id + ext);
     if (fs.existsSync(coverPath)) {
-      entry.cover = 'covers/' + entry.id + ext;
+      entry.cover = assetPath('covers/' + entry.id + ext);
       coverLinked++;
       break;
     }

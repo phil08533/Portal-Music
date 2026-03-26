@@ -14,9 +14,7 @@
   <meta property="og:site_name" content="Portal Music">
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/app.js"></script>
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5642457707478801"
-    crossorigin="anonymous"></script>
+  <script type="module" src="js/firebase-auth.js"></script>
 </head>
 
 <body>
@@ -40,6 +38,7 @@
         </div>
       </div>
     </nav>
+    <button id="auth-btn" class="auth-btn" title="Sign in with Google to save favorites">Sign in</button>
     <div class="theme-btns">
       <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
       <button class="theme-btn" data-theme="light" title="Light">☀️</button>
@@ -54,9 +53,7 @@
 
     <!-- AD SLOT — Download Interstitial -->
     <div class="ad-slot tall" style="margin:2rem 0;">
-      <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
-        data-ad-client="ca-pub-5642457707478801" data-ad-slot="7972280041"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      <!-- Ad network code goes here -->
     </div>
 
     <div class="countdown-ring" id="countdown">5</div>
@@ -79,7 +76,7 @@
 
   <!-- Cookie Consent -->
   <div id="cookie-banner" class="cookie-banner" style="display:none;">
-    <p>This site uses cookies from Google AdSense to serve ads. <a href="privacy.html" style="color:var(--accent);">Learn more</a></p>
+    <p>This site uses cookies to serve ads and improve your experience. <a href="privacy.html" style="color:var(--accent);">Learn more</a></p>
     <button id="cookie-accept" class="cookie-accept-btn">Got it</button>
   </div>
 
