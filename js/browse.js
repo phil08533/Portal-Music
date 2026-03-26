@@ -10,6 +10,44 @@ var filterMode   = params.get('filter');
 var trackParam   = params.get('track');
 var allSongsPage = [];
 var activeFilters = [];
+var activeUseCase = '';
+var activeLengthFilter = '';
+
+var USE_CASE_GENRES = {
+  workout:   ['Rock', 'Electronic', 'Hip-Hop'],
+  study:     ['Electronic', 'Ambient & Chill', 'Classical'],
+  gaming:    ['Cinematic', 'Rock', 'Electronic', 'Dark & Suspense'],
+  roadtrip:  ['Rock', 'Country & Folk', 'Pop'],
+  content:   ['Cinematic', 'Pop', 'Electronic', 'Playful & Mood'],
+  relax:     ['Ambient & Chill', 'Jazz', 'Acoustic', 'R&B / Soul'],
+  party:     ['Hip-Hop', 'Pop', 'Electronic', 'R&B / Soul'],
+  latenight: ['Jazz', 'R&B / Soul', 'Ambient & Chill', 'Dark & Suspense'],
+  podcast:   ['Jazz', 'Cinematic', 'Classical', 'Ambient & Chill'],
+  cinematic: ['Cinematic', 'Dark & Suspense', 'Classical'],
+};
+
+function parseDurationSecs(dur) {
+  if (!dur) return null;
+  var parts = String(dur).split(':');
+  if (parts.length === 2) return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  return null;
+}
+
+function matchesLength(song, filter) {
+  if (!filter) return true;
+  var secs = parseDurationSecs(song.duration);
+  if (secs === null) return true; // unknown duration passes all
+  if (filter === 'short')  return secs < 120;
+  if (filter === 'medium') return secs >= 120 && secs <= 240;
+  if (filter === 'long')   return secs > 240;
+  return true;
+}
+
+function matchesUseCase(song, useCase) {
+  if (!useCase) return true;
+  var genres = USE_CASE_GENRES[useCase] || [];
+  return genres.indexOf(song.genre) !== -1;
+}
 
 // --- Build genre/subgenre chip grid (multi-select) ---
 function renderBrowseFilters(songs) {
@@ -101,9 +139,15 @@ function renderBrowseFilters(songs) {
 // --- Clear filters ---
 document.getElementById('browse-clear-btn').addEventListener('click', function () {
   activeFilters = [];
+  activeUseCase = '';
+  activeLengthFilter = '';
   document.querySelectorAll('.browse-chip.active').forEach(function (b) {
     b.classList.remove('active');
   });
+  var ucEl = document.getElementById('use-case-filter');
+  var lenEl = document.getElementById('length-filter');
+  if (ucEl)  ucEl.value  = '';
+  if (lenEl) lenEl.value = '';
   renderFilteredGrid();
 });
 
@@ -113,7 +157,11 @@ function renderFilteredGrid() {
   var gridEl = document.getElementById('music-grid');
   var countEl = document.getElementById('browse-results-count');
 
-  if (activeFilters.length === 0) {
+  var hasChips  = activeFilters.length > 0;
+  var hasUseCase = !!activeUseCase;
+  var hasLength  = !!activeLengthFilter;
+
+  if (!hasChips && !hasUseCase && !hasLength) {
     bar.style.display = 'none';
     window.currentSongsView = allSongsPage;
     gridEl.innerHTML = allSongsPage.length
@@ -122,20 +170,24 @@ function renderFilteredGrid() {
     return;
   }
 
-  // Match by subgenre OR artist field (so artist chips include all their tracks)
   var filtered = allSongsPage.filter(function (s) {
-    return activeFilters.indexOf(s.subgenre) !== -1 ||
-           (s.artist && activeFilters.indexOf(s.artist) !== -1);
+    // Chip filter (subgenre / artist)
+    var passChip = !hasChips || (
+      activeFilters.indexOf(s.subgenre) !== -1 ||
+      (s.artist && activeFilters.indexOf(s.artist) !== -1)
+    );
+    return passChip && matchesUseCase(s, activeUseCase) && matchesLength(s, activeLengthFilter);
   });
 
+  var activeCount = activeFilters.length + (hasUseCase ? 1 : 0) + (hasLength ? 1 : 0);
   bar.style.display = 'flex';
   countEl.textContent = filtered.length + ' track' + (filtered.length !== 1 ? 's' : '') +
-    ' in ' + activeFilters.length + ' filter' + (activeFilters.length !== 1 ? 's' : '');
+    ' · ' + activeCount + ' filter' + (activeCount !== 1 ? 's' : '') + ' active';
 
   window.currentSongsView = filtered;
   gridEl.innerHTML = filtered.length
     ? filtered.map(createTrackCard).join('')
-    : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
+    : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks match those filters.</p></div>';
 }
 
 // --- Render simple grid (for genre/artist/favorites views) ---
@@ -244,4 +296,20 @@ Promise.all([loadGenres(), loadSongs()]).then(function (results) {
 // Featured Artists — only on main browse view
 if (!genre && !artist && !filterMode) {
   renderBrowseArtists();
+}
+
+// --- Use-case + length dropdown listeners ---
+var useCaseEl = document.getElementById('use-case-filter');
+var lengthEl  = document.getElementById('length-filter');
+if (useCaseEl) {
+  useCaseEl.addEventListener('change', function () {
+    activeUseCase = this.value;
+    renderFilteredGrid();
+  });
+}
+if (lengthEl) {
+  lengthEl.addEventListener('change', function () {
+    activeLengthFilter = this.value;
+    renderFilteredGrid();
+  });
 }

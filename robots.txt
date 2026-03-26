@@ -1,2 +1,5 @@
 User-agent: *
-Disallow:
+Disallow: /download.html
+Disallow: /profile.html
+
+Sitemap: https://portal-music.com/sitemap-index.xml

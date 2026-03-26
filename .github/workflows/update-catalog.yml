@@ -57,14 +57,17 @@ jobs:
         run: |
           git rm -r --cached music/ covers/ 2>/dev/null || true
 
-      - name: Commit updated catalog
+      - name: Generate SEO pages (genre + track pages + sitemap-tracks.xml)
+        run: node scripts/generate-seo-pages.js
+
+      - name: Commit updated catalog and SEO pages
         run: |
           git config user.name  "Portal Music Bot"
           git config user.email "bot@portal-music.com"
-          git add data/music.json data/license.pdf .gitignore
+          git add data/music.json data/license.pdf .gitignore genres/ tracks/ sitemap-tracks.xml sitemap-index.xml
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "🎵 Auto-update music catalog"
+            git commit -m "🎵 Auto-update music catalog + regenerate SEO pages"
             git push
           fi
