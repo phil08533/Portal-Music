@@ -361,7 +361,7 @@ function createTrackCard(song) {
     '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(\'' + song.id + '\', window.currentSongsView)">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
-    '<a href="download.html?file=' + encodeURIComponent(song.file) + '&title=' + encodeURIComponent(song.title) + '" class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
+    '<a href="download.html?file=' + encodeURIComponent(song.file) + '&title=' + encodeURIComponent(song.title) + '&cover=' + encodeURIComponent(song.cover || '') + '" class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
     '</div>' +
     '</div>'
   );
@@ -665,6 +665,9 @@ document.addEventListener('click', e => {
   // Let browser handle external links, new tabs, special protocols, or downloads
   if (link.target === '_blank' || link.hasAttribute('download') || link.host !== window.location.host) return;
   if (!link.href.startsWith('http')) return;
+
+  // Full page load for download page so ads/countdown/scripts work correctly
+  if (link.pathname.includes('download.html')) return;
 
   e.preventDefault();
   const url = link.href;

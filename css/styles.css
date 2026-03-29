@@ -1714,6 +1714,28 @@ button.chip.active {
   padding: 0 5%;
 }
 
+.dl-track-info {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.dl-cover {
+  width: 90px;
+  height: 90px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.dl-track-text {
+  text-align: left;
+}
+
 .download-wrap h1 {
   font-size: 1.6rem;
   font-weight: 900;

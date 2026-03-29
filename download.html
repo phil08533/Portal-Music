@@ -50,8 +50,13 @@
 
   <div class="download-wrap">
 
-    <h1>Preparing your download</h1>
-    <p class="dl-subtitle" id="dl-title"></p>
+    <div class="dl-track-info">
+      <img id="dl-cover" src="" alt="" class="dl-cover" style="display:none;">
+      <div class="dl-track-text">
+        <h1>Preparing your download</h1>
+        <p class="dl-subtitle" id="dl-title"></p>
+      </div>
+    </div>
 
     <!-- Monetag Multitag -->
     <script src="https://quge5.com/88/tag.min.js" data-zone="224600" async data-cfasync="false"></script>
@@ -60,7 +65,7 @@
     <p style="color:var(--text-muted);font-size:.9rem;">Your file will download automatically…</p>
 
     <a id="dl-link" class="dl-btn" style="display:none;" download>
-      Download MP3
+      ⬇ Download MP3
     </a>
 
     <p style="margin-top:1.5rem;font-size:.78rem;color:var(--text-muted);">
@@ -97,10 +102,17 @@
 
   <script>
     var params = new URLSearchParams(window.location.search);
-    var file = params.get('file');
+    var file  = params.get('file');
     var title = params.get('title') || 'Track';
+    var cover = params.get('cover');
 
     document.getElementById('dl-title').textContent = title;
+    if (cover) {
+      var img = document.getElementById('dl-cover');
+      img.src = cover;
+      img.alt = title;
+      img.style.display = 'block';
+    }
 
     var timeLeft = 5;
     var countEl = document.getElementById('countdown');
