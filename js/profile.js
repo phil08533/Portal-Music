@@ -128,7 +128,7 @@
       '</div>' +
       '<div class="playlist-card-actions">' +
       '<button class="playlist-action-btn" title="Open playlist" onclick="window._openPlaylist(\'' + pl.id + '\')">Open</button>' +
-      '<button class="playlist-action-btn" title="Rename" onclick="renamePlaylist(\'' + pl.id + '\',\'' + _esc(pl.name) + '\')">✏</button>' +
+      '<button class="playlist-action-btn" title="Rename" onclick="renamePlaylist(\'' + pl.id + '\',\'' + _esc(pl.name) + '\')">Rename</button>' +
       '<button class="playlist-action-btn danger" title="Delete" onclick="deletePlaylist(\'' + pl.id + '\')">🗑</button>' +
       '</div>' +
       '</div>'
