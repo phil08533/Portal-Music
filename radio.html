@@ -36,6 +36,7 @@
       <div class="nav-more">
         <button class="nav-more-btn">More ▾</button>
         <div class="nav-more-dropdown">
+          <a href="pro.html">✦ Pro Features</a>
           <a href="about.html">About</a>
           <a href="contact.html">Contact</a>
           <a href="license.html">License</a>
@@ -78,15 +79,12 @@
           <button class="rp-btn rp-play" id="rp-play" title="Play/Pause">▶</button>
           <button class="rp-btn" id="rp-next" title="Skip Track">⏭</button>
         </div>
-      </div>
-
-      <!-- Station track grid -->
-      <div id="radio-track-section" style="display:none;">
-        <div class="section-header" style="margin-top:2rem;">
-          <h2 id="radio-track-heading">Station Tracks</h2>
-          <span id="radio-track-count" style="color:var(--text-muted);font-size:.85rem;"></span>
+        <div class="rp-actions" id="rp-actions" style="display:none;">
+          <button class="rp-action-btn" id="rp-fav-btn" title="Toggle favorite" onclick="if(window.currentSong)toggleFavorite(window.currentSong.id)">🤍 Favorite</button>
+          <button class="rp-action-btn" id="rp-playlist-btn" title="Add to playlist" onclick="if(window.currentSong)showPlaylistMenu(window.currentSong.id, window.currentSong.title)">＋ Playlist</button>
+          <button class="rp-action-btn" id="rp-share-btn" title="Share" onclick="if(window.currentSong)shareTrack(window.currentSong.id, window.currentSong.title)">🔗 Share</button>
+          <a class="rp-action-btn" id="rp-dl-btn" href="#" title="Download">⬇ Download</a>
         </div>
-        <div class="grid" id="radio-track-grid"></div>
       </div>
 
     </div>
@@ -110,6 +108,17 @@
         { id: 'country', name: 'Backroads', icon: '🤠', desc: 'Country & Folk' }
       ];
 
+      const PRO_STATIONS = [
+        { id: 'vaporlounge', name: 'Vapor Lounge', icon: '🌊', desc: 'Electronic, Chill & Ambient — pure vibes' },
+        { id: 'studyhall', name: 'Study Hall', icon: '📚', desc: 'Classical, Ambient & Lo-fi focus music' },
+        { id: 'darkhours', name: 'Dark Hours', icon: '🌑', desc: 'Dark Suspense & Cinematic tension' },
+        { id: 'soultrain', name: 'Soul Train', icon: '🎷', desc: 'R&B, Soul & Jazz grooves' },
+        { id: 'gameon', name: 'Game On', icon: '🎮', desc: 'Cinematic & Rock — gaming energy' },
+      ];
+
+      const isPro = localStorage.getItem('pm_is_pro') === '1';
+      const allStations = isPro ? [...STATIONS, ...PRO_STATIONS] : STATIONS;
+
       let currentStation = null;
       let stationSongs = [];
 
@@ -124,8 +133,9 @@
 
       function renderStations() {
         const grid = document.getElementById('station-grid');
-        grid.innerHTML = STATIONS.map(s => `
-          <div class="station-card" data-station="${s.id}">
+        grid.innerHTML = allStations.map(s => `
+          <div class="station-card ${PRO_STATIONS.find(p=>p.id===s.id) ? 'pro-station' : ''}" data-station="${s.id}">
+            ${PRO_STATIONS.find(p=>p.id===s.id) ? '<span class="station-pro-badge">PRO</span>' : ''}
             <div class="station-icon">${s.icon}</div>
             <div class="station-name">${s.name}</div>
             <div class="station-desc">${s.desc}</div>
@@ -159,6 +169,11 @@
           case 'chill': pool = all.filter(s => ['Jazz', 'R&B / Soul', 'Acoustic'].includes(s.genre)); break;
           case 'epic': pool = all.filter(s => ['Cinematic'].includes(s.genre)); break;
           case 'country': pool = all.filter(s => ['Country & Folk'].includes(s.genre)); break;
+          case 'vaporlounge': pool = all.filter(s => ['Electronic', 'Ambient & Chill'].includes(s.genre)); break;
+          case 'studyhall': pool = all.filter(s => ['Classical', 'Ambient & Chill'].includes(s.genre)); break;
+          case 'darkhours': pool = all.filter(s => ['Dark & Suspense', 'Cinematic'].includes(s.genre)); break;
+          case 'soultrain': pool = all.filter(s => ['R&B / Soul', 'Jazz'].includes(s.genre)); break;
+          case 'gameon': pool = all.filter(s => ['Cinematic', 'Rock'].includes(s.genre)); break;
         }
 
         if (pool.length === 0) {
@@ -170,19 +185,6 @@
         stationSongs = shuffleArray(pool);
         window.currentSongsView = stationSongs;
         playSong(stationSongs[0], stationSongs);
-
-        // Render track grid for download/favorite/playlist
-        var trackSection = document.getElementById('radio-track-section');
-        var trackGrid = document.getElementById('radio-track-grid');
-        var trackHeading = document.getElementById('radio-track-heading');
-        var trackCount = document.getElementById('radio-track-count');
-        var station = STATIONS.find(function(s) { return s.id === stationId; });
-        if (trackSection && trackGrid) {
-          trackHeading.textContent = (station ? station.icon + ' ' + station.name : 'Station') + ' Tracks';
-          trackCount.textContent = stationSongs.length + ' tracks';
-          trackGrid.innerHTML = stationSongs.map(function(s) { return createTrackCard(s); }).join('');
-          trackSection.style.display = '';
-        }
       }
 
       window._syncLargePlayer = function() {
@@ -205,7 +207,21 @@
           artEl.textContent = '🎵';
         }
 
-        btn.textContent = window.isPlaying ? '⏸' : '▶';
+        btn.textContent = !audio.paused ? '⏸' : '▶';
+
+        // Show action buttons and sync state
+        const actionsEl = document.getElementById('rp-actions');
+        if (actionsEl) actionsEl.style.display = '';
+        const favBtn = document.getElementById('rp-fav-btn');
+        if (favBtn && currentSong) {
+          const faved = typeof isFavorited === 'function' && isFavorited(currentSong.id);
+          favBtn.textContent = (faved ? '❤️' : '🤍') + ' Favorite';
+          favBtn.classList.toggle('active', faved);
+        }
+        const dlBtn = document.getElementById('rp-dl-btn');
+        if (dlBtn && currentSong) {
+          dlBtn.href = 'download.html?file=' + encodeURIComponent(currentSong.file) + '&title=' + encodeURIComponent(currentSong.title) + '&cover=' + encodeURIComponent(currentSong.cover || '');
+        }
       };
 
       audio.addEventListener('play', window._syncLargePlayer);
@@ -251,7 +267,8 @@
     <div class="footer-inner">
       <p>&copy; 2025–2026 Portal Music. All tracks are free to use.</p>
       <div class="footer-links">
-        <a href="about.html">About</a>
+        <a href="pro.html">✦ Pro Features</a>
+          <a href="about.html">About</a>
         <a href="contact.html">Contact</a>
         <a href="license.html">License</a>
         <a href="dispute-guide.html">Copyright Help</a>

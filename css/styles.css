@@ -2955,8 +2955,8 @@ html.is-pro .is-inpage-push {
 
 .playlist-add-btn {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
+  top: 8px;
+  right: 48px;
   background: rgba(0,0,0,0.65);
   border: none;
   border-radius: 50%;
@@ -2968,13 +2968,9 @@ html.is-pro .is-inpage-push {
   font-size: 1.1rem;
   color: #fff;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   transition: opacity var(--transition), background var(--transition);
   line-height: 1;
-}
-
-.music-card-cover:hover .playlist-add-btn {
-  opacity: 1;
 }
 
 .playlist-add-btn:hover {
@@ -3646,4 +3642,129 @@ html.is-pro .is-inpage-push {
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-top: 1.5rem;
+}
+
+/* Radio player action buttons */
+.rp-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.rp-action-btn {
+  background: var(--chip-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.rp-action-btn:hover {
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  border-color: var(--accent);
+}
+
+.rp-action-btn.active {
+  color: var(--heart);
+  border-color: var(--heart);
+}
+
+/* Pro station badge */
+.station-card.pro-station {
+  position: relative;
+}
+.station-pro-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: linear-gradient(135deg, #f5a623, #f76b1c);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.05em;
+}
+
+/* Pro features page */
+.pro-features-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 0 4rem;
+}
+
+.pro-features-page h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 0.4rem;
+}
+
+.pro-features-page .pf-sub {
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+  font-size: 1.05rem;
+}
+
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.pf-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: box-shadow var(--transition);
+}
+
+.pf-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.pf-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.pf-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.pf-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.pf-cta-row {
+  text-align: center;
+  padding: 2rem;
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.pf-cta-row h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pf-cta-row p {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
 }
