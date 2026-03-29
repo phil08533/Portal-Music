@@ -61,11 +61,17 @@
             <div id="profile-avatar-fallback" class="profile-avatar-fallback">👤</div>
           </div>
           <div class="profile-info">
-            <h1 id="profile-name" class="profile-name"></h1>
+            <h1 id="profile-name" class="profile-name">
+              <span id="profile-pro-badge" class="pro-badge" style="display:none;">⭐ Pro</span>
+            </h1>
             <p id="profile-email" class="profile-email"></p>
             <div class="profile-stats" id="profile-stats"></div>
           </div>
-          <button class="btn-signout" onclick="window._fbSignOut && window._fbSignOut().then(()=>window.location.href='index.html')">Sign out</button>
+          <div class="profile-account-actions">
+            <button class="btn-signout" onclick="window._fbSignOut && window._fbSignOut().then(()=>window.location.href='index.html')">Sign out</button>
+            <a id="btn-manage-sub" class="btn-manage-sub" href="https://app.lemonsqueezy.com/my-orders" target="_blank" rel="noopener" style="display:none;">Manage subscription</a>
+            <button class="btn-delete-account" onclick="deleteAccount()">Delete account</button>
+          </div>
         </div>
 
         <!-- Main profile sections (hidden when viewing a playlist) -->

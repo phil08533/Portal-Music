@@ -35,8 +35,23 @@
     }
 
     // Name + email
-    document.getElementById('profile-name').textContent  = user.displayName || 'Anonymous';
+    var nameEl = document.getElementById('profile-name');
+    // Set text without removing the badge span
+    var firstChild = nameEl.firstChild;
+    if (firstChild && firstChild.nodeType === 3) firstChild.remove();
+    nameEl.insertBefore(document.createTextNode(user.displayName || 'Anonymous'), nameEl.firstChild);
     document.getElementById('profile-email').textContent = user.email || '';
+
+    // Pro badge + manage subscription
+    if (window._fbIsPro) {
+      var badge = document.getElementById('profile-pro-badge');
+      if (badge) badge.style.display = '';
+      var manageBtn = document.getElementById('btn-manage-sub');
+      if (manageBtn) {
+        manageBtn.style.display = '';
+        if (window._fbPortalUrl) manageBtn.href = window._fbPortalUrl;
+      }
+    }
 
     // Load songs catalog
     _songs = await loadSongs();
@@ -266,6 +281,25 @@
       ' · ' +
       '<span>' + recentCount + ' recently played</span>';
   }
+
+  // ── Delete account ──────────────────────────────────────────────────────
+  window.deleteAccount = async function () {
+    if (!confirm('Permanently delete your account?\n\nThis removes your favorites, playlists, and Pro status. This cannot be undone.')) return;
+    var user = window._fbUser;
+    if (!user) return;
+    try {
+      // Delete Firestore user doc (playlists are subcollection — also cleaned up)
+      if (window._fbDeleteUserDoc) await window._fbDeleteUserDoc();
+      await user.delete();
+      window.location.href = 'index.html';
+    } catch (e) {
+      if (e.code === 'auth/requires-recent-login') {
+        alert('For security, please sign out and sign back in, then try deleting again.');
+      } else {
+        alert('Could not delete account: ' + e.message);
+      }
+    }
+  };
 
   // helper to escape for attributes
   function _esc(str) {

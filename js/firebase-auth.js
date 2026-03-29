@@ -90,7 +90,8 @@ if (!configReady) {
         const cloud  = data.favorites || [];
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
         const merged = [...new Set([...cloud, ...local])];
-        window._fbIsPro = data.isPro === true;
+        window._fbIsPro      = data.isPro === true;
+        window._fbPortalUrl  = data.lsPortalUrl || null;
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
         await setDoc(doc(db, 'users', user.uid), {
           favorites:   merged,
@@ -176,6 +177,13 @@ if (!configReady) {
     } catch { /* ignore */ }
   };
 
+  window._fbDeleteUserDoc = async () => {
+    if (!window._fbUser) return;
+    try {
+      await deleteDoc(doc(db, 'users', window._fbUser.uid));
+    } catch { /* ignore */ }
+  };
+
   window._fbRemoveFromPlaylist = async (playlistId, songId) => {
     if (!window._fbUser) return;
     try {
@@ -196,6 +204,20 @@ if (!configReady) {
     // Remove any existing upgrade button so we can re-render cleanly
     const existingUpgrade = document.getElementById('upgrade-btn');
     if (existingUpgrade) existingUpgrade.remove();
+
+    // Pro body class + ad hiding
+    if (window._fbIsPro) {
+      document.body.classList.add('is-pro');
+    } else {
+      document.body.classList.remove('is-pro');
+    }
+
+    // Update logo text
+    const logo = document.querySelector('a.logo');
+    if (logo) {
+      const textNode = [...logo.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+      if (textNode) textNode.textContent = window._fbIsPro ? ' Portal Music Pro' : ' Portal Music';
+    }
 
     if (user) {
       btn.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';

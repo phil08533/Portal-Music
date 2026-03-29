@@ -211,6 +211,8 @@ header {
   display: flex;
   align-items: center;
   gap: 2px;
+  flex: 1;
+  justify-content: center;
 }
 
 .nav-links a {
@@ -357,23 +359,33 @@ header {
 
 .auth-btn {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  padding: 5px 11px;
+  padding: 6px 14px;
   cursor: pointer;
   color: var(--text);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all var(--transition);
   line-height: 1;
   flex-shrink: 0;
 }
 
-.auth-btn:hover,
+.auth-btn:hover {
+  background: var(--chip-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .auth-btn.signed-in {
   background: var(--accent);
   color: var(--btn-on-accent);
   border-color: var(--accent);
+}
+
+.auth-btn.signed-in:hover {
+  background: var(--accent-light);
+  color: var(--btn-on-accent);
 }
 
 /* --- Container --- */
@@ -2542,6 +2554,68 @@ button.chip.active {
 .btn-signout:hover {
   border-color: #e55;
   color: #e55;
+}
+
+/* Pro badge */
+.pro-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f5a623 0%, #f76b1c 100%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.04em;
+}
+
+/* Profile account actions (manage sub + delete) */
+.profile-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.btn-manage-sub {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-manage-sub:hover {
+  background: var(--chip-bg);
+}
+
+.btn-delete-account {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-delete-account:hover {
+  border-color: #e55;
+  color: #e55;
+}
+
+/* Hide ads for Pro users */
+.is-pro .ad-slot,
+.is-pro .side-ad {
+  display: none !important;
 }
 
 .btn-primary {
