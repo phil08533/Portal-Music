@@ -130,7 +130,13 @@ if (!configReady) {
         createdAt: serverTimestamp(),
       });
       return ref.id;
-    } catch { return null; }
+    } catch (e) {
+      console.error('[Portal Music] Playlist create failed:', e.message);
+      if (e.message && e.message.includes('permission')) {
+        alert('Firestore rules need updating — see instructions below.');
+      }
+      return null;
+    }
   };
 
   window._fbDeletePlaylist = async playlistId => {
