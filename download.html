@@ -18,8 +18,9 @@
 </head>
 
 <body>
-  <!-- Monetag OnClick Popunder — must be after <body> opens -->
-  <script>(function(s){s.dataset.zone='10786944',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  <script>if (localStorage.getItem('pm_is_pro') !== '1') {
+    (function(s){s.dataset.zone='10786944',s.src='https://al5sm.com/tag.min.js'})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+  }</script>
 
   <header>
     <a href="index.html" class="logo"><img src="images/portal.png" alt="" class="logo-img"> Portal Music</a>
@@ -58,10 +59,12 @@
       </div>
     </div>
 
-    <!-- Monetag Multitag -->
-    <script src="https://quge5.com/88/tag.min.js" data-zone="224600" async data-cfasync="false"></script>
+    <!-- Monetag Multitag (free users only) -->
+    <script>if (localStorage.getItem('pm_is_pro') !== '1') {
+      var _mt = document.createElement('script'); _mt.src = 'https://quge5.com/88/tag.min.js'; _mt.dataset.zone = '224600'; _mt.async = true; _mt.setAttribute('data-cfasync','false'); document.currentScript.insertAdjacentElement('afterend', _mt);
+    }</script>
 
-    <div class="countdown-ring" id="countdown">5</div>
+    <div class="countdown-ring" id="countdown" style="display:none;"></div>
     <p style="color:var(--text-muted);font-size:.9rem;">Your file will download automatically…</p>
 
     <a id="dl-link" class="dl-btn" style="display:none;" download>
@@ -114,30 +117,41 @@
       img.style.display = 'block';
     }
 
-    var timeLeft = 5;
+    var isPro = localStorage.getItem('pm_is_pro') === '1';
     var countEl = document.getElementById('countdown');
     var dlLink = document.getElementById('dl-link');
 
-    var tick = setInterval(function () {
-      timeLeft--;
-      countEl.textContent = timeLeft;
-      if (timeLeft <= 0) {
-        clearInterval(tick);
-        countEl.style.display = 'none';
-        if (file) {
-          var decoded = decodeURIComponent(file);
-          dlLink.href = decoded;
-          dlLink.style.display = 'inline-flex';
-          // Auto-trigger download
-          var a = document.createElement('a');
-          a.href = decoded;
-          a.download = '';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        }
+    function triggerDownload() {
+      countEl.style.display = 'none';
+      if (file) {
+        var decoded = decodeURIComponent(file);
+        dlLink.href = decoded;
+        dlLink.style.display = 'inline-flex';
+        var a = document.createElement('a');
+        a.href = decoded;
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
-    }, 1000);
+    }
+
+    if (isPro) {
+      // Pro: instant download, no countdown
+      triggerDownload();
+    } else {
+      var timeLeft = 5;
+      countEl.style.display = '';
+      countEl.textContent = timeLeft;
+      var tick = setInterval(function () {
+        timeLeft--;
+        countEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(tick);
+          triggerDownload();
+        }
+      }, 1000);
+    }
   </script>
 </body>
 
