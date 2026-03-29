@@ -68,33 +68,49 @@
           <button class="btn-signout" onclick="window._fbSignOut && window._fbSignOut().then(()=>window.location.href='index.html')">Sign out</button>
         </div>
 
-        <!-- Favorites -->
-        <div class="profile-section">
-          <div class="section-header">
-            <h2>Favorites</h2>
-            <a href="browse.html?filter=favorites">Browse all →</a>
-          </div>
-          <div id="profile-favorites-grid" class="grid"></div>
-          <p id="profile-favorites-empty" class="profile-empty" style="display:none;">No favorites yet — heart a track to save it here.</p>
-        </div>
+        <!-- Main profile sections (hidden when viewing a playlist) -->
+        <div id="profile-main-sections">
 
-        <!-- Playlists -->
-        <div class="profile-section">
-          <div class="section-header">
-            <h2>Playlists</h2>
-            <button class="btn-create-playlist" onclick="promptCreatePlaylist()">＋ New playlist</button>
+          <!-- Favorites -->
+          <div class="profile-section">
+            <div class="section-header">
+              <h2>Favorites</h2>
+              <a href="browse.html?filter=favorites">Browse all →</a>
+            </div>
+            <div id="profile-favorites-grid" class="grid"></div>
+            <p id="profile-favorites-empty" class="profile-empty" style="display:none;">No favorites yet — heart a track to save it here.</p>
           </div>
-          <div id="profile-playlists" class="playlist-grid"></div>
-          <p id="profile-playlists-empty" class="profile-empty" style="display:none;">No playlists yet — use the ＋ button on any track to add it to a playlist.</p>
-        </div>
 
-        <!-- Recently Played -->
-        <div class="profile-section">
-          <div class="section-header">
-            <h2>Recently Played</h2>
+          <!-- Playlists -->
+          <div class="profile-section">
+            <div class="section-header">
+              <h2>Playlists</h2>
+              <button class="btn-create-playlist" onclick="promptCreatePlaylist()">＋ New playlist</button>
+            </div>
+            <div id="profile-playlists" class="playlist-grid"></div>
+            <p id="profile-playlists-empty" class="profile-empty" style="display:none;">No playlists yet — use the ＋ button on any track to add it to a playlist.</p>
           </div>
-          <div id="profile-recent-grid" class="grid"></div>
-          <p id="profile-recent-empty" class="profile-empty" style="display:none;">Nothing played yet.</p>
+
+          <!-- Recently Played -->
+          <div class="profile-section">
+            <div class="section-header">
+              <h2>Recently Played</h2>
+            </div>
+            <div id="profile-recent-grid" class="grid"></div>
+            <p id="profile-recent-empty" class="profile-empty" style="display:none;">Nothing played yet.</p>
+          </div>
+
+        </div><!-- end #profile-main-sections -->
+
+        <!-- Playlist detail view (shown when a playlist is opened) -->
+        <div id="profile-playlist-detail" style="display:none;">
+          <div class="playlist-detail-bar">
+            <button class="btn-back-profile" onclick="window._closePlaylistDetail()">← Back</button>
+            <h2 id="playlist-detail-title"></h2>
+            <span id="playlist-detail-count" class="playlist-detail-count"></span>
+            <button id="playlist-detail-play" class="btn-play-all-pl">▶ Play all</button>
+          </div>
+          <div class="grid" id="playlist-detail-grid"></div>
         </div>
 
       </div>

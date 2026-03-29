@@ -95,7 +95,6 @@
 
   function renderPlaylistCard(pl) {
     var count = pl.songs ? pl.songs.length : 0;
-    // Get cover of first song in playlist
     var cover = '';
     if (pl.songs && pl.songs.length > 0) {
       var firstSong = _songs.find(function (s) { return s.id === pl.songs[0]; });
@@ -104,58 +103,56 @@
 
     return (
       '<div class="playlist-card" data-playlist-id="' + pl.id + '">' +
-      '<div class="playlist-card-art" onclick="togglePlaylistTracks(\'' + pl.id + '\')">' +
+      '<div class="playlist-card-art" onclick="window._openPlaylist(\'' + pl.id + '\')">' +
       (cover ? '<img src="' + _esc(cover) + '" alt="">' : '<div class="playlist-art-placeholder">♫</div>') +
       '<div class="playlist-play-overlay">▶</div>' +
       '</div>' +
       '<div class="playlist-card-info">' +
-      '<div class="playlist-card-name">' + _esc(pl.name) + '</div>' +
+      '<div class="playlist-card-name" onclick="window._openPlaylist(\'' + pl.id + '\')" style="cursor:pointer;">' + _esc(pl.name) + '</div>' +
       '<div class="playlist-card-count">' + count + ' track' + (count !== 1 ? 's' : '') + '</div>' +
       '</div>' +
       '<div class="playlist-card-actions">' +
-      '<button class="playlist-action-btn" title="Play all" onclick="playPlaylist(\'' + pl.id + '\')">▶ Play</button>' +
+      '<button class="playlist-action-btn" title="Open playlist" onclick="window._openPlaylist(\'' + pl.id + '\')">Open</button>' +
       '<button class="playlist-action-btn" title="Rename" onclick="renamePlaylist(\'' + pl.id + '\',\'' + _esc(pl.name) + '\')">✏</button>' +
       '<button class="playlist-action-btn danger" title="Delete" onclick="deletePlaylist(\'' + pl.id + '\')">🗑</button>' +
       '</div>' +
-      '<div class="playlist-tracks" id="pl-tracks-' + pl.id + '" style="display:none;"></div>' +
       '</div>'
     );
   }
 
-  // ── Playlist actions ────────────────────────────────────────────────────
-  window.togglePlaylistTracks = function (playlistId) {
-    var el = document.getElementById('pl-tracks-' + playlistId);
-    if (!el) return;
-    if (el.style.display === 'none') {
-      var pl = _playlists.find(function (p) { return p.id === playlistId; });
-      if (!pl) return;
-      var songs = (pl.songs || []).map(function (id) {
-        return _songs.find(function (s) { return String(s.id) === String(id); });
-      }).filter(Boolean);
+  // ── Open playlist as full track grid ────────────────────────────────────
+  window._openPlaylist = function (playlistId) {
+    var pl = _playlists.find(function (p) { return p.id === playlistId; });
+    if (!pl) return;
 
-      if (songs.length === 0) {
-        el.innerHTML = '<p class="profile-empty">No tracks in this playlist yet.</p>';
-      } else {
-        window.currentSongsView = songs;
-        el.innerHTML = '<div class="playlist-track-list">' +
-          songs.map(function (s) {
-            return (
-              '<div class="playlist-track-item">' +
-              '<button class="btn-play playlist-track-play" data-song-id="' + s.id + '" data-icon-only="1" ' +
-              'onclick="handlePlayBtn(\'' + s.id + '\', window.currentSongsView)">▶</button>' +
-              '<span class="playlist-track-name">' + _esc(s.title) + '</span>' +
-              '<span class="playlist-track-artist">' + _esc(s.artist || s.genre || '') + '</span>' +
-              '<button class="playlist-track-remove" title="Remove" ' +
-              'onclick="removeFromPlaylistUI(\'' + playlistId + '\',\'' + s.id + '\',this)">✕</button>' +
-              '</div>'
-            );
-          }).join('') +
-          '</div>';
-      }
-      el.style.display = 'block';
-    } else {
-      el.style.display = 'none';
-    }
+    var songs = (pl.songs || []).map(function (id) {
+      return _songs.find(function (s) { return String(s.id) === String(id); });
+    }).filter(Boolean);
+
+    window.currentSongsView = songs;
+
+    document.getElementById('profile-main-sections').style.display = 'none';
+
+    var detail = document.getElementById('profile-playlist-detail');
+    document.getElementById('playlist-detail-title').textContent = pl.name;
+    document.getElementById('playlist-detail-count').textContent = songs.length + ' track' + (songs.length !== 1 ? 's' : '');
+
+    var playBtn = document.getElementById('playlist-detail-play');
+    playBtn.style.display = songs.length ? '' : 'none';
+    playBtn.onclick = function () { window.playPlaylist(playlistId); };
+
+    var grid = document.getElementById('playlist-detail-grid');
+    grid.innerHTML = songs.length
+      ? songs.map(function (s) { return createTrackCard(s); }).join('')
+      : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No tracks in this playlist yet.<br>Use the ＋ button on any track to add songs.</p></div>';
+
+    detail.style.display = 'block';
+    window.scrollTo(0, 0);
+  };
+
+  window._closePlaylistDetail = function () {
+    document.getElementById('profile-playlist-detail').style.display = 'none';
+    document.getElementById('profile-main-sections').style.display = '';
   };
 
   window.playPlaylist = function (playlistId) {
@@ -220,6 +217,17 @@
     var inputEl = document.getElementById('profile-new-playlist-input');
     var name = inputEl ? inputEl.value.trim() : '';
     if (!name) { if (inputEl) inputEl.focus(); return; }
+
+    // Free tier: max 2 playlists
+    if (!window._fbIsPro && _playlists.length >= 2) {
+      var row = document.getElementById('profile-new-playlist-row');
+      if (row) row.remove();
+      if (confirm('Free accounts are limited to 2 playlists.\n\nUpgrade to Pro for unlimited playlists. Go to upgrade page?')) {
+        window.location.href = 'upgrade.html';
+      }
+      return;
+    }
+
     await window._fbCreatePlaylist(name);
     var row = document.getElementById('profile-new-playlist-row');
     if (row) row.remove();

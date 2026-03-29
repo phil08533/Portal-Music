@@ -49,6 +49,7 @@ const configReady = Object.values(firebaseConfig).every(v => !String(v).startsWi
 if (!configReady) {
   console.info('[Portal Music] Firebase not yet configured — sign-in disabled. See CLAUDE.md.');
   window._fbUser          = null;
+  window._fbIsPro         = false;
   window._fbAuthReady     = true;
   window.dispatchEvent(new CustomEvent('portalAuthReady', { detail: { user: null } }));
   window._fbSignIn        = () => { alert('Sign-in coming soon!'); };
@@ -80,13 +81,16 @@ if (!configReady) {
   // ── Auth state ─────────────────────────────────────────────────────────
   onAuthStateChanged(auth, async user => {
     window._fbUser = user;
+    window._fbIsPro = false;
 
     if (user) {
       try {
         const snap   = await getDoc(doc(db, 'users', user.uid));
-        const cloud  = snap.exists() ? (snap.data().favorites || []) : [];
+        const data   = snap.exists() ? snap.data() : {};
+        const cloud  = data.favorites || [];
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
         const merged = [...new Set([...cloud, ...local])];
+        window._fbIsPro = data.isPro === true;
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
         await setDoc(doc(db, 'users', user.uid), {
           favorites:   merged,
@@ -188,6 +192,11 @@ if (!configReady) {
     const btn = document.getElementById('auth-btn');
     if (!btn) return;
     const user = window._fbUser;
+
+    // Remove any existing upgrade button so we can re-render cleanly
+    const existingUpgrade = document.getElementById('upgrade-btn');
+    if (existingUpgrade) existingUpgrade.remove();
+
     if (user) {
       btn.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
       btn.title       = 'View your profile';
@@ -195,6 +204,17 @@ if (!configReady) {
       btn.classList.add('signed-in');
       const banner = document.getElementById('fav-banner');
       if (banner) banner.style.display = 'none';
+
+      // Inject upgrade button next to auth button (only if not already Pro)
+      if (!window._fbIsPro) {
+        const upgradeBtn = document.createElement('a');
+        upgradeBtn.id        = 'upgrade-btn';
+        upgradeBtn.href      = 'upgrade.html';
+        upgradeBtn.className = 'upgrade-btn';
+        upgradeBtn.textContent = '⭐ Pro';
+        upgradeBtn.title     = 'Remove ads & unlimited playlists';
+        btn.insertAdjacentElement('afterend', upgradeBtn);
+      }
     } else {
       btn.textContent = 'Sign in';
       btn.title       = 'Sign in with Google to save favorites';

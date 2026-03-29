@@ -446,6 +446,19 @@ async function createPlaylistAndAdd(songId) {
     if (inputEl) { inputEl.focus(); inputEl.classList.add('pm-new-input-shake'); setTimeout(() => inputEl.classList.remove('pm-new-input-shake'), 400); }
     return;
   }
+
+  // Free tier: max 2 playlists
+  if (!window._fbIsPro) {
+    const existing = await (window._fbGetPlaylists ? window._fbGetPlaylists() : []);
+    if (existing.length >= 2) {
+      document.getElementById('pm-playlist-modal')?.remove();
+      if (confirm('Free accounts are limited to 2 playlists.\n\nUpgrade to Pro for unlimited playlists. Go to upgrade page?')) {
+        window.location.href = 'upgrade.html';
+      }
+      return;
+    }
+  }
+
   const id = await window._fbCreatePlaylist(name);
   if (id) {
     await window._fbAddToPlaylist(id, songId);
@@ -675,7 +688,7 @@ document.addEventListener('click', e => {
   if (!link.href.startsWith('http')) return;
 
   // Full page load for these pages — they have their own scripts that won't run in SPA context
-  if (link.pathname.includes('download.html') || link.pathname.includes('profile.html')) return;
+  if (link.pathname.includes('download.html') || link.pathname.includes('profile.html') || link.pathname.includes('upgrade.html')) return;
 
   e.preventDefault();
   const url = link.href;

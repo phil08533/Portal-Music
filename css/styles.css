@@ -3257,3 +3257,202 @@ button.chip.active {
     justify-content: center;
   }
 }
+
+/* --- Playlist Detail Bar --- */
+.playlist-detail-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-back-profile {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-back-profile:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.playlist-detail-count {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-right: auto;
+}
+
+.btn-play-all-pl {
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.btn-play-all-pl:hover {
+  background: var(--accent-light);
+}
+
+/* --- Upgrade Button --- */
+.upgrade-btn {
+  background: linear-gradient(135deg, #f5a623 0%, #f76b1c 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 5px 11px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition);
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.upgrade-btn:hover {
+  opacity: 0.88;
+}
+
+/* --- Upgrade page --- */
+.upgrade-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.upgrade-page h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.upgrade-page .upgrade-sub {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.upgrade-cards {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.upgrade-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  width: 260px;
+  text-align: left;
+  transition: box-shadow var(--transition);
+}
+
+.upgrade-card.featured {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.upgrade-card-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.upgrade-card.featured .upgrade-card-label {
+  color: var(--accent);
+}
+
+.upgrade-price {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 0.25rem;
+}
+
+.upgrade-price span {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.upgrade-features {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 1.5rem;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upgrade-features li::before {
+  content: '✓ ';
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.upgrade-features li.no::before {
+  content: '✗ ';
+  color: var(--text-muted);
+}
+
+.upgrade-features li.no {
+  color: var(--text-muted);
+}
+
+.btn-upgrade-cta {
+  display: block;
+  width: 100%;
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background var(--transition);
+}
+
+.btn-upgrade-cta:hover {
+  background: var(--accent-light);
+}
+
+.btn-upgrade-cta.secondary {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+}
+
+.btn-upgrade-cta.secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.upgrade-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+}
