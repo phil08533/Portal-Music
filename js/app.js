@@ -361,7 +361,7 @@ function createTrackCard(song) {
     '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(\'' + song.id + '\', window.currentSongsView)">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
-    '<a href="' + _esc(song.file) + '" download class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
+    '<a href="download.html?file=' + encodeURIComponent(song.file) + '&title=' + encodeURIComponent(song.title) + '" class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
     '</div>' +
     '</div>'
   );
