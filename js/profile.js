@@ -6,17 +6,15 @@
   var _songs = [];
   var _playlists = [];
 
-  // Wait for Firebase to resolve auth state (_fbAuthReady = true after onAuthStateChanged fires)
-  var _authCheckInterval = setInterval(function () {
-    if (window._fbAuthReady) {
-      clearInterval(_authCheckInterval);
-      initProfile();
-    }
-  }, 80);
+  // firebase-auth.js dispatches 'portalAuthReady' once onAuthStateChanged resolves.
+  // Module scripts (firebase-auth.js) run AFTER regular scripts, so we always
+  // need to wait for the event — never assume auth is already known at this point.
+  window.addEventListener('portalAuthReady', function () {
+    initProfile();
+  }, { once: true });
 
-  // Expose initProfile so firebase-auth.js can call it after sign-in popup completes
-  window._profileInit    = initProfile;
-  window._initProfileFn  = initProfile; // stable reference for the sign-in button
+  // Stable reference so the sign-in button can re-register after sign-in popup
+  window._initProfileFn = initProfile;
 
   async function initProfile() {
     if (!window._fbUser) {

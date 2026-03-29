@@ -50,6 +50,7 @@ if (!configReady) {
   console.info('[Portal Music] Firebase not yet configured — sign-in disabled. See CLAUDE.md.');
   window._fbUser          = null;
   window._fbAuthReady     = true;
+  window.dispatchEvent(new CustomEvent('portalAuthReady', { detail: { user: null } }));
   window._fbSignIn        = () => { alert('Sign-in coming soon!'); };
   window._fbSignOut       = () => {};
   window._fbSaveFavorites = async () => {};
@@ -98,16 +99,10 @@ if (!configReady) {
       }
     }
 
-    // Mark auth as resolved — profile.js waits for this before rendering
+    // Mark auth as resolved and notify any waiting listeners
     window._fbAuthReady = true;
-
     window._renderAuthBtn();
-
-    // If profile page is loaded and waiting, kick it off now
-    if (typeof window._profileInit === 'function') {
-      window._profileInit();
-      window._profileInit = null; // only run once per auth state change
-    }
+    window.dispatchEvent(new CustomEvent('portalAuthReady', { detail: { user } }));
   });
 
   // ── Auth actions ────────────────────────────────────────────────────────

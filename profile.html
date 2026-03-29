@@ -48,7 +48,7 @@
       <!-- Not signed in state -->
       <div id="profile-signed-out" style="display:none; text-align:center; padding:4rem 0;">
         <p style="font-size:1.2rem; color:var(--text-muted); margin-bottom:1.5rem;">Sign in to view your profile</p>
-        <button class="btn-primary" onclick="window._profileInit = window._initProfileFn; window._fbSignIn && window._fbSignIn()">Sign in with Google</button>
+        <button class="btn-primary" onclick="window.addEventListener('portalAuthReady', function(){ window._initProfileFn && window._initProfileFn(); }, {once:true}); window._fbSignIn && window._fbSignIn()">Sign in with Google</button>
       </div>
 
       <!-- Signed in state -->
