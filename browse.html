@@ -20,6 +20,8 @@
   <script type="module" src="js/firebase-auth.js"></script>
   <!-- PropellerAds Push Notifications -->
   <script src="https://5gvci.com/act/files/tag.min.js?z=10786950" data-cfasync="false" async></script>
+  <!-- PropellerAds In-Page Push -->
+  <script>(function(s){s.dataset.zone='10803159',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </head>
 
 <body>
@@ -68,11 +70,32 @@
         <p class="browse-subtitle" id="page-subtitle"></p>
       </div>
 
-      <!-- Search bar -->
-      <div class="search-bar-wrap">
-        <span class="search-icon">🔍</span>
-        <input id="search-input" class="search-input" type="search"
-               placeholder="Search by title, artist, or genre…" autocomplete="off">
+      <!-- Search + filter bar -->
+      <div class="browse-top-bar">
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔍</span>
+          <input id="search-input" class="search-input" type="search"
+                 placeholder="Search by title, artist, or genre…" autocomplete="off">
+        </div>
+        <select id="use-case-filter" class="browse-dropdown" title="Find music for...">
+          <option value="">🎵 Any vibe</option>
+          <option value="workout">🏋️ Working Out</option>
+          <option value="study">📚 Studying / Focus</option>
+          <option value="gaming">🎮 Gaming</option>
+          <option value="roadtrip">🚗 Road Trip</option>
+          <option value="content">🎬 YouTube / Content</option>
+          <option value="relax">😌 Relaxing</option>
+          <option value="party">🎉 Party</option>
+          <option value="latenight">💜 Late Night</option>
+          <option value="podcast">🎙️ Podcast / Background</option>
+          <option value="cinematic">🎭 Cinematic / Dramatic</option>
+        </select>
+        <select id="length-filter" class="browse-dropdown" title="Filter by track length">
+          <option value="">⏱ Any length</option>
+          <option value="short">Short (&lt;2 min)</option>
+          <option value="medium">Medium (2–4 min)</option>
+          <option value="long">Long (&gt;4 min)</option>
+        </select>
       </div>
 
       <!-- Genre filter chips (multi-select) -->
