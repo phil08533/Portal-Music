@@ -49,6 +49,7 @@ const configReady = Object.values(firebaseConfig).every(v => !String(v).startsWi
 if (!configReady) {
   console.info('[Portal Music] Firebase not yet configured — sign-in disabled. See CLAUDE.md.');
   window._fbUser          = null;
+  window._fbAuthReady     = true;
   window._fbSignIn        = () => { alert('Sign-in coming soon!'); };
   window._fbSignOut       = () => {};
   window._fbSaveFavorites = async () => {};
@@ -72,7 +73,8 @@ if (!configReady) {
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  window._fbUser = null;
+  window._fbUser      = null;
+  window._fbAuthReady = false;
 
   // ── Auth state ─────────────────────────────────────────────────────────
   onAuthStateChanged(auth, async user => {
@@ -96,7 +98,16 @@ if (!configReady) {
       }
     }
 
+    // Mark auth as resolved — profile.js waits for this before rendering
+    window._fbAuthReady = true;
+
     window._renderAuthBtn();
+
+    // If profile page is loaded and waiting, kick it off now
+    if (typeof window._profileInit === 'function') {
+      window._profileInit();
+      window._profileInit = null; // only run once per auth state change
+    }
   });
 
   // ── Auth actions ────────────────────────────────────────────────────────

@@ -6,13 +6,17 @@
   var _songs = [];
   var _playlists = [];
 
-  // Wait for Firebase auth state to be known
+  // Wait for Firebase to resolve auth state (_fbAuthReady = true after onAuthStateChanged fires)
   var _authCheckInterval = setInterval(function () {
-    if (typeof window._fbUser !== 'undefined') {
+    if (window._fbAuthReady) {
       clearInterval(_authCheckInterval);
       initProfile();
     }
   }, 80);
+
+  // Expose initProfile so firebase-auth.js can call it after sign-in popup completes
+  window._profileInit    = initProfile;
+  window._initProfileFn  = initProfile; // stable reference for the sign-in button
 
   async function initProfile() {
     if (!window._fbUser) {
