@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/app.js"></script>
   <script type="module" src="js/firebase-auth.js"></script>
+  <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
 </head>
 
 <body>
@@ -78,6 +79,11 @@
             <li>Support independent artists</li>
           </ul>
           <button class="btn-upgrade-cta" id="upgrade-cta-btn" onclick="handleUpgrade()">Get Pro</button>
+          <!-- Hidden Lemon Squeezy overlay trigger (activated by handleUpgrade) -->
+          <a id="ls-checkout-link"
+             href="https://portalmusic.lemonsqueezy.com/checkout/buy/d7eaf3c5-ec93-46e0-a19f-d0014da01bd8?embed=1&logo=0"
+             class="lemonsqueezy-button"
+             style="display:none;">Buy Portal Music Pro</a>
         </div>
 
       </div>
@@ -146,11 +152,19 @@
 
     function handleUpgrade() {
       if (!window._fbUser) {
-        window._fbSignIn && window._fbSignIn();
+        if (window._fbSignIn) window._fbSignIn();
         return;
       }
-      // Payment integration placeholder — connect Stripe or LemonSqueezy here
-      alert('Payment coming soon!\n\nTo manually enable Pro, contact us at the link in the footer.');
+      // Pass Firebase UID as custom data so webhook can identify the user
+      var uid = window._fbUser.uid;
+      var email = window._fbUser.email || '';
+      var link = document.getElementById('ls-checkout-link');
+      if (link) {
+        link.href = 'https://portalmusic.lemonsqueezy.com/checkout/buy/d7eaf3c5-ec93-46e0-a19f-d0014da01bd8?embed=1&logo=0'
+          + '&checkout[custom][firebase_uid]=' + encodeURIComponent(uid)
+          + '&checkout[email]=' + encodeURIComponent(email);
+        link.click(); // triggers the Lemon Squeezy overlay
+      }
     }
   </script>
 </body>
