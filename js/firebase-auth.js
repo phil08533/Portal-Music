@@ -197,19 +197,16 @@ if (!configReady) {
 
   // ── Auth button ─────────────────────────────────────────────────────────
   window._renderAuthBtn = function () {
-    const btn = document.getElementById('auth-btn');
-    if (!btn) return;
-    const user = window._fbUser;
+    // Cache Pro status in localStorage so app.js can suppress ads before auth resolves
+    try { localStorage.setItem('pm_is_pro', window._fbIsPro ? '1' : '0'); } catch {}
 
-    // Remove any existing upgrade button so we can re-render cleanly
-    const existingUpgrade = document.getElementById('upgrade-btn');
-    if (existingUpgrade) existingUpgrade.remove();
-
-    // Pro body class + ad hiding
+    // Pro body/html class for ad hiding (works even if no auth-btn on page)
     if (window._fbIsPro) {
-      document.body.classList.add('is-pro');
+      document.documentElement.classList.add('is-pro');
+      document.body && document.body.classList.add('is-pro');
     } else {
-      document.body.classList.remove('is-pro');
+      document.documentElement.classList.remove('is-pro');
+      document.body && document.body.classList.remove('is-pro');
     }
 
     // Update logo text
@@ -218,6 +215,14 @@ if (!configReady) {
       const textNode = [...logo.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
       if (textNode) textNode.textContent = window._fbIsPro ? ' Portal Music Pro' : ' Portal Music';
     }
+
+    const btn = document.getElementById('auth-btn');
+    if (!btn) return;
+    const user = window._fbUser;
+
+    // Remove any existing upgrade button so we can re-render cleanly
+    const existingUpgrade = document.getElementById('upgrade-btn');
+    if (existingUpgrade) existingUpgrade.remove();
 
     if (user) {
       btn.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';

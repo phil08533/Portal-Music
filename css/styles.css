@@ -198,6 +198,14 @@ header {
   align-items: center;
   gap: 10px;
   text-shadow: 0 0 15px var(--accent-glow);
+  order: 1;
+}
+
+#auth-btn { order: 2; }
+#upgrade-btn { order: 3; }
+
+.theme-btns {
+  order: 5;
 }
 
 .logo-img {
@@ -213,6 +221,7 @@ header {
   gap: 2px;
   flex: 1;
   justify-content: center;
+  order: 4;
 }
 
 .nav-links a {
@@ -2612,9 +2621,20 @@ button.chip.active {
   color: #e55;
 }
 
-/* Hide ads for Pro users */
+/* Hide ads for Pro users (html.is-pro set before ads load via localStorage cache) */
+html.is-pro .ad-slot,
+html.is-pro .side-ad,
 .is-pro .ad-slot,
 .is-pro .side-ad {
+  display: none !important;
+}
+
+/* Hide PropellerAds injected elements for Pro users */
+html.is-pro iframe[src*="5gvci.com"],
+html.is-pro iframe[src*="nap5k.com"],
+html.is-pro iframe[src*="propellerads"],
+html.is-pro div[id^="adngin"],
+html.is-pro .is-inpage-push {
   display: none !important;
 }
 

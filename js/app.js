@@ -2,6 +2,11 @@
 // Portal Music — Application JavaScript
 // ============================================
 
+// Pre-set Pro class from localStorage cache so ads are hidden before they load
+if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') === '1') {
+  document.documentElement.classList.add('is-pro');
+}
+
 // --- Genre Config — loaded from data/genres.json ---
 // Populated by loadGenres(); pages should await that before using GENRES.
 let GENRES = {};
@@ -450,9 +455,9 @@ async function createPlaylistAndAdd(songId) {
   // Free tier: max 2 playlists
   if (!window._fbIsPro) {
     const existing = await (window._fbGetPlaylists ? window._fbGetPlaylists() : []);
-    if (existing.length >= 2) {
+    if (existing.length >= 1) {
       document.getElementById('pm-playlist-modal')?.remove();
-      if (confirm('Free accounts are limited to 2 playlists.\n\nUpgrade to Pro for unlimited playlists. Go to upgrade page?')) {
+      if (confirm('Free accounts are limited to 1 playlist.\n\nUpgrade to Pro for unlimited playlists. Go to upgrade page?')) {
         window.location.href = 'upgrade.html';
       }
       return;

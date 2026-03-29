@@ -234,10 +234,10 @@
     if (!name) { if (inputEl) inputEl.focus(); return; }
 
     // Free tier: max 2 playlists
-    if (!window._fbIsPro && _playlists.length >= 2) {
+    if (!window._fbIsPro && _playlists.length >= 1) {
       var row = document.getElementById('profile-new-playlist-row');
       if (row) row.remove();
-      if (confirm('Free accounts are limited to 2 playlists.\n\nUpgrade to Pro for unlimited playlists. Go to upgrade page?')) {
+      if (confirm('Free accounts are limited to 1 playlist.\n\nUpgrade to Pro for unlimited playlists. Go to upgrade page?')) {
         window.location.href = 'upgrade.html';
       }
       return;
