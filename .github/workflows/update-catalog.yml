@@ -41,12 +41,20 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
         run: |
-          aws s3 sync music/ s3://portal-music-assets/music/ \
-            --endpoint-url "$R2_ENDPOINT" \
-            --content-type "audio/mpeg" \
-            --metadata "Content-Disposition=attachment"
-          aws s3 sync covers/ s3://portal-music-assets/covers/ \
-            --endpoint-url "$R2_ENDPOINT"
+          if [ -d "music/" ]; then
+            aws s3 sync music/ s3://portal-music-assets/music/ \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "audio/mpeg" \
+              --metadata "Content-Disposition=attachment"
+          else
+            echo "No music/ folder found — skipping upload."
+          fi
+          if [ -d "covers/" ]; then
+            aws s3 sync covers/ s3://portal-music-assets/covers/ \
+              --endpoint-url "$R2_ENDPOINT"
+          else
+            echo "No covers/ folder found — skipping upload."
+          fi
 
       - name: Scan music folder and update catalog
         env:
