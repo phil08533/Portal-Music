@@ -27,8 +27,16 @@ function setTheme(theme) {
   });
 }
 
+const PRO_THEMES = ['obsidian', 'ivory', 'velvet'];
+
 function initTheme() {
-  setTheme(localStorage.getItem(THEME_KEY) || 'light');
+  const saved = localStorage.getItem(THEME_KEY) || 'light';
+  // If a Pro theme was saved but user is no longer Pro, fall back to dark
+  if (PRO_THEMES.includes(saved) && localStorage.getItem('pm_is_pro') !== '1') {
+    setTheme('dark');
+  } else {
+    setTheme(saved);
+  }
 }
 
 // ============================================

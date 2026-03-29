@@ -236,6 +236,10 @@ if (!configReady) {
       const navProfile = document.getElementById('nav-profile-link');
       if (navProfile) navProfile.style.display = '';
 
+      // Show Pro theme buttons
+      const proThemes = document.getElementById('pro-theme-btns');
+      if (proThemes && window._fbIsPro) proThemes.style.display = '';
+
       // Inject upgrade button next to auth button (only if not already Pro)
       if (!window._fbIsPro) {
         const upgradeBtn = document.createElement('a');
