@@ -79,6 +79,16 @@
           <button class="rp-btn" id="rp-next" title="Skip Track">⏭</button>
         </div>
       </div>
+
+      <!-- Station track grid -->
+      <div id="radio-track-section" style="display:none;">
+        <div class="section-header" style="margin-top:2rem;">
+          <h2 id="radio-track-heading">Station Tracks</h2>
+          <span id="radio-track-count" style="color:var(--text-muted);font-size:.85rem;"></span>
+        </div>
+        <div class="grid" id="radio-track-grid"></div>
+      </div>
+
     </div>
   <script>
 
@@ -158,7 +168,21 @@
         }
 
         stationSongs = shuffleArray(pool);
+        window.currentSongsView = stationSongs;
         playSong(stationSongs[0], stationSongs);
+
+        // Render track grid for download/favorite/playlist
+        var trackSection = document.getElementById('radio-track-section');
+        var trackGrid = document.getElementById('radio-track-grid');
+        var trackHeading = document.getElementById('radio-track-heading');
+        var trackCount = document.getElementById('radio-track-count');
+        var station = STATIONS.find(function(s) { return s.id === stationId; });
+        if (trackSection && trackGrid) {
+          trackHeading.textContent = (station ? station.icon + ' ' + station.name : 'Station') + ' Tracks';
+          trackCount.textContent = stationSongs.length + ' tracks';
+          trackGrid.innerHTML = stationSongs.map(function(s) { return createTrackCard(s); }).join('');
+          trackSection.style.display = '';
+        }
       }
 
       window._syncLargePlayer = function() {
