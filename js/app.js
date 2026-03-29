@@ -414,7 +414,11 @@ async function showPlaylistMenu(songId, songTitle) {
       _esc(pl.name) + ' <span class="pm-pl-count">(' + (pl.songs ? pl.songs.length : 0) + ')</span></button>'
     ).join('') +
     '</div>' +
-    '<button class="pm-playlist-new" onclick="createPlaylistAndAdd(\'' + songId + '\')">＋ New playlist</button>' +
+    '<div class="pm-new-row">' +
+    '<input type="text" id="pm-new-playlist-input" class="pm-new-input" placeholder="New playlist name…" ' +
+    'onkeydown="if(event.key===\'Enter\')createPlaylistAndAdd(\'' + songId + '\')">' +
+    '<button class="pm-playlist-new" onclick="createPlaylistAndAdd(\'' + songId + '\')">Create</button>' +
+    '</div>' +
     '</div>';
 
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
@@ -436,12 +440,16 @@ async function addSongToPlaylist(playlistId, songId, btn) {
 }
 
 async function createPlaylistAndAdd(songId) {
-  const name = prompt('Playlist name:');
-  if (!name || !name.trim()) return;
+  const inputEl = document.getElementById('pm-new-playlist-input');
+  const name = inputEl ? inputEl.value.trim() : '';
+  if (!name) {
+    if (inputEl) { inputEl.focus(); inputEl.classList.add('pm-new-input-shake'); setTimeout(() => inputEl.classList.remove('pm-new-input-shake'), 400); }
+    return;
+  }
   const id = await window._fbCreatePlaylist(name);
   if (id) {
     await window._fbAddToPlaylist(id, songId);
-    _showToast('Playlist created!');
+    _showToast('Playlist "' + name + '" created!');
     document.getElementById('pm-playlist-modal')?.remove();
   }
 }
@@ -666,8 +674,8 @@ document.addEventListener('click', e => {
   if (link.target === '_blank' || link.hasAttribute('download') || link.host !== window.location.host) return;
   if (!link.href.startsWith('http')) return;
 
-  // Full page load for download page so ads/countdown/scripts work correctly
-  if (link.pathname.includes('download.html')) return;
+  // Full page load for these pages — they have their own scripts that won't run in SPA context
+  if (link.pathname.includes('download.html') || link.pathname.includes('profile.html')) return;
 
   e.preventDefault();
   const url = link.href;

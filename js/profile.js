@@ -194,12 +194,36 @@
     updateStats();
   };
 
-  window.promptCreatePlaylist = async function () {
-    var name = prompt('Playlist name:');
-    if (!name || !name.trim()) return;
+  window.promptCreatePlaylist = function () {
+    // Toggle the inline create row
+    var existing = document.getElementById('profile-new-playlist-row');
+    if (existing) { existing.remove(); return; }
+
+    var section = document.getElementById('profile-playlists').parentElement;
+    var row = document.createElement('div');
+    row.id = 'profile-new-playlist-row';
+    row.className = 'profile-new-playlist-row';
+    row.innerHTML =
+      '<input type="text" id="profile-new-playlist-input" class="pm-new-input" placeholder="Playlist name…" autofocus>' +
+      '<button class="btn-primary" onclick="confirmCreatePlaylist()">Create</button>' +
+      '<button class="btn-cancel" onclick="document.getElementById(\'profile-new-playlist-row\').remove()">Cancel</button>';
+    section.insertBefore(row, document.getElementById('profile-playlists'));
+    row.querySelector('input').focus();
+    row.querySelector('input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') window.confirmCreatePlaylist();
+    });
+  };
+
+  window.confirmCreatePlaylist = async function () {
+    var inputEl = document.getElementById('profile-new-playlist-input');
+    var name = inputEl ? inputEl.value.trim() : '';
+    if (!name) { if (inputEl) inputEl.focus(); return; }
     await window._fbCreatePlaylist(name);
+    var row = document.getElementById('profile-new-playlist-row');
+    if (row) row.remove();
     await renderPlaylists();
     updateStats();
+    _showToast('Playlist created!');
   };
 
   // ── Recently Played ─────────────────────────────────────────────────────
