@@ -232,6 +232,10 @@ if (!configReady) {
       const banner = document.getElementById('fav-banner');
       if (banner) banner.style.display = 'none';
 
+      // Show My Profile nav link
+      const navProfile = document.getElementById('nav-profile-link');
+      if (navProfile) navProfile.style.display = '';
+
       // Inject upgrade button next to auth button (only if not already Pro)
       if (!window._fbIsPro) {
         const upgradeBtn = document.createElement('a');
