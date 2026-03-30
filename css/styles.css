@@ -287,8 +287,9 @@ header {
   order: 1;
 }
 
-#auth-btn { order: 2; }
-#upgrade-btn { order: 3; }
+#auth-btn { order: 3; }
+#pro-nav-btn { order: 2; }
+#upgrade-btn { order: 4; }
 
 .theme-btns {
   order: 5;
@@ -458,6 +459,23 @@ header {
   color: var(--btn-on-accent);
   border-color: var(--accent);
 }
+
+.pro-upsell-btn {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f5a623, #f76b1c);
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.pro-upsell-btn:hover { opacity: 0.85; }
+html.is-pro #pro-nav-btn { display: none !important; }
 
 .auth-btn {
   background: transparent;
@@ -2055,6 +2073,12 @@ button.chip.active {
     gap: 10px;
   }
 
+  /* Hide theme toggles on mobile — too many items, not worth the space */
+  .theme-btns,
+  #pro-theme-btns {
+    display: none !important;
+  }
+
   .logo {
     font-size: 1.2rem;
   }
@@ -2116,9 +2140,11 @@ button.chip.active {
     gap: 6px;
   }
 
+  /* Row 1: Logo | ✦ Pro | Sign In */
   .logo {
     font-size: 1.05rem;
     flex: 1;
+    order: 1;
   }
 
   .logo-img {
@@ -2126,12 +2152,19 @@ button.chip.active {
     height: 30px;
   }
 
-  .theme-btns {
-    order: 0;
+  #pro-nav-btn {
+    order: 2;
+    font-size: 0.7rem;
+    padding: 4px 10px;
   }
 
+  #auth-btn {
+    order: 3;
+  }
+
+  /* Row 2: Nav links full-width */
   .nav-links {
-    order: 1;
+    order: 10;
     width: 100%;
     justify-content: center;
     border-top: 1px solid var(--border);
