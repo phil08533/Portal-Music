@@ -50,7 +50,7 @@ let isPlaying = false;
 
 function playSong(song, forceQueue = null) {
   currentSong = song;
-  
+  window.currentSong = song; // expose for radio action buttons
   // Set the current queue. If not provided, we just play this song.
   if (forceQueue) {
     currentQueue = forceQueue;

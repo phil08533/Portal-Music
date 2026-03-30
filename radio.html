@@ -79,11 +79,11 @@
           <button class="rp-btn rp-play" id="rp-play" title="Play/Pause">▶</button>
           <button class="rp-btn" id="rp-next" title="Skip Track">⏭</button>
         </div>
-        <div class="rp-actions" id="rp-actions" style="display:none;">
-          <button class="rp-action-btn" id="rp-fav-btn" title="Toggle favorite" onclick="if(window.currentSong)toggleFavorite(window.currentSong.id)">🤍 Favorite</button>
-          <button class="rp-action-btn" id="rp-playlist-btn" title="Add to playlist" onclick="if(window.currentSong)showPlaylistMenu(window.currentSong.id, window.currentSong.title)">＋ Playlist</button>
-          <button class="rp-action-btn" id="rp-share-btn" title="Share" onclick="if(window.currentSong)shareTrack(window.currentSong.id, window.currentSong.title)">🔗 Share</button>
-          <a class="rp-action-btn" id="rp-dl-btn" href="#" title="Download">⬇ Download</a>
+        <div class="card-actions rp-actions" id="rp-actions" style="display:none;">
+          <button class="btn-fav" id="rp-fav-btn" title="Toggle favorite">🤍</button>
+          <a class="btn-dl" id="rp-dl-btn" href="#">Download</a>
+          <button class="btn-dl" id="rp-playlist-btn" title="Add to playlist">＋ Playlist</button>
+          <button class="btn-dl" id="rp-share-btn" title="Share">🔗 Share</button>
         </div>
       </div>
 
@@ -188,59 +188,81 @@
       }
 
       window._syncLargePlayer = function() {
-        if (!currentSong) return;
-        
+        const song = window.currentSong;
+        if (!song) return;
+
         const titleEl = document.getElementById('rp-title');
         const artistEl = document.getElementById('rp-artist');
         const artEl = document.getElementById('rp-art');
         const btn = document.getElementById('rp-play');
-        
-        // Safety check if user navigated away but listeners still fired
+
         if (!titleEl || !artistEl || !artEl || !btn) return;
-        
-        titleEl.textContent = currentSong.title;
-        artistEl.textContent = currentSong.artist || currentSong.genre;
-        
-        if (currentSong.cover) {
-          artEl.innerHTML = `<img src="${currentSong.cover}" alt="">`;
+
+        titleEl.textContent = song.title;
+        artistEl.textContent = song.artist || song.genre;
+
+        if (song.cover) {
+          artEl.innerHTML = `<img src="${song.cover}" alt="">`;
         } else {
           artEl.textContent = '🎵';
         }
 
         btn.textContent = !audio.paused ? '⏸' : '▶';
 
-        // Show action buttons and sync state
         const actionsEl = document.getElementById('rp-actions');
         if (actionsEl) actionsEl.style.display = '';
+
         const favBtn = document.getElementById('rp-fav-btn');
-        if (favBtn && currentSong) {
-          const faved = typeof isFavorited === 'function' && isFavorited(currentSong.id);
-          favBtn.textContent = (faved ? '❤️' : '🤍') + ' Favorite';
+        if (favBtn) {
+          const faved = typeof isFavorited === 'function' && isFavorited(song.id);
+          favBtn.textContent = faved ? '❤️' : '🤍';
           favBtn.classList.toggle('active', faved);
         }
+
         const dlBtn = document.getElementById('rp-dl-btn');
-        if (dlBtn && currentSong) {
-          dlBtn.href = 'download.html?file=' + encodeURIComponent(currentSong.file) + '&title=' + encodeURIComponent(currentSong.title) + '&cover=' + encodeURIComponent(currentSong.cover || '');
+        if (dlBtn) {
+          dlBtn.href = 'download.html?file=' + encodeURIComponent(song.file) +
+            '&title=' + encodeURIComponent(song.title) +
+            '&cover=' + encodeURIComponent(song.cover || '');
         }
       };
 
       audio.addEventListener('play', window._syncLargePlayer);
       audio.addEventListener('pause', window._syncLargePlayer);
-      
+
       window._radioInterval = setInterval(() => {
-          if (currentStation && currentSong && document.getElementById('rp-play')) {
-              window._syncLargePlayer();
-          }
+        if (currentStation && window.currentSong && document.getElementById('rp-play')) {
+          window._syncLargePlayer();
+        }
       }, 500);
 
       document.getElementById('rp-play').addEventListener('click', () => {
-          if(typeof togglePlay === 'function') togglePlay();
+        if (typeof togglePlay === 'function') togglePlay();
       });
       document.getElementById('rp-next').addEventListener('click', () => {
-          if(typeof playNext === 'function') playNext();
+        if (typeof playNext === 'function') playNext();
       });
       document.getElementById('rp-prev').addEventListener('click', () => {
-          if(typeof playPrev === 'function') playPrev();
+        if (typeof playPrev === 'function') playPrev();
+      });
+
+      document.getElementById('rp-fav-btn').addEventListener('click', () => {
+        const song = window.currentSong;
+        if (!song) return;
+        if (typeof toggleFavorite === 'function') toggleFavorite(song.id);
+        window._syncLargePlayer();
+      });
+
+      document.getElementById('rp-playlist-btn').addEventListener('click', () => {
+        const song = window.currentSong;
+        if (!song) return;
+        if (typeof showPlaylistMenu === 'function') showPlaylistMenu(song.id, song.title);
+      });
+
+      document.getElementById('rp-share-btn').addEventListener('click', () => {
+        const song = window.currentSong;
+        if (!song) return;
+        if (typeof shareTrack === 'function') shareTrack(song.id, song.title);
       });
 
       if (typeof loadSongs === 'function') {
