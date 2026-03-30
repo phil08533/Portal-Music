@@ -459,6 +459,23 @@ header {
   border-color: var(--accent);
 }
 
+.pro-upsell-btn {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f5a623, #f76b1c);
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.pro-upsell-btn:hover { opacity: 0.85; }
+html.is-pro #pro-nav-btn { display: none !important; }
+
 .auth-btn {
   background: transparent;
   border: 1.5px solid var(--border-strong);

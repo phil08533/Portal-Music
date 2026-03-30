@@ -21,6 +21,12 @@
   </url>
 
   <url>
+    <loc>https://portal-music.com/pro.html</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/license.html</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
