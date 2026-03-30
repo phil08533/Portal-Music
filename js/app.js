@@ -19,12 +19,16 @@ const FAV_KEY = 'pm_favorites'; // sessionStorage — clears on tab close
 // ============================================
 // THEME SYSTEM
 // ============================================
+const THEME_LABELS = { dark:'🌙 Theme', light:'☀️ Theme', sepia:'📜 Theme', obsidian:'💎 Theme', ivory:'👔 Theme', velvet:'🌸 Theme' };
+
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem(THEME_KEY, theme);
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
+  const pickerBtn = document.getElementById('theme-picker-btn');
+  if (pickerBtn) pickerBtn.textContent = THEME_LABELS[theme] || '🎨 Theme';
 }
 
 const PRO_THEMES = ['obsidian', 'ivory', 'velvet'];
@@ -591,10 +595,24 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Define header init function so SPA router can call it
   window.initHeaderElements = function() {
-    // Theme toggle buttons
+    // Theme toggle buttons (inside picker dropdown)
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.addEventListener('click', () => setTheme(btn.dataset.theme));
     });
+
+    // Theme picker dropdown open/close
+    const themePicker = document.getElementById('theme-picker');
+    if (themePicker) {
+      document.getElementById('theme-picker-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        themePicker.classList.toggle('open');
+        document.querySelector('.nav-more')?.classList.remove('open');
+      });
+      themePicker.querySelector('.theme-picker-dropdown').addEventListener('click', function(e) {
+        e.stopPropagation();
+        themePicker.classList.remove('open');
+      });
+    }
 
     // Setup search input
     const searchInput = document.getElementById('search-input');
@@ -668,8 +686,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Close More dropdown when clicking anywhere outside it
   document.addEventListener('click', function () {
-    const navMore = document.querySelector('.nav-more');
-    if (navMore) navMore.classList.remove('open');
+    document.querySelector('.nav-more')?.classList.remove('open');
+    document.getElementById('theme-picker')?.classList.remove('open');
   });
 
   // Cookie consent banner

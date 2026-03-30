@@ -42,15 +42,17 @@
       </div>
     </nav>
     <button id="auth-btn" class="auth-btn" title="Sign in with Google to save favorites">Sign in</button>
-    <div class="theme-btns">
-      <button class="theme-btn" data-theme="dark" title="Dark">🌙</button>
-      <button class="theme-btn" data-theme="light" title="Light">☀️</button>
-      <button class="theme-btn" data-theme="sepia" title="Sepia">📜</button>
-    </div>
-    <div class="theme-btns" id="pro-theme-btns" style="display:none;">
-      <button class="theme-btn" data-theme="obsidian" title="Obsidian Glass ✦ Pro">💎</button>
-      <button class="theme-btn" data-theme="ivory" title="Ivory Executive ✦ Pro">👔</button>
-      <button class="theme-btn" data-theme="velvet" title="Velvet ✦ Pro">🌸</button>
+    <div class="theme-picker" id="theme-picker">
+      <button class="theme-picker-btn" id="theme-picker-btn" title="Change theme">🌙 Theme</button>
+      <div class="theme-picker-dropdown">
+        <button class="theme-btn" data-theme="dark">🌙 Dark</button>
+        <button class="theme-btn" data-theme="light">☀️ Light</button>
+        <button class="theme-btn" data-theme="sepia">📜 Sepia</button>
+        <div class="theme-picker-sep"></div>
+        <button class="theme-btn theme-btn-pro" data-theme="obsidian">💎 Obsidian <span class="theme-pro-tag">PRO</span></button>
+        <button class="theme-btn theme-btn-pro" data-theme="ivory">👔 Ivory <span class="theme-pro-tag">PRO</span></button>
+        <button class="theme-btn theme-btn-pro" data-theme="velvet">🌸 Velvet <span class="theme-pro-tag">PRO</span></button>
+      </div>
     </div>
   </header>
 
