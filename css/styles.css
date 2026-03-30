@@ -291,16 +291,89 @@ header {
 #pro-nav-btn { order: 2; }
 #upgrade-btn { order: 4; }
 
-.theme-btns {
+.theme-picker {
+  position: relative;
   order: 5;
+  flex-shrink: 0;
 }
 
-#pro-theme-btns {
-  order: 6;
-  border-left: 1px solid var(--border-strong);
-  padding-left: 6px;
-  margin-left: 2px;
+.theme-picker-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all var(--transition);
+  white-space: nowrap;
+  line-height: 1;
 }
+.theme-picker-btn:hover,
+.theme-picker.open .theme-picker-btn {
+  background: var(--chip-bg);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.theme-picker-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  z-index: 200;
+  overflow: hidden;
+  padding: 4px;
+}
+.theme-picker.open .theme-picker-dropdown {
+  display: block;
+}
+
+.theme-picker-dropdown .theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  transition: background 0.12s, color 0.12s;
+}
+.theme-picker-dropdown .theme-btn:hover,
+.theme-picker-dropdown .theme-btn.active {
+  background: var(--chip-bg);
+  color: var(--accent);
+}
+
+.theme-picker-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.theme-pro-tag {
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f5a623;
+}
+
+/* Pro-locked themes: dimmed for free users, fully accessible for Pro */
+.theme-btn-pro { opacity: 0.4; pointer-events: none; }
+html.is-pro .theme-btn-pro { opacity: 1; pointer-events: auto; }
 
 .logo-img {
   width: 44px;
@@ -435,30 +508,6 @@ header {
   opacity: 0.85;
 }
 
-.theme-btns {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.theme-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 5px 9px;
-  cursor: pointer;
-  color: var(--text);
-  font-size: 0.82rem;
-  transition: all var(--transition);
-  line-height: 1;
-}
-
-.theme-btn:hover,
-.theme-btn.active {
-  background: var(--accent);
-  color: var(--btn-on-accent);
-  border-color: var(--accent);
-}
 
 .pro-upsell-btn {
   display: inline-block;
@@ -2071,12 +2120,6 @@ button.chip.active {
   header {
     padding: 0 4%;
     gap: 10px;
-  }
-
-  /* Hide theme toggles on mobile — too many items, not worth the space */
-  .theme-btns,
-  #pro-theme-btns {
-    display: none !important;
   }
 
   .logo {
