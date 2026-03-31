@@ -91,7 +91,7 @@
             <li>5 exclusive Pro radio stations</li>
             <li>Profile page with favorites &amp; history</li>
           </ul>
-          <button class="btn-upgrade-cta" id="upgrade-cta-btn" onclick="handleUpgrade()">Get Pro</button>
+          <button class="btn-upgrade-cta" id="upgrade-cta-btn" disabled style="opacity:0.45; cursor:not-allowed; filter:grayscale(0.3);">Coming Soon</button>
           <!-- Hidden Lemon Squeezy overlay trigger (activated by handleUpgrade) -->
           <a id="ls-checkout-link"
              href="https://portalmusic.lemonsqueezy.com/checkout/buy/d7eaf3c5-ec93-46e0-a19f-d0014da01bd8?embed=1&logo=0"
@@ -158,9 +158,9 @@
         var btn = document.getElementById('upgrade-cta-btn');
         if (btn) { btn.textContent = 'You\'re Pro ✓'; btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'default'; }
       } else if (window._fbUser) {
-        note.textContent = 'Signed in as ' + (window._fbUser.email || window._fbUser.displayName) + '. Click Get Pro to upgrade.';
+        note.textContent = 'Pro purchasing is coming soon — check back shortly!';
       } else {
-        note.textContent = 'Sign in first, then come back here to upgrade.';
+        note.textContent = 'Pro purchasing is coming soon — check back shortly!';
       }
     }, { once: true });
 
