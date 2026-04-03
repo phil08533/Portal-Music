@@ -78,6 +78,24 @@ if (!configReady) {
   window._fbUser      = null;
   window._fbAuthReady = false;
 
+  // ── Early render from cache ────────────────────────────────────────────
+  // Restore the signed-in button immediately (before Firebase resolves from IndexedDB)
+  // so users don't see a "Sign in" flash on every page load.
+  try {
+    const _cachedName = localStorage.getItem('pm_user_name');
+    if (_cachedName !== null) {
+      const _btn = document.getElementById('auth-btn');
+      if (_btn) {
+        _btn.textContent = _cachedName || 'Account';
+        _btn.title       = 'View your profile';
+        _btn.onclick     = () => { window.location.href = 'profile.html'; };
+        _btn.classList.add('signed-in');
+        const _np = document.getElementById('nav-profile-link');
+        if (_np) _np.style.display = '';
+      }
+    }
+  } catch (_e) {}
+
   // ── Auth state ─────────────────────────────────────────────────────────
   onAuthStateChanged(auth, async user => {
     window._fbUser = user;
@@ -225,7 +243,9 @@ if (!configReady) {
     if (existingUpgrade) existingUpgrade.remove();
 
     if (user) {
-      btn.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+      const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+      try { localStorage.setItem('pm_user_name', firstName); } catch {}
+      btn.textContent = firstName;
       btn.title       = 'View your profile';
       btn.onclick     = () => { window.location.href = 'profile.html'; };
       btn.classList.add('signed-in');
@@ -251,6 +271,7 @@ if (!configReady) {
         btn.insertAdjacentElement('afterend', upgradeBtn);
       }
     } else {
+      try { localStorage.removeItem('pm_user_name'); } catch {}
       btn.textContent = 'Sign in';
       btn.title       = 'Sign in with Google to save favorites';
       btn.onclick     = window._fbSignIn;
