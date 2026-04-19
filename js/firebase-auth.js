@@ -213,6 +213,19 @@ if (!configReady) {
     } catch { /* ignore */ }
   };
 
+  window._fbActivatePro = async () => {
+    if (!window._fbUser) return false;
+    try {
+      await updateDoc(doc(db, 'users', window._fbUser.uid), { isPro: true });
+      window._fbIsPro = true;
+      window._renderAuthBtn();
+      return true;
+    } catch (e) {
+      console.error('Pro activation failed:', e);
+      return false;
+    }
+  };
+
   // ── Auth button ─────────────────────────────────────────────────────────
   window._renderAuthBtn = function () {
     // Cache Pro status in localStorage so app.js can suppress ads before auth resolves

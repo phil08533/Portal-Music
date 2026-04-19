@@ -79,7 +79,7 @@
         <!-- Pro tier -->
         <div class="upgrade-card featured">
           <div class="upgrade-card-label">Pro</div>
-          <div class="upgrade-price">$3 <span>/ month</span></div>
+          <div class="upgrade-price">$5 <span>/ one-time support</span></div>
           <ul class="upgrade-features">
             <li>Download all 442+ tracks</li>
             <li>Royalty-free, no copyright strikes</li>
@@ -91,12 +91,18 @@
             <li>5 exclusive Pro radio stations</li>
             <li>Profile page with favorites &amp; history</li>
           </ul>
-          <button class="btn-upgrade-cta" id="upgrade-cta-btn" disabled style="opacity:0.45; cursor:not-allowed; filter:grayscale(0.3);">Coming Soon</button>
-          <!-- Hidden Lemon Squeezy overlay trigger (activated by handleUpgrade) -->
-          <a id="ls-checkout-link"
-             href="https://portalmusic.lemonsqueezy.com/checkout/buy/d7eaf3c5-ec93-46e0-a19f-d0014da01bd8?embed=1&logo=0"
-             class="lemonsqueezy-button"
-             style="display:none;">Buy Portal Music Pro</a>
+          <button class="btn-upgrade-cta" id="upgrade-cta-btn" onclick="supportVenmo()" style="margin-bottom:1rem; background-color: #008CFF;">💸 Support on Venmo</button>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">Please include your email in the Venmo note so we can send your Activation Code!</p>
+
+          <!-- Input for the Activation Code -->
+          <div style="text-align:left;background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border);">
+            <label style="display:block;font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);font-weight:600;">Got an Activation Code?</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="pro-code-input" placeholder="e.g. SUPPORTER2026" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);">
+              <button onclick="activateProCode()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Activate</button>
+            </div>
+            <p id="pro-code-error" style="color:#ff4757;font-size:0.8rem;margin-top:0.5rem;display:none;"></p>
+          </div>
         </div>
 
       </div>
@@ -157,27 +163,58 @@
         note.textContent = 'You are already on Pro. Thank you for your support!';
         var btn = document.getElementById('upgrade-cta-btn');
         if (btn) { btn.textContent = 'You\'re Pro ✓'; btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'default'; }
+        var inp = document.getElementById('pro-code-input');
+        if (inp) inp.disabled = true;
       } else if (window._fbUser) {
-        note.textContent = 'Pro purchasing is coming soon — check back shortly!';
+        note.textContent = 'You are signed in. Support us to activate Pro.';
       } else {
-        note.textContent = 'Pro purchasing is coming soon — check back shortly!';
+        note.textContent = 'Sign in with Google to get started, or click Support to donate.';
       }
     }, { once: true });
 
-    function handleUpgrade() {
+    function supportVenmo() {
+      if (!window._fbUser) {
+        alert("Please sign in with Google first so we can attach Pro to your account!");
+        if (window._fbSignIn) window._fbSignIn();
+        return;
+      }
+      window.open('https://account.venmo.com/u/aaephil', '_blank');
+    }
+
+    async function activateProCode() {
       if (!window._fbUser) {
         if (window._fbSignIn) window._fbSignIn();
         return;
       }
-      // Pass Firebase UID as custom data so webhook can identify the user
-      var uid = window._fbUser.uid;
-      var email = window._fbUser.email || '';
-      var link = document.getElementById('ls-checkout-link');
-      if (link) {
-        link.href = 'https://portalmusic.lemonsqueezy.com/checkout/buy/d7eaf3c5-ec93-46e0-a19f-d0014da01bd8?embed=1&logo=0'
-          + '&checkout[custom][firebase_uid]=' + encodeURIComponent(uid)
-          + '&checkout[email]=' + encodeURIComponent(email);
-        link.click(); // triggers the Lemon Squeezy overlay
+      var input = document.getElementById('pro-code-input').value.trim().toUpperCase();
+      var err = document.getElementById('pro-code-error');
+      
+      if (!input) {
+        err.textContent = 'Please enter a code.';
+        err.style.display = 'block';
+        return;
+      }
+      
+      if (input === 'SUPPORTER26' || input === 'PORTALMUSIC') {
+        err.style.display = 'none';
+        err.style.color = '#2ed573';
+        err.textContent = 'Activating...';
+        err.style.display = 'block';
+        
+        if (window._fbActivatePro) {
+          const success = await window._fbActivatePro();
+          if (success) {
+            err.textContent = 'Success! You are now Pro. Reloading...';
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            err.style.color = '#ff4757';
+            err.textContent = 'Activation failed. Please check your connection or contact support.';
+          }
+        }
+      } else {
+        err.style.color = '#ff4757';
+        err.textContent = 'Invalid code. Please try again.';
+        err.style.display = 'block';
       }
     }
   </script>

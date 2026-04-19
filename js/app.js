@@ -704,6 +704,37 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // --- AdBlock Detection ---
+  setTimeout(() => {
+    if (localStorage.getItem('pm_is_pro') !== '1' && !sessionStorage.getItem('pm_ab_dismissed')) {
+      const testAd = document.createElement('div');
+      testAd.className = 'adsbox ad-placement';
+      testAd.innerHTML = '&nbsp;';
+      testAd.style.position = 'absolute';
+      testAd.style.top = '-999px';
+      testAd.style.left = '-999px';
+      document.body.appendChild(testAd);
+      
+      setTimeout(() => {
+        if (testAd.offsetHeight === 0 || window.getComputedStyle(testAd).display === 'none') {
+          // Detected AdBlock
+          const div = document.createElement('div');
+          div.className = 'ab-prompt';
+          div.innerHTML = '<div style="position:fixed;bottom:20px;left:20px;z-index:9999;background:var(--card-bg);padding:20px;border-radius:12px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.5);max-width:320px;">' +
+            '<h3 style="margin-top:0;font-size:1.1rem;margin-bottom:10px;">AdBlock Detected 😢</h3>' +
+            '<p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:15px;line-height:1.4;">Portal Music is 100% free thanks to ads. Please consider whitelisting us or upgrading to Pro to remove ads natively!</p>' +
+            '<div style="display:flex;gap:10px;">' +
+              '<button onclick="this.parentElement.parentElement.parentElement.remove(); sessionStorage.setItem(\'pm_ab_dismissed\', \'1\')" style="flex:1;padding:8px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">Dismiss</button>' +
+              '<button onclick="window.location.href=\'upgrade.html\'" style="flex:1;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">⭐ Get Pro</button>' +
+            '</div></div>';
+          document.body.appendChild(div);
+        }
+        testAd.remove();
+      }, 150);
+    }
+  }, 1200);
+
 });
 
 // ============================================
@@ -777,6 +808,26 @@ async function navigateTo(url, pushState = true) {
       // Re-init header elements (Theme bind, search bind) since header was replaced
       if (typeof window.initHeaderElements === 'function') {
         window.initHeaderElements();
+      }
+
+      // Ad Monetization: Re-trigger Monetag scripts on SPA load
+      if (localStorage.getItem('pm_is_pro') !== '1') {
+        const mtAdNode = document.getElementById('pm-monetag-ad-script');
+        if (mtAdNode) mtAdNode.remove();
+        const mt = document.createElement('script');
+        mt.id = 'pm-monetag-ad-script';
+        mt.src = 'https://5gvci.com/act/files/tag.min.js?z=10786950';
+        mt.dataset.cfasync = 'false';
+        mt.async = true;
+        document.body.appendChild(mt);
+
+        const mt2AdNode = document.getElementById('pm-monetag-ad-script-2');
+        if (mt2AdNode) mt2AdNode.remove();
+        const mt2 = document.createElement('script');
+        mt2.id = 'pm-monetag-ad-script-2';
+        mt2.src = 'https://nap5k.com/tag.min.js';
+        mt2.dataset.zone = '10803159';
+        document.body.appendChild(mt2);
       }
 
       window.scrollTo(0, 0);
