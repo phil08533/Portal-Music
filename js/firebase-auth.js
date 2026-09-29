@@ -313,16 +313,7 @@ if (!configReady) {
       const proThemes = document.getElementById('pro-theme-btns');
       if (proThemes && window._fbIsPro) proThemes.style.display = '';
 
-      // Inject upgrade button next to auth button (only if not already Pro)
-      if (!window._fbIsPro) {
-        const upgradeBtn = document.createElement('a');
-        upgradeBtn.id        = 'upgrade-btn';
-        upgradeBtn.href      = 'upgrade.html';
-        upgradeBtn.className = 'upgrade-btn';
-        upgradeBtn.textContent = '⭐ Pro';
-        upgradeBtn.title     = 'Remove ads & unlimited playlists';
-        btn.insertAdjacentElement('afterend', upgradeBtn);
-      }
+      // (The header's ✦ Pro button already links non-Pro users to Pro)
     } else {
       try { localStorage.removeItem('pm_user_name'); } catch {}
       btn.textContent = 'Sign in';
