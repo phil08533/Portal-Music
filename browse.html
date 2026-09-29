@@ -106,9 +106,19 @@
           <option value="medium">Medium (2–4 min)</option>
           <option value="long">Long (&gt;4 min)</option>
         </select>
+        <select id="sort-filter" class="browse-dropdown" title="Sort tracks">
+          <option value="default">✨ Default</option>
+          <option value="newest">🔥 Newest</option>
+          <option value="az">🔤 Title (A–Z)</option>
+          <option value="shortest">⚡ Shortest</option>
+          <option value="longest">⌛ Longest</option>
+        </select>
       </div>
 
-      <!-- Genre filter chips (multi-select) -->
+      <!-- Dedicated Subgenre Pills (shown on genre & category views) -->
+      <div class="genre-subgenre-pills" id="genre-subgenre-pills" style="display:none;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px;"></div>
+
+      <!-- Genre filter chips (multi-select on all music view) -->
       <div class="browse-filters" id="browse-filters"></div>
 
       <!-- Active filters count + clear -->

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Music — Admin Studio</title>
+  <style>
+    :root {
+      --bg: #0d0f12;
+      --card-bg: #161920;
+      --card-border: #242936;
+      --accent: #a6ff00;
+      --accent-hover: #b8ff33;
+      --text: #f0f3f8;
+      --text-muted: #8b94a5;
+      --danger: #ff4757;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; min-height: 100vh; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 24px; }
+    .header h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+    .header h1 span { color: var(--accent); }
+    .stats-badge { background: var(--card-bg); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: var(--text-muted); }
+    .stats-badge strong { color: var(--text); }
+    
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+    .tab-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+    .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+    .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Upload Form */
+    .grid-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; }
+    .card h2 { font-size: 1.15rem; margin-bottom: 16px; color: var(--text); }
+
+    .dropzone { border: 2px dashed var(--card-border); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.02); margin-bottom: 16px; }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: rgba(166,255,0,0.05); }
+    .dropzone p { color: var(--text-muted); font-size: 0.9rem; margin-top: 6px; }
+    .dropzone input { display: none; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--card-border); border-radius: 6px; color: var(--text); font-size: 0.9rem; }
+    .form-control:focus { outline: none; border-color: var(--accent); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin: 16px 0; font-size: 0.9rem; cursor: pointer; }
+    .checkbox-group input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; border: none; font-size: 0.9rem; transition: 0.2s; }
+    .btn-primary { background: var(--accent); color: #000; width: 100%; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--bg); border: 1px solid var(--card-border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--text-muted); }
+    .btn-danger { background: var(--danger); color: #fff; }
+
+    /* Live Preview */
+    .preview-box { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px; background: var(--bg); border-radius: 8px; border: 1px solid var(--card-border); }
+    .preview-cover { width: 160px; height: 160px; border-radius: 8px; background: #222; margin-bottom: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 3rem; border: 1px solid var(--card-border); }
+    .preview-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .preview-artist { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
+    .preview-badges { display: flex; gap: 6px; }
+    .badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text); }
+    .badge-accent { background: rgba(166,255,0,0.15); color: var(--accent); border: 1px solid rgba(166,255,0,0.3); }
+
+    /* Catalog Table */
+    .search-bar { display: flex; gap: 12px; margin-bottom: 16px; }
+    .table-container { overflow-x: auto; max-height: 600px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { padding: 12px; background: rgba(255,255,255,0.03); color: var(--text-muted); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; background: var(--card-bg); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .track-thumb { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; background: #222; }
+    .action-btns { display: flex; gap: 6px; }
+    .btn-sm { padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; font-weight: 600; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    #toast.success { background: #2ed573; color: #000; display: block; }
+    #toast.error { background: var(--danger); color: #fff; display: block; }
+
+    /* Edit Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 999; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); width: 480px; max-width: 90%; padding: 24px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1><span>🎵</span> Portal Music — Studio Admin</h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="stats-badge" id="stats-badge">Loading catalog...</div>
+      <a href="http://localhost:8080" target="_blank" class="btn btn-secondary btn-sm" id="view-site-link">Preview Live Site ↗</a>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('upload')">⬆️ Upload & Add Track</button>
+    <button class="tab-btn" onclick="switchTab('catalog')">📚 Manage Catalog (<span id="tab-count">0</span>)</button>
+    <button class="tab-btn" onclick="switchTab('publish')">🚀 Actions & Sync</button>
+  </div>
+
+  <!-- TAB 1: UPLOAD -->
+  <div id="tab-upload" class="tab-content active">
+    <div class="grid-layout">
+      
+      <div class="card">
+        <h2>1. Select Audio File (.mp3)</h2>
+        
+        <div class="dropzone" id="audio-dropzone" onclick="document.getElementById('audio-input').click()">
+          <div style="font-size:2rem;">🎧</div>
+          <strong>Drag & drop an MP3 file here</strong>
+          <p>or click to browse your computer. ID3 tags will be auto-detected!</p>
+          <input type="file" id="audio-input" accept=".mp3,audio/mpeg">
+        </div>
+        <p id="audio-file-name" style="font-size:0.85rem;color:var(--accent);margin-bottom:16px;display:none;"></p>
+
+        <h2>2. Track Metadata</h2>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="track-title" class="form-control" placeholder="Song Title">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Artist</label>
+            <input type="text" id="track-artist" class="form-control" placeholder="Artist name (optional)" list="artists-datalist">
+            <datalist id="artists-datalist"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Genre</label>
+            <select id="track-genre" class="form-control" onchange="onGenreSelect()"></select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Subgenre</label>
+            <input type="text" id="track-subgenre" class="form-control" placeholder="Subgenre" list="subgenres-datalist">
+            <datalist id="subgenres-datalist"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Tags (comma separated)</label>
+            <input type="text" id="track-tags" class="form-control" placeholder="upbeat, video, gaming">
+          </div>
+        </div>
+
+        <label class="checkbox-group">
+          <input type="checkbox" id="track-new-release">
+          <span>Mark as <strong>New Release</strong> (Featured at the top of homepage)</span>
+        </label>
+
+        <label class="checkbox-group">
+          <input type="checkbox" id="track-featured">
+          <span>Featured in curated tracks grid</span>
+        </label>
+
+        <button class="btn btn-primary" id="save-track-btn" onclick="saveNewTrack()">
+          ✨ Add to Music Catalog
+        </button>
+      </div>
+
+      <div class="card">
+        <h2>3. Cover Art</h2>
+        <div class="dropzone" id="cover-dropzone" onclick="document.getElementById('cover-input').click()">
+          <div style="font-size:2rem;">🖼️</div>
+          <strong>Drag & drop custom cover art</strong>
+          <p>JPG or PNG (square recommended). If left empty, ID3 cover or placeholder will be used.</p>
+          <input type="file" id="cover-input" accept="image/jpeg,image/png,image/webp">
+        </div>
+
+        <h2 style="margin-top:20px;">Preview Track Card</h2>
+        <div class="preview-box">
+          <div class="preview-cover" id="preview-cover-box">🎵</div>
+          <div class="preview-title" id="preview-title-text">Track Title</div>
+          <div class="preview-artist" id="preview-artist-text">Artist</div>
+          <div class="preview-badges">
+            <span class="badge" id="preview-genre-badge">Genre</span>
+            <span class="badge badge-accent" id="preview-subgenre-badge">Subgenre</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB 2: CATALOG MANAGER -->
+  <div id="tab-catalog" class="tab-content">
+    <div class="card">
+      <div class="search-bar">
+        <input type="text" id="catalog-search" class="form-control" placeholder="🔍 Search catalog by title, artist, genre..." oninput="filterCatalogTable()">
+        <select id="catalog-genre-filter" class="form-control" style="width:230px;" onchange="filterCatalogTable()">
+          <option value="">All Tracks / Genres</option>
+          <option value="__featured__">⭐ Featured Tracks Only</option>
+          <option value="__new_release__">🔥 New Releases Only</option>
+        </select>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Art</th>
+              <th>Title</th>
+              <th>Artist</th>
+              <th>Genre</th>
+              <th>Subgenre</th>
+              <th>Audio Preview</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="catalog-table-body">
+            <tr><td colspan="7" style="text-align:center;">Loading catalog...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: ACTIONS & SYNC -->
+  <div id="tab-publish" class="tab-content">
+    <div class="grid-layout">
+      <div class="card">
+        <h2>🚀 Deployment & Sync Tools</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Perform one-click publishing actions to update SEO pages, sync to Cloudflare R2, and push to GitHub.</p>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--card-border);">
+            <strong style="display:block;margin-bottom:4px;">1. Regenerate SEO Pages & Sitemap</strong>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;">Rebuilds all 470+ track static pages and genre pages for Google SEO.</p>
+            <button class="btn btn-secondary" onclick="actionRegenerateSEO()">⚡ Run SEO Rebuild</button>
+          </div>
+
+          <div style="background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--card-border);">
+            <strong style="display:block;margin-bottom:4px;">2. Sync Assets to Cloudflare R2</strong>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">When you add new audio files to <code>music/</code>, sync them to your Cloudflare R2 bucket:</p>
+            <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:8px;overflow-x:auto;">aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --content-type "audio/mpeg"</code>
+            <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:10px;overflow-x:auto;">aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com"</code>
+            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com --content-type audio/mpeg && aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com'); showToast('R2 Sync commands copied to clipboard!', true);">📋 Copy Sync Commands</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📊 Catalog Health Summary</h2>
+        <div id="health-summary" style="font-size:0.9rem;line-height:1.8;">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-box">
+      <h2 style="margin-bottom:16px;">Edit Track Metadata</h2>
+      <input type="hidden" id="edit-id">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="edit-title" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Artist</label>
+        <input type="text" id="edit-artist" class="form-control">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Genre</label>
+          <select id="edit-genre" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Subgenre</label>
+          <input type="text" id="edit-subgenre" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="edit-tags" class="form-control">
+      </div>
+      <label class="checkbox-group">
+        <input type="checkbox" id="edit-featured">
+        <span>Featured Track</span>
+      </label>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-secondary" onclick="closeEditModal()" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTrackEdit()" style="flex:1;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio preview element -->
+  <audio id="admin-audio"></audio>
+  <div id="toast"></div>
+
+  <script>
+    let catalog = [];
+    let genresConfig = {};
+    let artistsConfig = [];
+    let audioBase64 = null;
+    let coverBase64 = null;
+    let playingId = null;
+    const adminAudio = document.getElementById('admin-audio');
+
+    function showToast(msg, isSuccess = true) {
+      const t = document.getElementById('toast');
+      t.className = isSuccess ? 'success' : 'error';
+      t.textContent = msg;
+      setTimeout(() => { t.className = ''; }, 3500);
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    async function loadCatalog() {
+      try {
+        const res = await fetch('/api/catalog');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        catalog = data.tracks;
+        genresConfig = data.genres;
+        artistsConfig = data.artists;
+
+        document.getElementById('stats-badge').innerHTML = `<strong>${catalog.length}</strong> Tracks &bull; <strong>${Object.keys(genresConfig).length}</strong> Genres`;
+        document.getElementById('tab-count').textContent = catalog.length;
+
+        // Populate Genre dropdowns
+        const genreSelect = document.getElementById('track-genre');
+        const filterSelect = document.getElementById('catalog-genre-filter');
+        const editGenreSelect = document.getElementById('edit-genre');
+
+        genreSelect.innerHTML = Object.keys(genresConfig).map(g => `<option value="${g}">${genresConfig[g].icon || ''} ${g}</option>`).join('');
+        editGenreSelect.innerHTML = genreSelect.innerHTML;
+        filterSelect.innerHTML = '<option value="">All Tracks / Genres</option>' +
+          '<option value="__featured__">⭐ Featured Tracks Only</option>' +
+          '<option value="__new_release__">🔥 New Releases Only</option>' +
+          '<optgroup label="Genres">' +
+          Object.keys(genresConfig).map(g => `<option value="${g}">${genresConfig[g].icon || ''} ${g}</option>`).join('') +
+          '</optgroup>';
+
+        // Populate Artist Datalist
+        const artistDatalist = document.getElementById('artists-datalist');
+        artistDatalist.innerHTML = artistsConfig.map(a => `<option value="${a.name}">`).join('');
+
+        onGenreSelect();
+        renderCatalogTable(catalog);
+        renderHealthSummary();
+      } catch (err) {
+        showToast('Error loading catalog: ' + err.message, false);
+      }
+    }
+
+    function onGenreSelect() {
+      const g = document.getElementById('track-genre').value;
+      const subDatalist = document.getElementById('subgenres-datalist');
+      const subs = genresConfig[g]?.subgenres || [];
+      subDatalist.innerHTML = subs.map(s => `<option value="${s}">`).join('');
+      if (subs.length) document.getElementById('track-subgenre').value = subs[0];
+      updateLivePreview();
+    }
+
+    function updateLivePreview() {
+      const title = document.getElementById('track-title').value || 'Track Title';
+      const artist = document.getElementById('track-artist').value || 'Artist';
+      const genre = document.getElementById('track-genre').value || 'Genre';
+      const subgenre = document.getElementById('track-subgenre').value || genre;
+
+      document.getElementById('preview-title-text').textContent = title;
+      document.getElementById('preview-artist-text').textContent = artist;
+      document.getElementById('preview-genre-badge').textContent = genre;
+      document.getElementById('preview-subgenre-badge').textContent = subgenre;
+
+      const coverBox = document.getElementById('preview-cover-box');
+      if (coverBase64) {
+        coverBox.innerHTML = `<img src="${coverBase64}">`;
+      } else {
+        coverBox.textContent = genresConfig[genre]?.icon || '🎵';
+      }
+    }
+
+    ['track-title', 'track-artist', 'track-genre', 'track-subgenre'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateLivePreview);
+    });
+
+    // File Drag & Drop Listeners
+    setupDropzone('audio-dropzone', 'audio-input', handleAudioFile);
+    setupDropzone('cover-dropzone', 'cover-input', handleCoverFile);
+
+    function setupDropzone(zoneId, inputId, handler) {
+      const zone = document.getElementById(zoneId);
+      const input = document.getElementById(inputId);
+
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handler(e.dataTransfer.files[0]);
+      });
+      input.addEventListener('change', e => {
+        if (e.target.files.length) handler(e.target.files[0]);
+      });
+    }
+
+    function handleAudioFile(file) {
+      if (!file.name.toLowerCase().endsWith('.mp3')) {
+        alert('Please choose an MP3 file.');
+        return;
+      }
+      const label = document.getElementById('audio-file-name');
+      label.style.display = 'block';
+      label.textContent = `Selected: ${file.name} (${(file.size / (1024*1024)).toFixed(1)} MB)`;
+
+      const reader = new FileReader();
+      reader.onload = async e => {
+        audioBase64 = e.target.result;
+        // Call server to parse ID3 tags
+        try {
+          const res = await fetch('/api/parse-audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName: file.name, base64Data: audioBase64 })
+          });
+          const parsed = await res.json();
+          if (parsed.success && parsed.metadata) {
+            const m = parsed.metadata;
+            if (m.title) document.getElementById('track-title').value = m.title;
+            if (m.artist) document.getElementById('track-artist').value = m.artist;
+            if (m.genre && genresConfig[m.genre]) {
+              document.getElementById('track-genre').value = m.genre;
+              onGenreSelect();
+            }
+            if (m.coverData) {
+              coverBase64 = m.coverData;
+            }
+            updateLivePreview();
+            showToast('ID3 metadata detected and filled!');
+          }
+        } catch (err) {
+          console.warn('ID3 parse failed:', err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleCoverFile(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        coverBase64 = e.target.result;
+        updateLivePreview();
+        showToast('Cover image updated!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveNewTrack() {
+      const title = document.getElementById('track-title').value.trim();
+      const artist = document.getElementById('track-artist').value.trim();
+      const genre = document.getElementById('track-genre').value;
+      const subgenre = document.getElementById('track-subgenre').value.trim() || genre;
+      const tags = document.getElementById('track-tags').value;
+      const isNewRelease = document.getElementById('track-new-release').checked;
+      const featured = document.getElementById('track-featured').checked;
+
+      if (!title) { alert('Please enter a track title'); return; }
+      if (!audioBase64) { alert('Please select an audio file'); return; }
+
+      const saveBtn = document.getElementById('save-track-btn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving track...';
+
+      try {
+        const res = await fetch('/api/track/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title, artist, genre, subgenre, tags, isNewRelease, featured,
+            audioBase64, coverBase64
+          })
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+
+        showToast(`🎉 "${title}" successfully added to catalog!`);
+        // Reset form
+        document.getElementById('track-title').value = '';
+        audioBase64 = null;
+        coverBase64 = null;
+        document.getElementById('audio-file-name').style.display = 'none';
+        updateLivePreview();
+        loadCatalog();
+      } catch (err) {
+        showToast('Save failed: ' + err.message, false);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '✨ Add to Music Catalog';
+      }
+    }
+
+    function renderCatalogTable(list) {
+      const tbody = document.getElementById('catalog-table-body');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No matching tracks found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(t => {
+        const isPlayingThis = playingId === t.id;
+        return `
+          <tr>
+            <td><img src="${t.cover || ''}" class="track-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22><rect fill=%22%23333%22 width=%2236%22 height=%2236%22/><text fill=%22%23888%22 x=%2210%22 y=%2224%22>🎵</text></svg>'"></td>
+            <td><strong>${escapeHtml(t.title)}</strong> ${t.featured ? '⭐' : ''}</td>
+            <td>${escapeHtml(t.artist || '—')}</td>
+            <td><span class="badge">${t.genre || 'Other'}</span></td>
+            <td><span class="badge badge-accent">${escapeHtml(t.subgenre || t.genre || '—')}</span></td>
+            <td>
+              <button class="btn btn-secondary btn-sm" onclick="togglePlayPreview('${t.id}', '${t.file}')">
+                ${isPlayingThis ? '⏸ Pause' : '▶ Play'}
+              </button>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn btn-secondary btn-sm" onclick="openEditModal('${t.id}')">✏️ Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.id}', '${escapeHtml(t.title)}')">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function togglePlayPreview(id, fileUrl) {
+      if (playingId === id) {
+        adminAudio.pause();
+        playingId = null;
+      } else {
+        adminAudio.src = fileUrl;
+        adminAudio.play().catch(e => alert('Audio stream failed: ' + e.message));
+        playingId = id;
+      }
+      renderCatalogTable(filteredTracks());
+    }
+
+    adminAudio.addEventListener('ended', () => {
+      playingId = null;
+      renderCatalogTable(filteredTracks());
+    });
+
+    function filteredTracks() {
+      const q = document.getElementById('catalog-search').value.toLowerCase().trim();
+      const g = document.getElementById('catalog-genre-filter').value;
+
+      return catalog.filter(t => {
+        const matchesQ = !q || (t.title && t.title.toLowerCase().includes(q)) || (t.artist && t.artist.toLowerCase().includes(q)) || (t.subgenre && t.subgenre.toLowerCase().includes(q));
+        let matchesG = true;
+        if (g === '__featured__') {
+          matchesG = !!t.featured;
+        } else if (g === '__new_release__') {
+          matchesG = t.file && t.file.indexOf('Newest Release') !== -1;
+        } else if (g) {
+          matchesG = t.genre === g;
+        }
+        return matchesQ && matchesG;
+      });
+    }
+
+    function filterCatalogTable() {
+      renderCatalogTable(filteredTracks());
+    }
+
+    function openEditModal(id) {
+      const t = catalog.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('edit-id').value = t.id;
+      document.getElementById('edit-title').value = t.title || '';
+      document.getElementById('edit-artist').value = t.artist || '';
+      document.getElementById('edit-genre').value = t.genre || '';
+      document.getElementById('edit-subgenre').value = t.subgenre || '';
+      document.getElementById('edit-tags').value = (t.tags || []).join(', ');
+      document.getElementById('edit-featured').checked = !!t.featured;
+      document.getElementById('edit-modal').classList.add('open');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('open');
+    }
+
+    async function saveTrackEdit() {
+      const id = document.getElementById('edit-id').value;
+      const title = document.getElementById('edit-title').value.trim();
+      const artist = document.getElementById('edit-artist').value.trim();
+      const genre = document.getElementById('edit-genre').value;
+      const subgenre = document.getElementById('edit-subgenre').value.trim();
+      const tags = document.getElementById('edit-tags').value;
+      const featured = document.getElementById('edit-featured').checked;
+
+      try {
+        const res = await fetch('/api/track/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, title, artist, genre, subgenre, tags, featured })
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        showToast('Track updated successfully!');
+        closeEditModal();
+        loadCatalog();
+      } catch (err) {
+        showToast('Update failed: ' + err.message, false);
+      }
+    }
+
+    async function deleteTrack(id, title) {
+      if (!confirm(`Are you sure you want to remove "${title}" from the catalog?`)) return;
+
+      try {
+        const res = await fetch('/api/track/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        showToast(`"${title}" removed from catalog.`);
+        loadCatalog();
+      } catch (err) {
+        showToast('Delete failed: ' + err.message, false);
+      }
+    }
+
+    async function actionRegenerateSEO() {
+      showToast('Rebuilding SEO pages and sitemap...');
+      try {
+        const res = await fetch('/api/action/regenerate-seo', { method: 'POST' });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        showToast('✅ SEO Pages & Sitemap rebuilt successfully!');
+      } catch (err) {
+        showToast('SEO rebuild failed: ' + err.message, false);
+      }
+    }
+
+    function renderHealthSummary() {
+      const total = catalog.length;
+      const withCover = catalog.filter(t => t.cover).length;
+      const withArtist = catalog.filter(t => t.artist).length;
+      const featured = catalog.filter(t => t.featured).length;
+
+      document.getElementById('health-summary').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:var(--bg);padding:10px;border-radius:6px;border:1px solid var(--card-border);">Total Tracks: <strong>${total}</strong></div>
+          <div style="background:var(--bg);padding:10px;border-radius:6px;border:1px solid var(--card-border);">Cover Art Coverage: <strong>${((withCover/total)*100).toFixed(0)}%</strong> (${withCover}/${total})</div>
+          <div style="background:var(--bg);padding:10px;border-radius:6px;border:1px solid var(--card-border);">Featured Tracks: <strong>${featured}</strong></div>
+          <div style="background:var(--bg);padding:10px;border-radius:6px;border:1px solid var(--card-border);">Attributed Artists: <strong>${withArtist}</strong> tracks</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+    }
+
+    // Initialize
+    loadCatalog();
+  </script>
+</body>
+</html>

@@ -1,1 +1,3 @@
+# Monetag ad network verification
+# Replace with your Publisher ID from Monetag dashboard -> Sites
 monetag.com, YOUR_MONETAG_PUBLISHER_ID, DIRECT

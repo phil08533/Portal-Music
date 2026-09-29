@@ -1528,6 +1528,98 @@ button.chip.active {
   color: var(--heart);
 }
 
+/* --- Volume controls in player bar --- */
+.player-vol-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.vol-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 0.95rem;
+  padding: 4px;
+  opacity: 0.8;
+  transition: opacity var(--transition);
+  display: flex;
+  align-items: center;
+}
+
+.vol-btn:hover {
+  opacity: 1;
+}
+
+.vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 65px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  cursor: pointer;
+}
+
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.vol-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.vol-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .player-vol-wrap {
+    display: none;
+  }
+}
+
+/* --- Active Playing Card Animation --- */
+.music-card.is-playing {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.music-card.is-playing .music-card-cover::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ed573;
+  box-shadow: 0 0 8px #2ed573;
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
 /* --- Browse Page --- */
 .browse-header {
   padding: 1.8rem 0 0.6rem;

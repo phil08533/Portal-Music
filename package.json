@@ -4,6 +4,8 @@
   "description": "Free AI-generated music for creators. Hosted on GitHub Pages at [portal-music.com](https://portal-music.com).",
   "main": "index.js",
   "scripts": {
+    "admin": "node admin/server.js",
+    "seo": "node scripts/generate-seo-pages.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

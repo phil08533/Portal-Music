@@ -158,10 +158,23 @@ function extractCoverFromMp3(absFilePath, songId) {
 // ── Load existing catalog ─────────────────────────────────────────────────────
 
 let existing = {};
+let existingList = [];
 if (fs.existsSync(CATALOG_PATH)) {
   try {
     const raw = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
-    raw.forEach(entry => { existing[entry.file] = entry; });
+    existingList = raw;
+    raw.forEach(entry => {
+      existing[entry.file] = entry;
+      // Also map relative path if entry has a CDN URL
+      if (entry.file && entry.file.startsWith('http')) {
+        try {
+          const u = new URL(entry.file);
+          const rel = u.pathname.replace(/^\/+/, '');
+          existing[rel] = entry;
+          existing[decodeURIComponent(rel)] = entry;
+        } catch {}
+      }
+    });
     console.log(`Loaded ${raw.length} existing catalog entries.`);
   } catch {
     console.warn('Could not parse existing catalog — starting fresh.');
@@ -170,20 +183,18 @@ if (fs.existsSync(CATALOG_PATH)) {
 
 // ── Scan music/ folder ────────────────────────────────────────────────────────
 
-if (!fs.existsSync(MUSIC_DIR)) {
-  console.error('ERROR: music/ directory not found.');
-  process.exit(1);
-}
-
 const catalog = [];
+const seenIds = new Set();
 let added   = 0;
 let kept    = 0;
 let removed = 0;
 
-const folders = fs.readdirSync(MUSIC_DIR, { withFileTypes: true })
-  .filter(d => d.isDirectory())
-  .map(d => d.name)
-  .sort();
+const folders = fs.existsSync(MUSIC_DIR)
+  ? fs.readdirSync(MUSIC_DIR, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name)
+      .sort()
+  : [];
 
 // Track folder-level covers so we copy them only once per folder
 const folderCoverCache = {}; // absDir → 'covers/xxx.jpg'
@@ -204,9 +215,11 @@ for (const folder of folders) {
   for (const file of files) {
     const filePath = `music/${folder}/${file}`;
     const baseName = path.parse(file).name;
+    const existingEntry = existing[filePath] || existing[decodeURIComponent(filePath)];
 
-    if (existing[filePath]) {
-      const entry = Object.assign({}, existing[filePath]);
+    if (existingEntry) {
+      const entry = Object.assign({}, existingEntry);
+      seenIds.add(entry.id);
       // Repair: fill in missing genre/subgenre without overwriting manual edits,
       // and always normalize subgenre display names (e.g. 'Hiphop' → 'Hip-Hop').
       if (!entry.genre)    entry.genre    = genre;
@@ -271,8 +284,11 @@ for (const folder of folders) {
       const filePath = `music/${folder}/${subdir}/${file}`;
       const baseName = path.parse(file).name;
 
-      if (existing[filePath]) {
-        const entry = Object.assign({}, existing[filePath]);
+      const existingEntry = existing[filePath] || existing[decodeURIComponent(filePath)];
+
+      if (existingEntry) {
+        const entry = Object.assign({}, existingEntry);
+        seenIds.add(entry.id);
         // Repair: fill in missing genre without overwriting manual edits
         if (!entry.genre) entry.genre = genre;
         // Assign cover from MP3 tag or music folder if not already set
@@ -321,6 +337,7 @@ for (const folder of folders) {
           }
         }
         catalog.push(newEntry);
+        seenIds.add(id);
         console.log(`  + Added:   ${filePath}`);
         added++;
       }
@@ -328,14 +345,14 @@ for (const folder of folders) {
   }
 }
 
-// Count removed
-const catalogFiles = new Set(catalog.map(e => e.file));
-Object.keys(existing).forEach(f => {
-  if (!catalogFiles.has(f)) {
-    console.log(`  - Removed: ${f} (file not found on disk)`);
-    removed++;
+// Preserve existing catalog entries (e.g. tracks living on Cloudflare R2 CDN)
+for (const entry of existingList) {
+  if (!seenIds.has(entry.id)) {
+    catalog.push(entry);
+    seenIds.add(entry.id);
+    kept++;
   }
-});
+}
 
 // ── Cover art pass 1: link covers/<id>.<ext> if file exists ──────────────────
 

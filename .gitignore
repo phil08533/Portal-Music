@@ -15,6 +15,9 @@ Thumbs.db
 *.key
 secrets.json
 credentials.json
+serviceAccountKey.json
+*serviceAccount*.json
+firebase-admin-key.json
 
 # Node (if you ever use npm locally)
 node_modules/

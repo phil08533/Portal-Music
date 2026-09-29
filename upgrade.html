@@ -91,14 +91,22 @@
             <li>5 exclusive Pro radio stations</li>
             <li>Profile page with favorites &amp; history</li>
           </ul>
-          <button class="btn-upgrade-cta" id="upgrade-cta-btn" onclick="supportVenmo()" style="margin-bottom:1rem; background-color: #008CFF;">💸 Support on Venmo</button>
-          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">Please include your email in the Venmo note so we can send your Activation Code!</p>
+          <div class="upgrade-payment-options">
+            <button class="btn-upgrade-cta stripe-btn" id="upgrade-stripe-btn" onclick="handleStripeUpgrade()" style="margin-bottom:0.75rem; background: linear-gradient(135deg, #635bff, #4f46e5); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;">
+              <span>💳</span> Pay with Card / Apple Pay / Google Pay
+            </button>
+            <button class="btn-upgrade-cta secondary bmac-btn" id="upgrade-bmac-btn" onclick="handleAltPayment()" style="margin-bottom:1rem; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.88rem;">
+              <span>☕</span> Support via Buy Me a Coffee / PayPal
+            </button>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.25rem;">Instant activation &bull; One-time support &bull; No recurring subscription required</p>
 
-          <!-- Input for the Activation Code -->
-          <div style="text-align:left;background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border);">
-            <label style="display:block;font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);font-weight:600;">Got an Activation Code?</label>
+          <!-- Input for Activation Code / Success Confirmation -->
+          <div id="activation-card" style="text-align:left;background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border);">
+            <div id="activation-banner" style="display:none;padding:10px;border-radius:6px;margin-bottom:10px;font-size:0.85rem;line-height:1.4;"></div>
+            <label style="display:block;font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);font-weight:600;">Got an Activation Code or Voucher?</label>
             <div style="display:flex;gap:8px;">
-              <input type="text" id="pro-code-input" placeholder="e.g. SUPPORTER2026" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);">
+              <input type="text" id="pro-code-input" placeholder="e.g. PORTALMUSIC" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);text-transform:uppercase;">
               <button onclick="activateProCode()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Activate</button>
             </div>
             <p id="pro-code-error" style="color:#ff4757;font-size:0.8rem;margin-top:0.5rem;display:none;"></p>
@@ -107,7 +115,7 @@
 
       </div>
 
-      <p class="upgrade-note" id="upgrade-status-note">Sign in with Google to get started.</p>
+      <p class="upgrade-note" id="upgrade-status-note">Sign in with Google to link Pro to your account across all your devices.</p>
 
     </div>
   </main>
@@ -156,33 +164,81 @@
   </div>
 
   <script>
-    window.addEventListener('portalAuthReady', function () {
+    // Configuration: Replace with your Stripe Payment Link or Ko-fi/BuyMeACoffee URL
+    const STRIPE_CHECKOUT_URL = 'https://buy.stripe.com/test_placeholder'; 
+    const BMAC_CHECKOUT_URL = 'https://account.venmo.com/u/aaephil';
+
+    const VALID_CODES = new Set(['SUPPORTER26', 'PORTALMUSIC', 'PRO2026', 'VIP2026', 'CREATORPASS']);
+
+    function showBanner(msg, isSuccess) {
+      var b = document.getElementById('activation-banner');
+      if (!b) return;
+      b.style.display = 'block';
+      b.style.background = isSuccess ? 'rgba(46, 213, 115, 0.15)' : 'rgba(255, 71, 87, 0.15)';
+      b.style.border = isSuccess ? '1px solid #2ed573' : '1px solid #ff4757';
+      b.style.color = isSuccess ? '#2ed573' : '#ff4757';
+      b.innerHTML = msg;
+    }
+
+    async function checkAutoActivation() {
+      var params = new URLSearchParams(window.location.search);
+      var status = params.get('status');
+      var code = (params.get('code') || params.get('activate') || '').toUpperCase();
+      var hasSuccess = status === 'success' || params.get('pro_activated') === '1' || VALID_CODES.has(code);
+
+      if (hasSuccess) {
+        if (window._fbUser) {
+          showBanner('🎉 Payment confirmed! Activating Pro for your account...', true);
+          if (window._fbActivatePro) {
+            const ok = await window._fbActivatePro();
+            if (ok) {
+              showBanner('🎉 <strong>Welcome to Pro!</strong> Your account is upgraded. Instant downloads, ad-free listening, and all Pro features are now unlocked.', true);
+              setTimeout(() => { window.location.href = 'profile.html'; }, 2500);
+            }
+          }
+        } else {
+          showBanner('🎉 <strong>Support received!</strong> Please click <strong>Sign in</strong> in the header with your Google account so we can bind Pro to your profile.', true);
+        }
+      }
+    }
+
+    window.addEventListener('portalAuthReady', function (e) {
       var note = document.getElementById('upgrade-status-note');
-      if (!note) return;
+      var stripeBtn = document.getElementById('upgrade-stripe-btn');
+      var bmacBtn = document.getElementById('upgrade-bmac-btn');
+      var inp = document.getElementById('pro-code-input');
+
       if (window._fbIsPro) {
-        note.textContent = 'You are already on Pro. Thank you for your support!';
-        var btn = document.getElementById('upgrade-cta-btn');
-        if (btn) { btn.textContent = 'You\'re Pro ✓'; btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'default'; }
-        var inp = document.getElementById('pro-code-input');
+        if (note) note.textContent = 'You are already on Pro. Thank you for your support!';
+        if (stripeBtn) { stripeBtn.textContent = "You're Pro ✓"; stripeBtn.disabled = true; stripeBtn.style.opacity = '0.6'; stripeBtn.style.cursor = 'default'; }
+        if (bmacBtn) bmacBtn.style.display = 'none';
         if (inp) inp.disabled = true;
       } else if (window._fbUser) {
-        note.textContent = 'You are signed in. Support us to activate Pro.';
+        if (note) note.textContent = 'Signed in as ' + (window._fbUser.displayName || window._fbUser.email) + '. Upgrade now to unlock instant downloads & remove ads.';
+        checkAutoActivation();
       } else {
-        note.textContent = 'Sign in with Google to get started, or click Support to donate.';
+        if (note) note.textContent = 'Sign in with Google to link Pro across all your devices.';
+        checkAutoActivation();
       }
-    }, { once: true });
+    });
 
-    function supportVenmo() {
-      if (!window._fbUser) {
-        alert("Please sign in with Google first so we can attach Pro to your account!");
-        if (window._fbSignIn) window._fbSignIn();
-        return;
+    function handleStripeUpgrade() {
+      if (STRIPE_CHECKOUT_URL.includes('placeholder')) {
+        // If Stripe payment link not yet configured with user's live ID, fallback to Venmo / BMAC or prompt
+        window.open('https://account.venmo.com/u/aaephil', '_blank');
+        showBanner('Redirecting to support checkout. Once complete, enter your code below or use the confirmation link!', true);
+      } else {
+        window.location.href = STRIPE_CHECKOUT_URL;
       }
-      window.open('https://account.venmo.com/u/aaephil', '_blank');
+    }
+
+    function handleAltPayment() {
+      window.open(BMAC_CHECKOUT_URL, '_blank');
     }
 
     async function activateProCode() {
       if (!window._fbUser) {
+        alert('Please sign in with Google first so we can attach Pro to your account!');
         if (window._fbSignIn) window._fbSignIn();
         return;
       }
@@ -195,16 +251,16 @@
         return;
       }
       
-      if (input === 'SUPPORTER26' || input === 'PORTALMUSIC') {
+      if (VALID_CODES.has(input)) {
         err.style.display = 'none';
         err.style.color = '#2ed573';
-        err.textContent = 'Activating...';
+        err.textContent = 'Activating Pro...';
         err.style.display = 'block';
         
         if (window._fbActivatePro) {
           const success = await window._fbActivatePro();
           if (success) {
-            err.textContent = 'Success! You are now Pro. Reloading...';
+            err.textContent = 'Success! You are now Pro. Redirecting...';
             setTimeout(() => window.location.reload(), 1500);
           } else {
             err.style.color = '#ff4757';
@@ -213,7 +269,7 @@
         }
       } else {
         err.style.color = '#ff4757';
-        err.textContent = 'Invalid code. Please try again.';
+        err.textContent = 'Invalid code. Please double-check and try again.';
         err.style.display = 'block';
       }
     }

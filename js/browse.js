@@ -151,6 +151,37 @@ document.getElementById('browse-clear-btn').addEventListener('click', function (
   renderFilteredGrid();
 });
 
+var activeSort = 'default';
+
+function applySorting(list) {
+  var copy = list.slice();
+  if (activeSort === 'az') {
+    return copy.sort(function(a, b) {
+      return (a.title || '').localeCompare(b.title || '');
+    });
+  } else if (activeSort === 'newest') {
+    return copy.sort(function(a, b) {
+      var aNew = (a.file && a.file.indexOf('Newest Release') !== -1) ? 1 : 0;
+      var bNew = (b.file && b.file.indexOf('Newest Release') !== -1) ? 1 : 0;
+      if (aNew !== bNew) return bNew - aNew;
+      return String(b.id).localeCompare(String(a.id));
+    });
+  } else if (activeSort === 'shortest') {
+    return copy.sort(function(a, b) {
+      var da = parseDurationSecs(a.duration) || 99999;
+      var db = parseDurationSecs(b.duration) || 99999;
+      return da - db;
+    });
+  } else if (activeSort === 'longest') {
+    return copy.sort(function(a, b) {
+      var da = parseDurationSecs(a.duration) || 0;
+      var db = parseDurationSecs(b.duration) || 0;
+      return db - da;
+    });
+  }
+  return copy;
+}
+
 // --- Render grid based on active filters ---
 function renderFilteredGrid() {
   var bar = document.getElementById('browse-active-bar');
@@ -163,9 +194,10 @@ function renderFilteredGrid() {
 
   if (!hasChips && !hasUseCase && !hasLength) {
     bar.style.display = 'none';
-    window.currentSongsView = allSongsPage;
-    gridEl.innerHTML = allSongsPage.length
-      ? allSongsPage.map(createTrackCard).join('')
+    var sortedAll = applySorting(allSongsPage);
+    window.currentSongsView = sortedAll;
+    gridEl.innerHTML = sortedAll.length
+      ? sortedAll.map(createTrackCard).join('')
       : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No tracks found.</p></div>';
     return;
   }
@@ -178,6 +210,8 @@ function renderFilteredGrid() {
     );
     return passChip && matchesUseCase(s, activeUseCase) && matchesLength(s, activeLengthFilter);
   });
+
+  filtered = applySorting(filtered);
 
   var activeCount = activeFilters.length + (hasUseCase ? 1 : 0) + (hasLength ? 1 : 0);
   bar.style.display = 'flex';
@@ -192,11 +226,51 @@ function renderFilteredGrid() {
 
 // --- Render simple grid (for genre/artist/favorites views) ---
 function renderSimpleGrid(songs) {
-  window.currentSongsView = songs;
+  var sorted = applySorting(songs);
+  window.currentSongsView = sorted;
   var gridEl = document.getElementById('music-grid');
-  gridEl.innerHTML = songs.length
-    ? songs.map(createTrackCard).join('')
+  gridEl.innerHTML = sorted.length
+    ? sorted.map(createTrackCard).join('')
     : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
+}
+
+// --- Render subgenre pills for a single genre view ---
+function renderGenreSubgenrePills(genreName, genreTracks) {
+  var pillsEl = document.getElementById('genre-subgenre-pills');
+  if (!pillsEl) return;
+  pillsEl.style.display = 'flex';
+
+  var counts = {};
+  genreTracks.forEach(function (s) {
+    var sub = s.subgenre || genreName;
+    counts[sub] = (counts[sub] || 0) + 1;
+  });
+
+  var subKeys = Object.keys(counts).sort();
+  if (subKeys.length <= 1) {
+    pillsEl.style.display = 'none';
+    return;
+  }
+
+  var html = '<button class="chip browse-chip active" data-sub="ALL">All ' + genreName + ' <span class="chip-count">' + genreTracks.length + '</span></button>';
+  subKeys.forEach(function (sub) {
+    html += '<button class="chip browse-chip" data-sub="' + sub + '">' + sub + ' <span class="chip-count">' + counts[sub] + '</span></button>';
+  });
+  pillsEl.innerHTML = html;
+
+  pillsEl.querySelectorAll('.browse-chip').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      pillsEl.querySelectorAll('.browse-chip').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var chosen = btn.dataset.sub;
+      if (chosen === 'ALL') {
+        renderSimpleGrid(genreTracks);
+      } else {
+        var filteredSubs = genreTracks.filter(function (s) { return s.subgenre === chosen; });
+        renderSimpleGrid(filteredSubs);
+      }
+    });
+  });
 }
 
 // --- Scroll to and highlight a shared track ---
@@ -264,13 +338,7 @@ Promise.all([loadGenres(), loadSongs()]).then(function (results) {
         ? genreInfo.subgenres.indexOf(s.subgenre) !== -1 || s.genre === genre
         : s.genre === genre;
     });
-    renderBrowseFilters(songs);
-    if (genreInfo) {
-      activeFilters = genreInfo.subgenres.slice();
-      document.querySelectorAll('.browse-chip').forEach(function (btn) {
-        if (activeFilters.indexOf(btn.dataset.sub) !== -1) btn.classList.add('active');
-      });
-    }
+    renderGenreSubgenrePills(genre, genreSongs);
     renderSimpleGrid(genreSongs);
 
   } else if (artist) {
@@ -298,9 +366,11 @@ if (!genre && !artist && !filterMode) {
   renderBrowseArtists();
 }
 
-// --- Use-case + length dropdown listeners ---
+// --- Use-case + length + sort dropdown listeners ---
 var useCaseEl = document.getElementById('use-case-filter');
 var lengthEl  = document.getElementById('length-filter');
+var sortEl    = document.getElementById('sort-filter');
+
 if (useCaseEl) {
   useCaseEl.addEventListener('change', function () {
     activeUseCase = this.value;
@@ -313,3 +383,14 @@ if (lengthEl) {
     renderFilteredGrid();
   });
 }
+if (sortEl) {
+  sortEl.addEventListener('change', function () {
+    activeSort = this.value;
+    if (window.currentSongsView) {
+      renderSimpleGrid(window.currentSongsView);
+    } else {
+      renderFilteredGrid();
+    }
+  });
+}
+

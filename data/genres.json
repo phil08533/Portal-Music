@@ -1,75 +1,174 @@
 {
   "genres": {
-    "Rock":            { "icon": "🎸", "subgenres": ["Rock", "Hard Rock", "Hair Metal", "Cinematic Rock", "Punk Rock"] },
-    "Jazz":            { "icon": "🎷", "subgenres": ["Calm Jazz", "Fast Jazz"] },
-    "Hip-Hop":         { "icon": "🎤", "subgenres": ["Hip-Hop"] },
-    "Electronic":      { "icon": "🎛️", "subgenres": ["Techno-Wave", "Chillhop", "Dream Pop", "Lo-Fi", "Electronic"] },
-    "Cinematic":       { "icon": "🎬", "subgenres": ["Cinematic", "Dramatic", "Fantasy", "Space"] },
-    "Cinematic Epic":  { "icon": "🏛️", "subgenres": ["Cinematic Epic"] },
-    "Classical":       { "icon": "🎻", "subgenres": ["Classical", "Romantic", "Medieval"] },
-    "Country & Folk":  { "icon": "🤠", "subgenres": ["Country", "Bluegrass", "Western", "Whiskey Pines"] },
-    "Ambient & Chill": { "icon": "🌊", "subgenres": ["Peaceful", "Meditative", "Uplifting", "Ambient"] },
-    "Pop":             { "icon": "🍭", "subgenres": ["Pop", "Avilyn Grace", "Dem Bois"] },
-    "Acoustic":        { "icon": "🪕", "subgenres": ["Acoustic"] },
-    "R&B / Soul":      { "icon": "🍷", "subgenres": ["R&B / Soul"] },
-    "Dark & Suspense": { "icon": "👻", "subgenres": ["Horror", "Suspenseful", "Unsettling"] },
-    "Playful & Mood":  { "icon": "🎭", "subgenres": ["Playful", "Sad", "Melancholy"] }
+    "Rock": {
+      "icon": "\ud83c\udfb8",
+      "subgenres": [
+        "Rock",
+        "Hard Rock",
+        "Hair Metal",
+        "Cinematic Rock",
+        "Punk Rock"
+      ]
+    },
+    "Jazz": {
+      "icon": "\ud83c\udfb7",
+      "subgenres": [
+        "Calm Jazz",
+        "Fast Jazz"
+      ]
+    },
+    "Hip-Hop": {
+      "icon": "\ud83c\udfa4",
+      "subgenres": [
+        "Hip-Hop"
+      ]
+    },
+    "Electronic": {
+      "icon": "\ud83c\udf9b\ufe0f",
+      "subgenres": [
+        "Techno-Wave",
+        "Chillhop",
+        "Dream Pop",
+        "Lo-Fi",
+        "Electronic"
+      ]
+    },
+    "Cinematic": {
+      "icon": "\ud83c\udfac",
+      "subgenres": [
+        "Cinematic",
+        "Dramatic",
+        "Fantasy",
+        "Space",
+        "Cinematic Epic"
+      ]
+    },
+    "Classical": {
+      "icon": "\ud83c\udfbb",
+      "subgenres": [
+        "Classical",
+        "Romantic",
+        "Medieval"
+      ]
+    },
+    "Country & Folk": {
+      "icon": "\ud83e\udd20",
+      "subgenres": [
+        "Country",
+        "Bluegrass",
+        "Western"
+      ]
+    },
+    "Ambient & Chill": {
+      "icon": "\ud83c\udf0a",
+      "subgenres": [
+        "Peaceful",
+        "Meditative",
+        "Uplifting",
+        "Ambient"
+      ]
+    },
+    "Pop": {
+      "icon": "\ud83c\udf6d",
+      "subgenres": [
+        "Pop",
+        "Indie Pop"
+      ]
+    },
+    "Acoustic": {
+      "icon": "\ud83e\ude95",
+      "subgenres": [
+        "Acoustic"
+      ]
+    },
+    "R&B / Soul": {
+      "icon": "\ud83c\udf77",
+      "subgenres": [
+        "R&B / Soul"
+      ]
+    },
+    "Dark & Suspense": {
+      "icon": "\ud83d\udc7b",
+      "subgenres": [
+        "Horror",
+        "Suspenseful",
+        "Unsettling"
+      ]
+    },
+    "Playful & Mood": {
+      "icon": "\ud83c\udfad",
+      "subgenres": [
+        "Playful",
+        "Sad",
+        "Melancholy"
+      ]
+    }
   },
   "folderToGenre": {
-    "Rock":           "Rock",
-    "Hard Rock":      "Rock",
-    "Hair Metal":     "Rock",
+    "Rock": "Rock",
+    "Hard Rock": "Rock",
+    "Hair Metal": "Rock",
     "Cinematic Rock": "Rock",
-    "Punk Rock":      "Rock",
-    "Calm Jazz":      "Jazz",
-    "Fast Jazz":      "Jazz",
-    "Hiphop":         "Hip-Hop",
-    "Techno-Wave":    "Electronic",
-    "Chillhop":       "Electronic",
-    "dream-pop":      "Electronic",
-    "Cinematic":      "Cinematic",
-    "Dramatic":       "Cinematic",
-    "Fantasy":        "Cinematic",
-    "Space":          "Cinematic",
-    "Cinematic Epic": "Cinematic Epic",
-    "Classical":      "Classical",
-    "Romantic":       "Classical",
-    "medieval":       "Classical",
-    "Country":        "Country & Folk",
-    "Bluegrass":      "Country & Folk",
-    "Western":        "Country & Folk",
-    "Whiskey Pines":  "Country & Folk",
-    "Peaceful":       "Ambient & Chill",
-    "Meditative":     "Ambient & Chill",
-    "Uplifting":      "Ambient & Chill",
-    "Horror":         "Dark & Suspense",
-    "Suspenseful":    "Dark & Suspense",
-    "Unsettling":     "Dark & Suspense",
-    "Playful":        "Playful & Mood",
-    "Sad":            "Playful & Mood",
-    "melancholy":     "Playful & Mood",
-    "Avilyn Grace":   "Pop",
-    "Dem Bois":       "Pop",
-    "acoustic":       "Acoustic",
-    "ambient":        "Ambient & Chill",
-    "cinematic":      "Cinematic",
-    "electronic":     "Electronic",
-    "lo-fi":          "Electronic",
-    "pop":            "Pop",
-    "rb-soul":        "R&B / Soul"
+    "Punk Rock": "Rock",
+    "Calm Jazz": "Jazz",
+    "Fast Jazz": "Jazz",
+    "Hiphop": "Hip-Hop",
+    "Techno-Wave": "Electronic",
+    "Chillhop": "Electronic",
+    "dream-pop": "Electronic",
+    "Cinematic": "Cinematic",
+    "Dramatic": "Cinematic",
+    "Fantasy": "Cinematic",
+    "Space": "Cinematic",
+    "Cinematic Epic": "Cinematic",
+    "Classical": "Classical",
+    "Romantic": "Classical",
+    "medieval": "Classical",
+    "Country": "Country & Folk",
+    "Bluegrass": "Country & Folk",
+    "Western": "Country & Folk",
+    "Whiskey Pines": "Country & Folk",
+    "Peaceful": "Ambient & Chill",
+    "Meditative": "Ambient & Chill",
+    "Uplifting": "Ambient & Chill",
+    "Horror": "Dark & Suspense",
+    "Suspenseful": "Dark & Suspense",
+    "Unsettling": "Dark & Suspense",
+    "Playful": "Playful & Mood",
+    "Sad": "Playful & Mood",
+    "melancholy": "Playful & Mood",
+    "Avilyn Grace": "Pop",
+    "Dem Bois": "Hip-Hop",
+    "acoustic": "Acoustic",
+    "ambient": "Ambient & Chill",
+    "cinematic": "Cinematic",
+    "electronic": "Electronic",
+    "lo-fi": "Electronic",
+    "pop": "Pop",
+    "rb-soul": "R&B / Soul",
+    "Epic": "Cinematic"
   },
   "subgenreNormalize": {
-    "acoustic":   "Acoustic",
-    "ambient":    "Ambient",
-    "cinematic":  "Cinematic",
-    "dream-pop":  "Dream Pop",
+    "acoustic": "Acoustic",
+    "ambient": "Ambient",
+    "cinematic": "Cinematic",
+    "dream-pop": "Dream Pop",
     "electronic": "Electronic",
-    "Hiphop":     "Hip-Hop",
-    "lo-fi":      "Lo-Fi",
-    "medieval":   "Medieval",
+    "Hiphop": "Hip-Hop",
+    "lo-fi": "Lo-Fi",
+    "medieval": "Medieval",
     "melancholy": "Melancholy",
-    "pop":        "Pop",
-    "rb-soul":    "R&B / Soul"
+    "pop": "Pop",
+    "rb-soul": "R&B / Soul",
+    "Epic": "Cinematic Epic",
+    "Cinematic Epic": "Cinematic Epic",
+    "Avilyn Grace": "Indie Pop",
+    "Dem Bois": "Hip-Hop",
+    "Whiskey Pines": "Country"
   },
-  "artistFolders": ["Avilyn Grace", "Dem Bois"]
+  "artistFolders": [
+    "Avilyn Grace",
+    "Dem Bois",
+    "Whiskey Pines"
+  ]
 }

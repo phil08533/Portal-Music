@@ -193,6 +193,11 @@ function _updateAllPlayBtns(activeSongId) {
       : (btn.dataset.iconOnly ? '▶' : '▶ Play');
     btn.classList.toggle('playing', isActive);
   });
+  document.querySelectorAll('.music-card').forEach(card => {
+    const cid = card.dataset.id;
+    const isActive = cid === String(activeSongId) && isPlaying;
+    card.classList.toggle('is-playing', isActive);
+  });
 }
 
 function _fmt(secs) {
@@ -567,10 +572,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextBtn = document.getElementById('play-next-btn');
   if (nextBtn) nextBtn.addEventListener('click', playNext);
   
-  // Keyboard shortcuts (Spacebar, Arrows)
+  // Keyboard shortcuts (Spacebar, Arrows, Mute, Next, Prev)
   document.addEventListener('keydown', e => {
-    // Ignore if typing in an input
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    // Ignore if typing in an input or textarea
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
 
     if (e.code === 'Space') {
       e.preventDefault();
@@ -582,6 +587,14 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (e.code === 'ArrowRight') {
       e.preventDefault();
       if (audio.duration && audio.currentTime < audio.duration - 5) audio.currentTime += 5;
+    } else if (e.code === 'KeyM') {
+      audio.muted = !audio.muted;
+      const volBtn = document.getElementById('player-vol-btn');
+      if (volBtn) volBtn.textContent = audio.muted ? '🔇' : (audio.volume < 0.5 ? '🔉' : '🔊');
+    } else if (e.code === 'KeyN') {
+      playNext();
+    } else if (e.code === 'KeyP') {
+      playPrev();
     }
   });
 
@@ -592,6 +605,55 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentSong) toggleFavorite(currentSong.id);
     });
   }
+
+  // Volume control setup
+  const VOLUME_KEY = 'pm_volume';
+  let savedVol = parseFloat(localStorage.getItem(VOLUME_KEY) || '0.9');
+  audio.volume = isNaN(savedVol) ? 0.9 : Math.max(0, Math.min(1, savedVol));
+
+  function initVolumeUI() {
+    const bar = document.getElementById('player-bar');
+    if (!bar || document.getElementById('player-vol-wrap')) return;
+
+    const wrap = document.createElement('div');
+    wrap.id = 'player-vol-wrap';
+    wrap.className = 'player-vol-wrap';
+    wrap.innerHTML = '<button class="vol-btn" id="player-vol-btn" title="Mute / Unmute">🔊</button>' +
+      '<input type="range" class="vol-slider" id="player-vol-slider" min="0" max="1" step="0.02" value="' + audio.volume + '" title="Volume">';
+
+    const favBtn = document.getElementById('player-fav-btn');
+    if (favBtn) favBtn.insertAdjacentElement('beforebegin', wrap);
+    else bar.appendChild(wrap);
+
+    const volBtn = document.getElementById('player-vol-btn');
+    const slider = document.getElementById('player-vol-slider');
+
+    function updateVolIcon() {
+      if (audio.muted || audio.volume === 0) volBtn.textContent = '🔇';
+      else if (audio.volume < 0.5) volBtn.textContent = '🔉';
+      else volBtn.textContent = '🔊';
+    }
+
+    slider.addEventListener('input', e => {
+      audio.volume = parseFloat(e.target.value);
+      audio.muted = false;
+      localStorage.setItem(VOLUME_KEY, audio.volume);
+      updateVolIcon();
+    });
+
+    volBtn.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      if (!audio.muted && audio.volume === 0) {
+        audio.volume = 0.5;
+        slider.value = 0.5;
+      }
+      updateVolIcon();
+    });
+
+    updateVolIcon();
+  }
+
+  initVolumeUI();
   
   // Define header init function so SPA router can call it
   window.initHeaderElements = function() {
@@ -810,8 +872,11 @@ async function navigateTo(url, pushState = true) {
         window.initHeaderElements();
       }
 
-      // Ad Monetization: Re-trigger Monetag scripts on SPA load
-      if (localStorage.getItem('pm_is_pro') !== '1') {
+      // Ad Monetization: Re-trigger Monetag scripts on SPA load (rate-limited so UX stays smooth)
+      const now = Date.now();
+      window._lastSpaAdTrigger = window._lastSpaAdTrigger || 0;
+      if (localStorage.getItem('pm_is_pro') !== '1' && (now - window._lastSpaAdTrigger > 120000)) {
+        window._lastSpaAdTrigger = now;
         const mtAdNode = document.getElementById('pm-monetag-ad-script');
         if (mtAdNode) mtAdNode.remove();
         const mt = document.createElement('script');
