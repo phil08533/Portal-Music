@@ -111,7 +111,6 @@ if (!configReady) {
         const merged = [...new Set([...cloud, ...local])];
         window._fbIsPro      = data.isPro === true;
         window._fbProInfo    = proInfo(data);
-        window._fbPortalUrl  = data.lsPortalUrl || null;
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
         await setDoc(doc(db, 'users', user.uid), {
           favorites:   merged,

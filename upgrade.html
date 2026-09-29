@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/app.js"></script>
   <script type="module" src="js/firebase-auth.js"></script>
-  <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
 </head>
 
 <body>
@@ -168,13 +167,12 @@
 
   <script>
     // ── Stripe configuration ────────────────────────────────────────────────
-    // Paste your two Stripe Payment Links and your customer portal login link
-    // (see workers/stripe-pro/README.md). Leave as '' until they exist.
+    // Stripe Payment Links (see workers/stripe-pro/README.md).
+    // The customer portal link is STRIPE_PORTAL_URL in js/app.js.
     const STRIPE_LINKS = {
       month: 'https://buy.stripe.com/dRm3cw4Bx2Wuel88Tx5Ne00',   // $3 / month
       year:  'https://buy.stripe.com/dRm00k6JFbt0dh44Dh5Ne01',   // $20 / year
     };
-    const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
 
     const PLANS = {
       month: { price: '$3',  period: '/ month', equiv: 'Billed monthly' },

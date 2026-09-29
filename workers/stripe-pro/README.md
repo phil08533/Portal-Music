@@ -35,7 +35,7 @@ This is where subscribers cancel or update their card.
 
 ## 4. Create the Worker (Cloudflare)
 1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Create Worker**
-2. Name it `portal-music-stripe` → **Deploy**
+2. Name it `portal-music-stripe` → **Deploy** (or reuse an existing unused Worker, e.g. `portal-music-webhook`)
 3. **Edit code** → delete everything → paste the whole contents of `workers/stripe-pro/worker.js` → **Deploy**
 4. Copy the Worker's URL (looks like `https://portal-music-stripe.<you>.workers.dev`).
    Opening it in a browser should say "Portal Music Stripe webhook is running."
