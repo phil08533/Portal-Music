@@ -44,8 +44,33 @@ function loadAds() {
 
 try { loadAds(); } catch (e) { /* never let ads break the site */ }
 
+// ============================================
+// ANALYTICS — Cloudflare Web Analytics (free, no cookies, no personal data)
+// ============================================
+// Paste the token from Cloudflare → Analytics & Logs → Web Analytics → portal-music.com
+// (the value after "token": in the snippet Cloudflare shows). Empty = off.
+const CF_ANALYTICS_TOKEN = '';
+
+(function loadAnalytics() {
+  if (!CF_ANALYTICS_TOKEN || document.getElementById('pm-analytics')) return;
+  const s = document.createElement('script');
+  s.id = 'pm-analytics';
+  s.defer = true;
+  s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN, spa: true });
+  (document.head || document.documentElement).appendChild(s);
+})();
+
 // Stripe customer portal: where subscribers update their card or cancel
 const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
+
+// Broken cover art → show the genre icon on the card's gradient instead of alt text
+function pmCoverFallback(img) {
+  const icon = document.createElement('span');
+  icon.className = 'art-icon';
+  icon.textContent = img.dataset.icon || '🎵';
+  img.replaceWith(icon);
+}
 
 // --- Genre Config — loaded from data/genres.json ---
 // Populated by loadGenres(); pages should await that before using GENRES.
@@ -193,7 +218,7 @@ function _updatePlayerUI(song) {
   if (artistEl) artistEl.textContent = song.artist || song.subgenre || song.genre || '';
   if (artEl) {
     if (song.cover) {
-      artEl.innerHTML = '<img src="' + song.cover + '" alt="">';
+      artEl.innerHTML = '<img src="' + song.cover + '" alt="" data-icon="🎵" onerror="pmCoverFallback(this)">';
     } else {
       artEl.textContent = '🎵';
     }
@@ -393,7 +418,7 @@ function createTrackCard(song) {
     : '';
   // Album art: use cover image if available, else gradient with icon
   const artContent = song.cover
-    ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy">'
+    ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy" data-icon="' + _esc(icon) + '" onerror="pmCoverFallback(this)">'
     : '<span class="art-icon">' + icon + '</span>';
 
   return (

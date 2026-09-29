@@ -4,7 +4,7 @@
     "name": "Avilyn Grace",
     "bio": "Avilyn Grace blends soulful vocals with modern R&B and indie pop production. Her AI-assisted compositions explore themes of late nights, urban emotion, and quiet vulnerability.",
     "genre": "R&B / Soul · Pop",
-    "image": "images/artists/avilyn-grace.png",
+    "image": "images/artists/avilyn-grace.jpg",
     "hasImage": true
   },
   {
@@ -12,7 +12,7 @@
     "name": "Dem Bois",
     "bio": "Dem Bois bring raw energy and authentic street storytelling to every track. From hard-hitting Trap to soulful Boom Bap, their music hits different every time.",
     "genre": "Hip-Hop",
-    "image": "images/artists/dembois.png",
+    "image": "images/artists/dembois.jpg",
     "hasImage": true
   },
   {
@@ -20,7 +20,7 @@
     "name": "Whiskey Pines",
     "bio": "Whiskey Pines brings the authentic sound of the backroads to life. Their brand of Country & Folk blends storytelling with acoustic grit, perfect for late night drives and campfire nights.",
     "genre": "Country & Folk",
-    "image": "images/artists/whiskey-pines.png",
+    "image": "images/artists/whiskey-pines.jpg",
     "hasImage": true
   }
 ]

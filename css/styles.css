@@ -739,9 +739,15 @@ button.chip.active {
 }
 
 .trust-icon {
-  font-size: 1.5rem;
   flex-shrink: 0;
-  margin-top: 2px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: var(--accent-glow);
 }
 
 .trust-item strong {
@@ -858,7 +864,7 @@ button.chip.active {
 /* --- Music Cards --- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 14px;
 }
 
@@ -2397,6 +2403,11 @@ button.chip.active {
   .browse-top-bar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* In a column, a 220px flex-basis would become the search box's height */
+  .browse-top-bar .search-bar-wrap {
+    flex: none;
   }
 
   .browse-dropdown {
@@ -4008,3 +4019,11 @@ body:has(#player-bar.visible) .cookie-banner { bottom: 96px; }
 .plan-opt:not(.active) .plan-save { background: rgba(76, 175, 80, 0.15); color: var(--accent); }
 .plan-equiv { font-size: 0.8rem; color: var(--text-muted); margin: -0.4rem 0 1rem; }
 .plan-fine { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 1.1rem; line-height: 1.5; }
+
+/* Browse page: featured artists as a compact strip so tracks come first */
+.featured-artists-box--compact { padding: 12px 16px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.featured-artists-box--compact .featured-artists-byline { margin: 0; white-space: nowrap; }
+.featured-artists-box--compact .featured-artists-portraits { display: flex; flex-wrap: wrap; gap: 10px; grid-template-columns: none; }
+.featured-artists-box--compact .featured-artist-portrait { flex: none; flex-direction: row; align-items: center; gap: 10px; padding: 4px 14px 4px 4px; border: 1px solid var(--border); border-radius: 999px; }
+.featured-artists-box--compact .featured-artist-portrait-img { width: 40px; height: 40px; aspect-ratio: auto; border-radius: 50%; flex-shrink: 0; font-size: 1.1rem; }
+.featured-artists-box--compact .featured-artist-portrait-name { margin: 0; font-size: 0.88rem; }

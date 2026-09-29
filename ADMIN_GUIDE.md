@@ -76,6 +76,8 @@ Then open your browser to:
   (They must have signed in on the site at least once.)
 - **Pro switch**: flip Pro on/off for any user.
 - **Details**: see their playlists and keep a private note (e.g. "Paid $5 Venmo 9/29").
+- **🎟️ Pro codes**: generate single-use codes (for giveaways or people who paid another way).
+  Copy the code or its redeem link; each code works once and shows who used it.
 - **Suspend / Restore**: blocks sign-in and signs them out everywhere.
 - **🗑️ Delete**: permanently removes their account, favorites and playlists (type `DELETE` to confirm).
 - **⬇ CSV**: export the current (filtered) user list.
