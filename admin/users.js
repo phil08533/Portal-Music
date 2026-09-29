@@ -44,8 +44,11 @@ function init() {
   let admin;
   try {
     admin = require('firebase-admin');
-  } catch {
-    throw new Error('firebase-admin is not installed. Run: npm install');
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      throw new Error('firebase-admin is not installed. In the Portal-Music folder run: git pull, then npm install');
+    }
+    throw new Error(`firebase-admin failed to load on Node ${process.version}: ${err.message}`);
   }
 
   const key = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
