@@ -10,20 +10,22 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 // ============================================
 // ADS (Monetag) — the only place ad zones are configured
 // ============================================
-// Only the two zones that actually earn are used:
-//   Cheerful tag (10803159) — In-Page Push, shown on content pages
-//   Glad tag     (10786944) — OnClick popunder, download page only
-// Pro members and the checkout pages never load ads.
+// Chosen from real Monetag stats (Mar–Sep 2026):
+//   Glad tag (10786944), OnClick popunder: ~$2 per 1,000 views, the best earner.
+//   In-page push and push notifications earned ~$0.02–$0.45 per 1,000 and made
+//   the site look spammy, so they're not used.
+// The popunder opens at most once per click-session behind the current tab;
+// the frequency cap is set in the Monetag dashboard. Pro members and the
+// checkout pages never load ads.
 const AD_ZONES = {
-  inPagePush: { zone: '10803159', src: 'https://nap5k.com/tag.min.js' },
-  popunder:   { zone: '10786944', src: 'https://al5sm.com/tag.min.js' },
+  popunder: { zone: '10786944', src: 'https://al5sm.com/tag.min.js' },
 };
 const AD_FREE_PAGES = ['upgrade.html', 'pro.html'];
 
 function injectAdZone(key) {
   const cfg = AD_ZONES[key];
   const id = 'pm-ad-' + key;
-  document.getElementById(id)?.remove();
+  if (document.getElementById(id)) return; // one copy per page load; it persists across SPA navigation
   const s = document.createElement('script');
   s.id = id;
   s.dataset.zone = cfg.zone;
@@ -37,9 +39,7 @@ function loadAds() {
   let page = location.pathname.split('/').pop() || 'index.html';
   if (!page.endsWith('.html')) page += '.html'; // GitHub Pages also serves /pro as pro.html
   if (AD_FREE_PAGES.includes(page)) return;
-  if (page === 'download.html') injectAdZone('popunder');
-  else injectAdZone('inPagePush');
-  window._lastSpaAdTrigger = Date.now();
+  injectAdZone('popunder');
 }
 
 try { loadAds(); } catch (e) { /* never let ads break the site */ }
@@ -909,10 +909,8 @@ async function navigateTo(url, pushState = true) {
         window.initHeaderElements();
       }
 
-      // Refresh the in-page push zone on SPA navigation (rate-limited so playback isn't disrupted)
-      if (Date.now() - (window._lastSpaAdTrigger || 0) > 120000) {
-        try { loadAds(); } catch (e) {}
-      }
+      // Pages reached from an ad-free page (upgrade/pro) pick up ads here
+      try { loadAds(); } catch (e) {}
 
       window.scrollTo(0, 0);
     } else {
