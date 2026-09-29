@@ -126,7 +126,9 @@ function timingSafeEqual(a, b) {
 // ── Firebase (REST, authenticated with the service account) ─────────────────
 
 function firestore(env) {
-  const sa = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+  // A "Secret" arrives as text; a "JSON" variable arrives already parsed
+  const raw = env.FIREBASE_SERVICE_ACCOUNT;
+  const sa = typeof raw === 'string' ? JSON.parse(raw) : raw;
   const project = sa.project_id;
   // FIRESTORE_EMULATOR_HOST is only used for local testing
   const emulator = env.FIRESTORE_EMULATOR_HOST;
