@@ -198,7 +198,11 @@ if (!configReady) {
   window._fbDeleteUserDoc = async () => {
     if (!window._fbUser) return;
     try {
-      await deleteDoc(doc(db, 'users', window._fbUser.uid));
+      // Firestore doesn't cascade: delete the playlists subcollection first
+      const uid = window._fbUser.uid;
+      const playlists = await getDocs(collection(db, 'users', uid, 'playlists'));
+      await Promise.all(playlists.docs.map(p => deleteDoc(p.ref)));
+      await deleteDoc(doc(db, 'users', uid));
     } catch { /* ignore */ }
   };
 

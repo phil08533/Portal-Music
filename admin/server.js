@@ -1,7 +1,9 @@
 const http = require('http');
 const fs   = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { exec } = require('child_process');
+const users = require('./users');
 
 let NodeID3;
 try {
@@ -11,6 +13,14 @@ try {
 }
 
 const PORT = process.env.ADMIN_PORT || 3030;
+const HOST = '127.0.0.1'; // never expose the studio to your network
+const MAX_BODY_BYTES = 300 * 1024 * 1024;
+
+// Fresh secret every launch. It is embedded in the page this server serves and
+// required on every API call, so other websites open in your browser can't
+// drive the studio (they can't read the page, so they never learn the token).
+const SESSION_TOKEN = crypto.randomBytes(24).toString('hex');
+const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`]);
 const ROOT_DIR = path.join(__dirname, '..');
 const MUSIC_JSON_PATH = path.join(ROOT_DIR, 'data', 'music.json');
 const GENRES_JSON_PATH = path.join(ROOT_DIR, 'data', 'genres.json');
@@ -25,7 +35,16 @@ function uid() {
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
-    req.on('data', chunk => { body += chunk; });
+    let size = 0;
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        reject(new Error('Upload too large'));
+        req.destroy();
+        return;
+      }
+      body += chunk;
+    });
     req.on('end', () => {
       try {
         resolve(body ? JSON.parse(body) : {});
@@ -41,21 +60,86 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    return res.end();
+  // Reject DNS-rebinding style requests that arrive under a foreign hostname
+  if (!ALLOWED_HOSTS.has(req.headers.host)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    return res.end('Forbidden');
   }
 
   // --- Serve Admin UI ---
   if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
     const htmlPath = path.join(__dirname, 'index.html');
-    if (fs.existsSync(htmlPath)) {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end(fs.readFileSync(htmlPath));
+    const html = fs.readFileSync(htmlPath, 'utf8')
+      .replace('</head>', `  <meta name="admin-token" content="${SESSION_TOKEN}">\n</head>`);
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'no-referrer',
+    });
+    return res.end(html);
+  }
+
+  if (pathname.startsWith('/api/')) {
+    const given = String(req.headers['x-admin-token'] || '');
+    const ok = given.length === SESSION_TOKEN.length &&
+      crypto.timingSafeEqual(Buffer.from(given), Buffer.from(SESSION_TOKEN));
+    if (!ok) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ success: false, error: 'Session expired — reload the Admin Studio page.' }));
+    }
+  }
+
+  const sendJson = (code, obj) => {
+    res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify(obj));
+  };
+
+  // --- API: User Accounts (Firebase Admin SDK) ---
+  if (pathname.startsWith('/api/users')) {
+    try {
+      if (req.method === 'GET' && pathname === '/api/users/status') {
+        return sendJson(200, { success: true, ...users.status() });
+      }
+      if (req.method === 'GET' && pathname === '/api/users') {
+        return sendJson(200, { success: true, ...(await users.listUsers()) });
+      }
+      if (req.method === 'GET' && pathname === '/api/users/detail') {
+        const uid = url.searchParams.get('uid');
+        if (!uid) throw new Error('uid required');
+        return sendJson(200, { success: true, ...(await users.getUserDetail(uid)) });
+      }
+      if (req.method === 'POST') {
+        const body = await parseBody(req);
+        if (pathname === '/api/users/set-pro') {
+          if (!body.uid) throw new Error('uid required');
+          await users.setPro(body.uid, body.isPro);
+          return sendJson(200, { success: true });
+        }
+        if (pathname === '/api/users/grant-by-email') {
+          if (!body.email) throw new Error('email required');
+          const user = await users.setProByEmail(body.email, body.isPro !== false);
+          return sendJson(200, { success: true, user });
+        }
+        if (pathname === '/api/users/note') {
+          if (!body.uid) throw new Error('uid required');
+          await users.setNote(body.uid, body.note);
+          return sendJson(200, { success: true });
+        }
+        if (pathname === '/api/users/disable') {
+          if (!body.uid) throw new Error('uid required');
+          await users.setDisabled(body.uid, body.disabled);
+          return sendJson(200, { success: true });
+        }
+        if (pathname === '/api/users/delete') {
+          if (!body.uid) throw new Error('uid required');
+          await users.deleteUser(body.uid);
+          return sendJson(200, { success: true });
+        }
+      }
+      return sendJson(404, { success: false, error: 'Unknown users endpoint' });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 
@@ -296,9 +380,13 @@ const server = http.createServer(async (req, res) => {
   res.end('Not Found');
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   console.log(`\n======================================================`);
   console.log(`🎵 Portal Music Admin Studio is running!`);
   console.log(`👉 Open: http://localhost:${PORT}`);
+  const fb = users.status();
+  console.log(fb.configured
+    ? `👥 User accounts: connected to Firebase project "${fb.projectId}"`
+    : `👥 User accounts: not connected (${fb.error})`);
   console.log(`======================================================\n`);
 });
