@@ -46,10 +46,11 @@
     if (window._fbIsPro) {
       var badge = document.getElementById('profile-pro-badge');
       if (badge) badge.style.display = '';
+      // Only Stripe subscribers have a subscription to manage
       var manageBtn = document.getElementById('btn-manage-sub');
-      if (manageBtn) {
+      if (manageBtn && window._fbProInfo && window._fbProInfo.source === 'stripe') {
         manageBtn.style.display = '';
-        if (window._fbPortalUrl) manageBtn.href = window._fbPortalUrl;
+        manageBtn.href = STRIPE_PORTAL_URL;
       }
     }
 

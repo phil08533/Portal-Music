@@ -44,6 +44,9 @@ function loadAds() {
 
 try { loadAds(); } catch (e) { /* never let ads break the site */ }
 
+// Stripe customer portal: where subscribers update their card or cancel
+const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
+
 // --- Genre Config — loaded from data/genres.json ---
 // Populated by loadGenres(); pages should await that before using GENRES.
 let GENRES = {};

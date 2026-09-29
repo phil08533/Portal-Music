@@ -3999,3 +3999,12 @@ body:has(#player-bar.visible) .cookie-banner { bottom: 96px; }
 .upgrade-steps { text-align: left; margin: 0 0 1rem 1.1rem; padding: 0; font-size: 0.82rem; line-height: 1.55; color: var(--text-muted); }
 .upgrade-steps li { margin-bottom: 0.3rem; }
 .upgrade-steps strong { color: var(--text); }
+
+/* Upgrade page: monthly / yearly plan picker */
+.plan-toggle { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin: 0.25rem 0 0.9rem; }
+.plan-opt { white-space: nowrap; background: none; border: none; border-radius: 999px; padding: 6px 11px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+.plan-opt.active { background: var(--accent); color: #fff; }
+.plan-save { white-space: nowrap; font-size: 0.64rem; font-weight: 700; padding: 1px 5px; border-radius: 999px; background: rgba(255, 255, 255, 0.25); }
+.plan-opt:not(.active) .plan-save { background: rgba(76, 175, 80, 0.15); color: var(--accent); }
+.plan-equiv { font-size: 0.8rem; color: var(--text-muted); margin: -0.4rem 0 1rem; }
+.plan-fine { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 1.1rem; line-height: 1.5; }

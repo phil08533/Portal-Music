@@ -104,6 +104,9 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'GET' && pathname === '/api/users') {
         return sendJson(200, { success: true, ...(await users.listUsers()) });
       }
+      if (req.method === 'GET' && pathname === '/api/users/codes') {
+        return sendJson(200, { success: true, codes: await users.listCodes() });
+      }
       if (req.method === 'GET' && pathname === '/api/users/detail') {
         const uid = url.searchParams.get('uid');
         if (!uid) throw new Error('uid required');
@@ -129,6 +132,14 @@ const server = http.createServer(async (req, res) => {
         if (pathname === '/api/users/disable') {
           if (!body.uid) throw new Error('uid required');
           await users.setDisabled(body.uid, body.disabled);
+          return sendJson(200, { success: true });
+        }
+        if (pathname === '/api/users/codes/create') {
+          return sendJson(200, { success: true, codes: await users.createCodes(body.count, body.note) });
+        }
+        if (pathname === '/api/users/codes/delete') {
+          if (!body.code) throw new Error('code required');
+          await users.deleteCode(body.code);
           return sendJson(200, { success: true });
         }
         if (pathname === '/api/users/delete') {

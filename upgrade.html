@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/app.js"></script>
   <script type="module" src="js/firebase-auth.js"></script>
-  <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
 </head>
 
 <body>
@@ -56,7 +55,7 @@
     <div class="container upgrade-page">
 
       <h1>Upgrade to Pro</h1>
-      <p class="upgrade-sub">Support Portal Music and unlock a better experience</p>
+      <p class="upgrade-sub">Support Portal Music and unlock a better experience. Cancel anytime.</p>
 
       <div class="upgrade-cards">
 
@@ -79,7 +78,12 @@
         <!-- Pro tier -->
         <div class="upgrade-card featured">
           <div class="upgrade-card-label">Pro</div>
-          <div class="upgrade-price">$5 <span>/ one-time support</span></div>
+          <div class="plan-toggle" role="radiogroup" aria-label="Billing period">
+            <button type="button" class="plan-opt" data-plan="month" role="radio" aria-checked="false">Monthly</button>
+            <button type="button" class="plan-opt active" data-plan="year" role="radio" aria-checked="true">Yearly <span class="plan-save">Save 44%</span></button>
+          </div>
+          <div class="upgrade-price"><b id="plan-price" style="font-weight:inherit;">$20</b> <span id="plan-period">/ year</span></div>
+          <p class="plan-equiv" id="plan-equiv">Just $1.67 a month, billed yearly</p>
           <ul class="upgrade-features">
             <li>Download all 470+ tracks</li>
             <li>Royalty-free, no copyright strikes</li>
@@ -92,18 +96,12 @@
             <li>Profile page with favorites &amp; history</li>
           </ul>
           <div class="upgrade-payment-options">
-            <button class="btn-upgrade-cta stripe-btn" id="upgrade-stripe-btn" onclick="handleStripeUpgrade()" style="display:none;margin-bottom:0.75rem;background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;">
-              Pay $5 with card
-            </button>
-            <button class="btn-upgrade-cta" id="upgrade-venmo-btn" onclick="handleAltPayment()" style="margin-bottom:0.75rem;background:#008cff;color:#fff;border:none;">
-              Pay $5 with Venmo
+            <button class="btn-upgrade-cta" id="upgrade-checkout-btn" onclick="startCheckout()" style="margin-bottom:0.6rem;">
+              Get Pro
             </button>
           </div>
-          <ol class="upgrade-steps" id="upgrade-steps">
-            <li><strong>Sign in</strong> with Google (top right).</li>
-            <li>Pay $5 and put <strong>your Google email</strong> in the payment note.</li>
-            <li>We turn on Pro for your account, usually within a few hours. It works on every device you sign in on.</li>
-          </ol>
+          <p class="plan-fine" id="plan-fine">Secure checkout by Stripe &bull; Card, Apple Pay &amp; Google Pay &bull; Cancel anytime</p>
+          <div id="manage-sub" class="plan-fine" style="display:none;"></div>
 
           <!-- Input for Activation Code / Success Confirmation -->
           <div id="activation-card" style="text-align:left;background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border);">
@@ -168,11 +166,81 @@
   </div>
 
   <script>
-    // Configuration: Replace with your Stripe Payment Link or Ko-fi/BuyMeACoffee URL
-    const STRIPE_CHECKOUT_URL = 'https://buy.stripe.com/test_placeholder'; 
-    const VENMO_URL = 'https://account.venmo.com/u/aaephil';
+    // ── Stripe configuration ────────────────────────────────────────────────
+    // Stripe Payment Links (see workers/stripe-pro/README.md).
+    // The customer portal link is STRIPE_PORTAL_URL in js/app.js.
+    const STRIPE_LINKS = {
+      month: 'https://buy.stripe.com/dRm3cw4Bx2Wuel88Tx5Ne00',   // $3 / month
+      year:  'https://buy.stripe.com/dRm00k6JFbt0dh44Dh5Ne01',   // $20 / year
+    };
 
-    const VALID_CODES = new Set(['SUPPORTER26', 'PORTALMUSIC', 'PRO2026', 'VIP2026', 'CREATORPASS']);
+    const PLANS = {
+      month: { price: '$3',  period: '/ month', equiv: 'Billed monthly' },
+      year:  { price: '$20', period: '/ year',  equiv: 'Just $1.67 a month, billed yearly' },
+    };
+    var selectedPlan = 'year';
+
+    document.querySelectorAll('.plan-opt').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedPlan = btn.dataset.plan;
+        document.querySelectorAll('.plan-opt').forEach(function (b) {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-checked', b === btn ? 'true' : 'false');
+        });
+        var p = PLANS[selectedPlan];
+        document.getElementById('plan-price').textContent = p.price;
+        document.getElementById('plan-period').textContent = p.period;
+        document.getElementById('plan-equiv').textContent = p.equiv;
+      });
+    });
+
+    function startCheckout() {
+      var link = STRIPE_LINKS[selectedPlan];
+      if (!link) {
+        showBanner('Checkout is almost ready. Please check back soon, or <a href="contact.html" style="color:inherit;text-decoration:underline;">contact us</a>.', false);
+        return;
+      }
+      if (!window._fbUser) {
+        // Pro is attached to the Google account, so sign in first, then continue
+        sessionStorage.setItem('pm_checkout_plan', selectedPlan);
+        if (window._fbSignIn) window._fbSignIn();
+        return;
+      }
+      var url = link + (link.indexOf('?') === -1 ? '?' : '&') +
+        'client_reference_id=' + encodeURIComponent(window._fbUser.uid) +
+        (window._fbUser.email ? '&prefilled_email=' + encodeURIComponent(window._fbUser.email) : '');
+      window.location.href = url;
+    }
+
+    // Back from Stripe: wait for the webhook to switch Pro on (usually a few seconds)
+    async function waitForActivation() {
+      showBanner('✅ <strong>Payment received!</strong> Activating Pro on your account…', true);
+      for (var i = 0; i < 20; i++) {
+        if (await window._fbRefreshPro()) {
+          showBanner('🎉 <strong>Welcome to Pro!</strong> Instant downloads, ad-free listening and every Pro feature are now unlocked on all your devices.', true);
+          setTimeout(function () { window.location.href = 'profile.html'; }, 3000);
+          return;
+        }
+        await new Promise(function (r) { setTimeout(r, 3000); });
+      }
+      showBanner('Your payment went through, but activation is taking longer than usual. Refresh this page in a minute, or <a href="contact.html" style="color:inherit;text-decoration:underline;">contact us</a> and we\'ll sort it out right away.', false);
+    }
+
+    function describeSubscription() {
+      var info = window._fbProInfo || {};
+      var el = document.getElementById('manage-sub');
+      var parts = [];
+      if (info.source === 'stripe') {
+        var planName = info.plan === 'month' ? 'Monthly' : info.plan === 'year' ? 'Yearly' : 'Pro';
+        var date = info.periodEnd ? info.periodEnd.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+        parts.push(planName + ' plan' + (date ? (info.renews ? ' · renews ' : ' · ends ') + date : ''));
+        if (info.status === 'past_due') parts.push('<strong style="color:#ff4757;">Payment failed — please update your card.</strong>');
+        if (STRIPE_PORTAL_URL) parts.push('<a href="' + STRIPE_PORTAL_URL + '" target="_blank" rel="noopener" style="color:var(--accent);">Manage or cancel subscription</a>');
+      } else if (info.source === 'code' || info.source === 'admin') {
+        parts.push('Pro was added to your account — no subscription to manage.');
+      }
+      if (parts.length) { el.innerHTML = parts.join('<br>'); el.style.display = 'block'; }
+    }
 
     function showBanner(msg, isSuccess) {
       var b = document.getElementById('activation-banner');
@@ -184,100 +252,82 @@
       b.innerHTML = msg;
     }
 
-    async function checkAutoActivation() {
-      var params = new URLSearchParams(window.location.search);
-      var status = params.get('status');
-      var code = (params.get('code') || params.get('activate') || '').toUpperCase();
-      var hasSuccess = status === 'success' || params.get('pro_activated') === '1' || VALID_CODES.has(code);
+    // Links like upgrade.html?code=PM-XXXX-XXXX prefill the box and redeem after sign-in
+    var urlCode = (new URLSearchParams(window.location.search).get('code') || '').trim().toUpperCase();
+    if (urlCode) document.getElementById('pro-code-input').value = urlCode;
 
-      if (hasSuccess) {
-        if (window._fbUser) {
-          showBanner('🎉 Payment confirmed! Activating Pro for your account...', true);
-          if (window._fbActivatePro) {
-            const ok = await window._fbActivatePro();
-            if (ok) {
-              showBanner('🎉 <strong>Welcome to Pro!</strong> Your account is upgraded. Instant downloads, ad-free listening, and all Pro features are now unlocked.', true);
-              setTimeout(() => { window.location.href = 'profile.html'; }, 2500);
-            }
-          }
-        } else {
-          showBanner('🎉 <strong>Support received!</strong> Please click <strong>Sign in</strong> in the header with your Google account so we can bind Pro to your profile.', true);
-        }
-      }
-    }
-
-    window.addEventListener('portalAuthReady', function (e) {
+    window.addEventListener('portalAuthReady', function () {
       var note = document.getElementById('upgrade-status-note');
-      var stripeBtn = document.getElementById('upgrade-stripe-btn');
-      var venmoBtn = document.getElementById('upgrade-venmo-btn');
-      var steps = document.getElementById('upgrade-steps');
+      var checkoutBtn = document.getElementById('upgrade-checkout-btn');
       var inp = document.getElementById('pro-code-input');
+      var params = new URLSearchParams(window.location.search);
 
       if (window._fbIsPro) {
-        if (note) note.textContent = 'You are already on Pro. Thank you for your support!';
-        if (stripeBtn) stripeBtn.style.display = 'none';
-        if (venmoBtn) { venmoBtn.textContent = "You're Pro ✓"; venmoBtn.disabled = true; venmoBtn.style.background = 'var(--accent)'; venmoBtn.style.cursor = 'default'; }
-        if (steps) steps.style.display = 'none';
+        if (note) note.textContent = 'You are on Pro. Thank you for supporting Portal Music!';
+        checkoutBtn.textContent = "You're Pro ✓";
+        checkoutBtn.disabled = true;
+        checkoutBtn.style.cursor = 'default';
+        document.querySelector('.plan-toggle').style.display = 'none';
+        document.getElementById('plan-fine').style.display = 'none';
         if (inp) inp.disabled = true;
+        describeSubscription();
       } else if (window._fbUser) {
-        if (note) note.textContent = 'Signed in as ' + (window._fbUser.displayName || window._fbUser.email) + '. Upgrade now to unlock instant downloads & remove ads.';
-        checkAutoActivation();
+        if (note) note.textContent = 'Signed in as ' + (window._fbUser.displayName || window._fbUser.email) + '.';
+        if (params.get('checkout') === 'success') {
+          waitForActivation();
+        } else if (urlCode) {
+          activateProCode();
+        } else {
+          // Signed in from the checkout button: carry on to Stripe
+          var pending = sessionStorage.getItem('pm_checkout_plan');
+          if (pending) {
+            sessionStorage.removeItem('pm_checkout_plan');
+            document.querySelector('.plan-opt[data-plan="' + pending + '"]')?.click();
+            startCheckout();
+          }
+        }
       } else {
-        if (note) note.textContent = 'Sign in with Google to link Pro across all your devices.';
-        checkAutoActivation();
+        if (note) note.textContent = 'You\'ll sign in with Google at checkout so Pro works on all your devices.';
+        if (params.get('checkout') === 'success') {
+          showBanner('✅ <strong>Payment received!</strong> Sign in with the Google account you used at checkout to finish.', true);
+        }
       }
     });
 
-    // Card checkout appears automatically once a real Stripe Payment Link is pasted above
-    if (!STRIPE_CHECKOUT_URL.includes('placeholder')) {
-      document.getElementById('upgrade-stripe-btn').style.display = '';
-    }
-
-    function handleStripeUpgrade() {
-      window.location.href = STRIPE_CHECKOUT_URL;
-    }
-
-    function handleAltPayment() {
-      window.open(VENMO_URL, '_blank', 'noopener');
-    }
-
+    var redeeming = false;
     async function activateProCode() {
+      var err = document.getElementById('pro-code-error');
+      var code = document.getElementById('pro-code-input').value.trim().toUpperCase();
+      function say(msg, ok) {
+        err.textContent = msg;
+        err.style.color = ok ? '#2ed573' : '#ff4757';
+        err.style.display = 'block';
+      }
+
+      if (!code) { say('Please enter a code.'); return; }
       if (!window._fbUser) {
-        alert('Please sign in with Google first so we can attach Pro to your account!');
+        say('Sign in with Google first. Your code will be applied to your account.');
         if (window._fbSignIn) window._fbSignIn();
         return;
       }
-      var input = document.getElementById('pro-code-input').value.trim().toUpperCase();
-      var err = document.getElementById('pro-code-error');
-      
-      if (!input) {
-        err.textContent = 'Please enter a code.';
-        err.style.display = 'block';
-        return;
-      }
-      
-      if (VALID_CODES.has(input)) {
+      if (redeeming || !window._fbRedeemCode) return;
+      redeeming = true;
+      say('Checking your code…', true);
+      var result = await window._fbRedeemCode(code);
+      redeeming = false;
+      if (result.ok) {
+        say('');
         err.style.display = 'none';
-        err.style.color = '#2ed573';
-        err.textContent = 'Activating Pro...';
-        err.style.display = 'block';
-        
-        if (window._fbActivatePro) {
-          const success = await window._fbActivatePro();
-          if (success) {
-            err.textContent = 'Success! You are now Pro. Redirecting...';
-            setTimeout(() => window.location.reload(), 1500);
-          } else {
-            err.style.color = '#ff4757';
-            err.textContent = 'Activation failed. Please check your connection or contact support.';
-          }
-        }
+        showBanner('🎉 <strong>Welcome to Pro!</strong> Instant downloads, ad-free listening and every Pro feature are now unlocked on all your devices.', true);
+        setTimeout(function () { window.location.href = 'profile.html'; }, 2500);
       } else {
-        err.style.color = '#ff4757';
-        err.textContent = 'Invalid code. Please double-check and try again.';
-        err.style.display = 'block';
+        say(result.error);
       }
     }
+
+    document.getElementById('pro-code-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') activateProCode();
+    });
   </script>
 </body>
 </html>
