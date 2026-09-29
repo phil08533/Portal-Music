@@ -40,7 +40,16 @@ export default {
 
 // ── Event handling ───────────────────────────────────────────────────────────
 
+const HANDLED_EVENTS = new Set([
+  'checkout.session.completed',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+]);
+
 async function handleEvent(event, env) {
+  // The endpoint may be subscribed to every event; ignore everything else
+  if (!HANDLED_EVENTS.has(event.type) || !event.data?.object) return;
   const fb = firestore(env);
   const obj = event.data.object;
 
@@ -117,7 +126,9 @@ function timingSafeEqual(a, b) {
 // ── Firebase (REST, authenticated with the service account) ─────────────────
 
 function firestore(env) {
-  const sa = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+  // A "Secret" arrives as text; a "JSON" variable arrives already parsed
+  const raw = env.FIREBASE_SERVICE_ACCOUNT;
+  const sa = typeof raw === 'string' ? JSON.parse(raw) : raw;
   const project = sa.project_id;
   // FIRESTORE_EMULATOR_HOST is only used for local testing
   const emulator = env.FIRESTORE_EMULATOR_HOST;
