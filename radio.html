@@ -206,7 +206,7 @@
         artistEl.textContent = song.artist || song.genre;
 
         if (song.cover) {
-          artEl.innerHTML = `<img src="${song.cover}" alt="">`;
+          artEl.innerHTML = `<img src="${song.cover}" alt="" data-icon="🎵" onerror="pmCoverFallback(this)">`;
         } else {
           artEl.textContent = '🎵';
         }

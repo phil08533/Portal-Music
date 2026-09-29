@@ -320,7 +320,6 @@ function renderBrowseArtists() {
   fetch('data/artists.json')
     .then(function (r) { return r.json(); })
     .then(function (artists) {
-      var names = artists.map(function (a) { return a.name; }).join(', ');
       var portraits = artists.map(function (a) {
         return '<a class="featured-artist-portrait" href="browse.html?artist=' + encodeURIComponent(a.name) + '" title="Browse ' + a.name + '">' +
           '<div class="featured-artist-portrait-img">' +
@@ -332,8 +331,8 @@ function renderBrowseArtists() {
           '</a>';
       }).join('');
       document.getElementById('browse-artists-grid').innerHTML =
-        '<div class="featured-artists-box">' +
-          '<div class="featured-artists-byline">Featured Artists — ' + names + '</div>' +
+        '<div class="featured-artists-box featured-artists-box--compact">' +
+          '<div class="featured-artists-byline">Featured artists</div>' +
           '<div class="featured-artists-portraits">' + portraits + '</div>' +
         '</div>';
     }).catch(function () {});

@@ -47,6 +47,14 @@ try { loadAds(); } catch (e) { /* never let ads break the site */ }
 // Stripe customer portal: where subscribers update their card or cancel
 const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
 
+// Broken cover art → show the genre icon on the card's gradient instead of alt text
+function pmCoverFallback(img) {
+  const icon = document.createElement('span');
+  icon.className = 'art-icon';
+  icon.textContent = img.dataset.icon || '🎵';
+  img.replaceWith(icon);
+}
+
 // --- Genre Config — loaded from data/genres.json ---
 // Populated by loadGenres(); pages should await that before using GENRES.
 let GENRES = {};
@@ -193,7 +201,7 @@ function _updatePlayerUI(song) {
   if (artistEl) artistEl.textContent = song.artist || song.subgenre || song.genre || '';
   if (artEl) {
     if (song.cover) {
-      artEl.innerHTML = '<img src="' + song.cover + '" alt="">';
+      artEl.innerHTML = '<img src="' + song.cover + '" alt="" data-icon="🎵" onerror="pmCoverFallback(this)">';
     } else {
       artEl.textContent = '🎵';
     }
@@ -393,7 +401,7 @@ function createTrackCard(song) {
     : '';
   // Album art: use cover image if available, else gradient with icon
   const artContent = song.cover
-    ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy">'
+    ? '<img src="' + _esc(song.cover) + '" alt="' + _esc(song.title) + '" loading="lazy" data-icon="' + _esc(icon) + '" onerror="pmCoverFallback(this)">'
     : '<span class="art-icon">' + icon + '</span>';
 
   return (

@@ -120,7 +120,7 @@
     return (
       '<div class="playlist-card" data-playlist-id="' + pl.id + '">' +
       '<div class="playlist-card-art" onclick="window._openPlaylist(\'' + pl.id + '\')">' +
-      (cover ? '<img src="' + _esc(cover) + '" alt="">' : '<div class="playlist-art-placeholder">♫</div>') +
+      (cover ? '<img src="' + _esc(cover) + '" alt="" onerror="this.outerHTML=\'<div class=&quot;playlist-art-placeholder&quot;>♫</div>\'">' : '<div class="playlist-art-placeholder">♫</div>') +
       '<div class="playlist-play-overlay">▶</div>' +
       '</div>' +
       '<div class="playlist-card-info">' +
