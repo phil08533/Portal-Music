@@ -4,7 +4,6 @@ Things only you can do (accounts, dashboards, decisions). Claude keeps this list
 Tick items off as you go.
 
 ## Do soon
-- [ ] **Merge branch `claude/modest-bell-fy2i57`** (analytics, share image, layout fixes) — ask Claude to open the pull request, then merge it.
 - [ ] **Test subscription:** in an incognito window sign in with a second Google account → Upgrade →
       Monthly → pay → check "Welcome to Pro" → cancel via Manage subscription → refund the $3 in
       Stripe → Payments. If Pro doesn't turn on, screenshot Stripe → Webhooks → memorable-victory-snapshot.
@@ -53,4 +52,4 @@ Tick items off as you go.
 ## Done
 - [x] Firebase rules published
 - [x] Stripe payment links, customer portal, webhook and Worker set up
-- [x] Pull request #45 merged
+- [x] Pull requests #45 and #46 merged; latest changes pushed to main
