@@ -4,6 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { exec } = require('child_process');
 const users = require('./users');
+const reels = require('./reels');
 
 let NodeID3;
 try {
@@ -94,6 +95,33 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify(obj));
   };
+
+  // --- API: Social video maker ---
+  if (req.method === 'POST' && pathname === '/api/social/reel') {
+    try {
+      const { id, format, start, duration } = await parseBody(req);
+      const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
+      const track = music.find(t => t.id === id);
+      if (!track) throw new Error('Track not found');
+      const out = await reels.makeReel(track, { format, start, duration });
+      return sendJson(200, { success: true, file: out.file, caption: out.caption });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
+    }
+  }
+  if (req.method === 'GET' && pathname === '/api/social/reel-file') {
+    try {
+      const file = reels.reelPath(url.searchParams.get('name'));
+      res.writeHead(200, {
+        'Content-Type': 'video/mp4',
+        'Content-Length': fs.statSync(file).size,
+        'Cache-Control': 'no-store',
+      });
+      return fs.createReadStream(file).pipe(res);
+    } catch (err) {
+      return sendJson(404, { success: false, error: err.message });
+    }
+  }
 
   // --- API: User Accounts (Firebase Admin SDK) ---
   if (pathname.startsWith('/api/users')) {

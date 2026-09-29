@@ -91,7 +91,22 @@ Yes. The studio only runs on your own computer:
 
 ---
 
-## ☁️ 4. Syncing to Cloudflare R2 & Deploying Live
+## 🎬 4. Making Reels & YouTube videos
+
+1. Open the **Reels & Videos** tab (or click 🎬 next to any track in **Manage Catalog**).
+2. Type the track name, play it, and when you hear the best part click **⏱ Now**.
+3. Pick a length (15–30 s for Reels/TikTok, or "Whole track" for YouTube) and a format:
+   - **Vertical 9:16**: Instagram/Facebook Reels, TikTok, YouTube Shorts
+   - **Landscape 16:9**: a regular YouTube video
+4. Click **🎬 Make video**. A few seconds later you can preview it, **Download MP4**, and
+   **Copy caption** (with hashtags that fit the genre).
+
+Videos are also saved in `social/reels/` (not uploaded to GitHub). The first time, run
+`npm install` so the bundled video engine (ffmpeg) is downloaded; there's nothing else to install.
+
+---
+
+## ☁️ 5. Syncing to Cloudflare R2 & Deploying Live
 
 When you add new MP3 files locally and want them live on your CDN:
 

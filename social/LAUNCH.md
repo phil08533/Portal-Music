@@ -61,6 +61,9 @@ algorithm rewards it.)
   music, answer helpfully with a link to a specific track, not just the homepage
 
 ## 4. Ongoing rhythm (2–3 hours a week)
+Make the videos in the admin studio (`npm run admin` → **Reels & Videos**): pick a track, click
+⏱ Now at the best part, choose 15–30 s vertical, Make video, then Download + Copy caption.
+
 - **Mon:** "Music for your ___" Reel (gameplay/vlog clip + one track)
 - **Wed:** before/after Reel (silent clip → same clip with music)
 - **Fri:** "New this week" Reel (newest track + cover art)
