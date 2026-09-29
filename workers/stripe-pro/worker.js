@@ -40,7 +40,16 @@ export default {
 
 // ── Event handling ───────────────────────────────────────────────────────────
 
+const HANDLED_EVENTS = new Set([
+  'checkout.session.completed',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+]);
+
 async function handleEvent(event, env) {
+  // The endpoint may be subscribed to every event; ignore everything else
+  if (!HANDLED_EVENTS.has(event.type) || !event.data?.object) return;
   const fb = firestore(env);
   const obj = event.data.object;
 
