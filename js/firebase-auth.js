@@ -7,18 +7,7 @@
 //   2. Create project named "portal-music"
 //   3. Authentication → Sign-in method → Google → Enable (add support email)
 //   4. Firestore Database → Create → Production mode → choose us-east1
-//   5. Firestore Rules → replace with:
-//        rules_version = '2';
-//        service cloud.firestore {
-//          match /databases/{database}/documents {
-//            match /users/{uid} {
-//              allow read, write: if request.auth != null && request.auth.uid == uid;
-//              match /playlists/{playlistId} {
-//                allow read, write: if request.auth != null && request.auth.uid == uid;
-//              }
-//            }
-//          }
-//        }
+//   5. Firestore Rules → paste the contents of firestore.rules (repo root) → Publish
 //   6. Project Settings → Your apps → Web → Register app → copy firebaseConfig
 //   7. Authentication → Settings → Authorized domains → add portal-music.com
 //
@@ -28,7 +17,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
   from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, serverTimestamp, query, orderBy }
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, serverTimestamp, query, orderBy, writeBatch }
   from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // ── Replace with your Firebase project config ──────────────────────────────
@@ -217,16 +206,35 @@ if (!configReady) {
     } catch { /* ignore */ }
   };
 
-  window._fbActivatePro = async () => {
-    if (!window._fbUser) return false;
+  // Redeem a single-use Pro code. Firestore rules only allow the Pro update
+  // when it's written together with marking an unused code as redeemed.
+  // Returns { ok: true } or { ok: false, error: '...' }.
+  window._fbRedeemCode = async (rawCode) => {
+    if (!window._fbUser) return { ok: false, error: 'Please sign in first.' };
+    const code = String(rawCode || '').trim().toUpperCase();
+    if (!/^[A-Z0-9-]{4,40}$/.test(code)) return { ok: false, error: 'That code doesn\'t look right. Check for typos.' };
+    const uid = window._fbUser.uid;
+    const codeRef = doc(db, 'proCodes', code);
     try {
-      await updateDoc(doc(db, 'users', window._fbUser.uid), { isPro: true });
+      const snap = await getDoc(codeRef);
+      if (!snap.exists()) return { ok: false, error: 'That code isn\'t valid. Check for typos.' };
+      if (snap.data().redeemedBy) {
+        return snap.data().redeemedBy === uid
+          ? { ok: false, error: 'You already used this code.' }
+          : { ok: false, error: 'That code has already been used.' };
+      }
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'users', uid), {
+        isPro: true, proSource: 'code', proCode: code, proUpdatedAt: serverTimestamp(),
+      }, { merge: true });
+      batch.update(codeRef, { redeemedBy: uid, redeemedAt: serverTimestamp() });
+      await batch.commit();
       window._fbIsPro = true;
       window._renderAuthBtn();
-      return true;
+      return { ok: true };
     } catch (e) {
-      console.error('Pro activation failed:', e);
-      return false;
+      console.error('Code redemption failed:', e);
+      return { ok: false, error: 'Couldn\'t redeem that code right now. Please try again or contact us.' };
     }
   };
 

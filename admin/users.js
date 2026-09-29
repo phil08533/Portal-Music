@@ -87,6 +87,10 @@ async function listUsers() {
   const snap = await db.collection('users').get();
   snap.forEach(d => docs.set(d.id, d.data()));
 
+  // Admin notes live in their own collection, which site visitors can't read
+  const notes = new Map();
+  (await db.collection('adminNotes').get()).forEach(d => notes.set(d.id, d.get('note') || ''));
+
   const users = authUsers.map(u => {
     const data = docs.get(u.uid) || {};
     docs.delete(u.uid);
@@ -102,7 +106,8 @@ async function listUsers() {
       proSource:    data.proSource || null,
       proUpdatedAt: toIso(data.proUpdatedAt),
       favorites:    Array.isArray(data.favorites) ? data.favorites.length : 0,
-      adminNote:    data.adminNote || '',
+      proCode:      data.proCode || null,
+      adminNote:    notes.get(u.uid) || data.adminNote || '',
     };
   });
 
@@ -148,8 +153,71 @@ async function setProByEmail(email, isPro) {
 }
 
 async function setNote(uid, note) {
+  const { db, admin } = init();
+  await db.collection('adminNotes').doc(uid).set({ note: String(note || '').slice(0, 500) });
+  // Older versions stored the note on the user's own (user-readable) profile
+  await db.collection('users').doc(uid).set({ adminNote: admin.firestore.FieldValue.delete() }, { merge: true });
+}
+
+// ── Single-use Pro codes ────────────────────────────────────────────────────
+// Unambiguous characters only (no 0/O, 1/I/L) so codes are easy to type.
+const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+function randomCode() {
+  const crypto = require('crypto');
+  const bytes = crypto.randomBytes(8);
+  let body = '';
+  for (let i = 0; i < 8; i++) body += CODE_CHARS[bytes[i] % CODE_CHARS.length];
+  return `PM-${body.slice(0, 4)}-${body.slice(4)}`;
+}
+
+async function createCodes(count, note) {
+  const { db, admin } = init();
+  const n = Math.max(1, Math.min(50, parseInt(count, 10) || 1));
+  const codes = [];
+  const batch = db.batch();
+  for (let i = 0; i < n; i++) {
+    const code = randomCode();
+    codes.push(code);
+    batch.create(db.collection('proCodes').doc(code), {
+      note: String(note || '').slice(0, 200),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      redeemedBy: null,
+      redeemedAt: null,
+    });
+  }
+  await batch.commit();
+  return codes;
+}
+
+async function listCodes() {
+  const { db, auth } = init();
+  const snap = await db.collection('proCodes').get();
+  const codes = snap.docs.map(d => ({
+    code: d.id,
+    note: d.get('note') || '',
+    createdAt: toIso(d.get('createdAt')),
+    redeemedBy: d.get('redeemedBy') || null,
+    redeemedAt: toIso(d.get('redeemedAt')),
+    redeemedEmail: '',
+  }));
+  const uids = [...new Set(codes.map(c => c.redeemedBy).filter(Boolean))];
+  for (let i = 0; i < uids.length; i += 100) {
+    const res = await auth.getUsers(uids.slice(i, i + 100).map(uid => ({ uid })));
+    const byUid = new Map(res.users.map(u => [u.uid, u.email || u.displayName || '']));
+    codes.forEach(c => { if (byUid.has(c.redeemedBy)) c.redeemedEmail = byUid.get(c.redeemedBy); });
+  }
+  codes.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  return codes;
+}
+
+async function deleteCode(code) {
   const { db } = init();
-  await db.collection('users').doc(uid).set({ adminNote: String(note || '').slice(0, 500) }, { merge: true });
+  const ref = db.collection('proCodes').doc(String(code));
+  const snap = await ref.get();
+  if (!snap.exists) throw new Error('Code not found');
+  if (snap.get('redeemedBy')) throw new Error('That code was already used, so it is kept as a record');
+  await ref.delete();
 }
 
 async function setDisabled(uid, disabled) {
@@ -164,6 +232,7 @@ async function deleteUser(uid) {
   const { auth, db } = init();
   const ref = db.collection('users').doc(uid);
   await db.recursiveDelete(ref);
+  await db.collection('adminNotes').doc(uid).delete();
   try {
     await auth.deleteUser(uid);
   } catch (err) {
@@ -171,4 +240,7 @@ async function deleteUser(uid) {
   }
 }
 
-module.exports = { status, listUsers, getUserDetail, setPro, setProByEmail, setNote, setDisabled, deleteUser };
+module.exports = {
+  status, listUsers, getUserDetail, setPro, setProByEmail, setNote, setDisabled, deleteUser,
+  createCodes, listCodes, deleteCode,
+};

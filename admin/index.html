@@ -288,6 +288,22 @@
         </div>
       </div>
 
+      <div class="card" style="margin-bottom:16px;">
+        <h2>🎟️ Pro codes</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px;">Single-use codes for giveaways, collaborators or people who paid. Each code unlocks Pro for one account, then stops working. Share the code or its link.</p>
+        <div class="inline-form" style="margin-bottom:12px;">
+          <input type="number" id="code-count" class="form-control" value="1" min="1" max="50" style="width:90px;">
+          <input type="text" id="code-note" class="form-control" placeholder="Note, e.g. &quot;YouTube giveaway Oct&quot; (optional)" maxlength="200">
+          <button class="btn btn-primary" id="code-create-btn" onclick="createCodes()">Generate</button>
+        </div>
+        <div class="table-container" style="max-height:320px;">
+          <table>
+            <thead><tr><th>Code</th><th>Note</th><th>Created</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="codes-table-body"><tr><td colspan="5" style="text-align:center;">Loading codes...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <div class="search-bar">
           <input type="text" id="users-search" class="form-control" placeholder="🔍 Search by name, email or UID..." oninput="renderUsersTable()">
@@ -859,6 +875,7 @@
           : '';
         renderUserStats();
         renderUsersTable();
+        loadCodes();
       } catch (err) {
         showToast('Could not load users: ' + err.message, false);
       }
@@ -1001,7 +1018,7 @@
       document.getElementById('user-modal-meta').innerHTML = `
         UID: <code>${escapeHtml(u.uid)}</code><br>
         Joined: ${fmtDate(u.createdAt)} &bull; Last sign-in: ${timeAgo(u.lastSignIn)}<br>
-        Plan: ${u.isPro ? '<strong style="color:var(--accent)">Pro</strong>' + (u.proSource ? ' via ' + escapeHtml(u.proSource) : '') + (u.proUpdatedAt ? ' on ' + fmtDate(u.proUpdatedAt) : '') : 'Free'}
+        Plan: ${u.isPro ? '<strong style="color:var(--accent)">Pro</strong>' + (u.proSource ? ' via ' + escapeHtml(u.proSource) : '') + (u.proUpdatedAt ? ' on ' + fmtDate(u.proUpdatedAt) : '') + (u.proCode ? ' (code ' + escapeHtml(u.proCode) + ')' : '') : 'Free'}
         &bull; Favorites: ${u.favorites}`;
       document.getElementById('user-modal-note').value = u.adminNote || '';
       const pl = document.getElementById('user-modal-playlists');
@@ -1040,7 +1057,7 @@
     }
 
     function exportUsersCsv() {
-      const cols = ['uid', 'displayName', 'email', 'createdAt', 'lastSignIn', 'isPro', 'proSource', 'favorites', 'disabled', 'adminNote'];
+      const cols = ['uid', 'displayName', 'email', 'createdAt', 'lastSignIn', 'isPro', 'proSource', 'proCode', 'favorites', 'disabled', 'adminNote'];
       const cell = v => {
         let s = String(v ?? '');
         if (/^[=+\-@]/.test(s)) s = "'" + s; // stop spreadsheet formula injection
@@ -1052,6 +1069,89 @@
       a.download = `portal-music-users-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(a.href);
+    }
+
+    // ── Pro codes ───────────────────────────────────────────────────────────
+    let codesList = [];
+    const SITE_URL = 'https://portal-music.com';
+
+    async function loadCodes() {
+      try {
+        const data = await (await fetch('/api/users/codes')).json();
+        if (!data.success) throw new Error(data.error);
+        codesList = data.codes;
+        renderCodes();
+      } catch (err) {
+        document.getElementById('codes-table-body').innerHTML =
+          `<tr><td colspan="5" style="text-align:center;">Could not load codes: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderCodes(highlight = []) {
+      const tbody = document.getElementById('codes-table-body');
+      if (!codesList.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No codes yet. Generate one above.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = codesList.map(c => `
+        <tr data-code="${escapeHtml(c.code)}" style="${highlight.includes(c.code) ? 'background:rgba(166,255,0,0.08);' : ''}">
+          <td><code style="font-size:0.9rem;letter-spacing:0.03em;">${escapeHtml(c.code)}</code></td>
+          <td class="muted">${escapeHtml(c.note || '—')}</td>
+          <td class="muted">${fmtDate(c.createdAt)}</td>
+          <td>${c.redeemedBy
+            ? `<span class="badge">Used</span> <span class="muted">${escapeHtml(c.redeemedEmail || c.redeemedBy)} · ${fmtDate(c.redeemedAt)}</span>`
+            : '<span class="badge badge-accent">Unused</span>'}</td>
+          <td><div class="action-btns">
+            ${c.redeemedBy ? '' : `
+              <button class="btn btn-secondary btn-sm" data-code-action="copy">Copy code</button>
+              <button class="btn btn-secondary btn-sm" data-code-action="link">Copy link</button>
+              <button class="btn btn-danger btn-sm" data-code-action="delete" title="Delete unused code">🗑️</button>`}
+          </div></td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('codes-table-body').addEventListener('click', async e => {
+      const el = e.target.closest('[data-code-action]');
+      if (!el) return;
+      const code = el.closest('tr').dataset.code;
+      const action = el.dataset.codeAction;
+      if (action === 'copy') {
+        await navigator.clipboard.writeText(code);
+        showToast('Code copied');
+      } else if (action === 'link') {
+        await navigator.clipboard.writeText(`${SITE_URL}/upgrade.html?code=${encodeURIComponent(code)}`);
+        showToast('Redeem link copied');
+      } else if (action === 'delete') {
+        if (!confirm(`Delete unused code ${code}? It will stop working.`)) return;
+        try {
+          await apiPost('/api/users/codes/delete', { code });
+          codesList = codesList.filter(c => c.code !== code);
+          renderCodes();
+          showToast('Code deleted');
+        } catch (err) {
+          showToast(err.message, false);
+        }
+      }
+    });
+
+    async function createCodes() {
+      const btn = document.getElementById('code-create-btn');
+      btn.disabled = true;
+      try {
+        const { codes } = await apiPost('/api/users/codes/create', {
+          count: document.getElementById('code-count').value,
+          note: document.getElementById('code-note').value.trim(),
+        });
+        document.getElementById('code-note').value = '';
+        await navigator.clipboard.writeText(codes.join('\n')).catch(() => {});
+        await loadCodes();
+        renderCodes(codes);
+        showToast(`${codes.length} code${codes.length > 1 ? 's' : ''} created and copied`);
+      } catch (err) {
+        showToast('Could not create codes: ' + err.message, false);
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     // Initialize

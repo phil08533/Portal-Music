@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// Portal Music — Firestore security rules
+// Paste this into Firebase Console → Firestore Database → Rules → Publish.
+//
+// - Users can read and edit their own profile, favorites and playlists.
+// - Only the admin studio (service account, which bypasses these rules) can
+//   turn Pro on or off.
+// - The one exception: a user can turn on their own Pro by redeeming a valid,
+//   unused single-use code in the same write that marks the code as used.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function proFields() {
+      return ['isPro', 'proSource', 'proCode', 'proUpdatedAt'];
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function codePath(code) {
+      return /databases/$(database)/documents/proCodes/$(code);
+    }
+
+    // Pro fields may only change as part of redeeming an unused code
+    function redeemingCode(uid) {
+      let code = request.resource.data.proCode;
+      return changedKeys().hasOnly(proFields())
+        && request.resource.data.isPro == true
+        && request.resource.data.proSource == 'code'
+        && request.resource.data.proUpdatedAt == request.time
+        && code is string
+        && get(codePath(code)).data.redeemedBy == null
+        && getAfter(codePath(code)).data.redeemedBy == uid;
+    }
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && !request.resource.data.keys().hasAny(proFields());
+      allow update: if isOwner(uid)
+        && (!changedKeys().hasAny(proFields()) || redeemingCode(uid));
+
+      match /playlists/{playlistId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Single-use Pro codes, created in the admin studio. Codes can be looked up
+    // by exact value (never listed) and redeemed once, only together with the
+    // redeemer's own Pro update.
+    match /proCodes/{code} {
+      allow get: if signedIn();
+      allow update: if signedIn()
+        && resource.data.redeemedBy == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['redeemedBy', 'redeemedAt'])
+        && request.resource.data.redeemedBy == request.auth.uid
+        && request.resource.data.redeemedAt == request.time
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.proCode == code;
+    }
+
+    // Everything else (including adminNotes) is admin-only.
+  }
+}
