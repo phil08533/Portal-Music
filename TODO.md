@@ -15,7 +15,8 @@ Tick items off as you go.
       `git checkout main && git pull && npm install`
 
 ## Monetag (dashboard)
-- [ ] Glad tag (popunder, 10786944) → set **frequency cap** to about 1 per 12–24 hours.
+- [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
+      limits it to once per 12 h and never on a visitor's first page).
 - [ ] Delete unused zones on portal-music.com: Epic (10786950), the four Sharp-witted zones
       (10803343–10803346), Cheerful (10803159) and the two untitled ones (11392081, 11392281).
 - [ ] If the site ever shows "Unverified": copy the `ads.txt` line Monetag gives you into `ads.txt`.

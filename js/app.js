@@ -14,13 +14,21 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 //   Glad tag (10786944), OnClick popunder: ~$2 per 1,000 views, the best earner.
 //   In-page push and push notifications earned ~$0.02–$0.45 per 1,000 and made
 //   the site look spammy, so they're not used.
-// The popunder opens at most once per click-session behind the current tab;
-// the frequency cap is set in the Monetag dashboard. Pro members and the
+// To keep it from being annoying, the popunder is only armed:
+//   - at most once every 12 hours per visitor, and
+//   - never on a visitor's first page: only after 30 seconds on the site or on
+//     their second page view.
+// Monetag's own frequency cap (dashboard) applies on top. Pro members and the
 // checkout pages never load ads.
 const AD_ZONES = {
   popunder: { zone: '10786944', src: 'https://al5sm.com/tag.min.js' },
 };
 const AD_FREE_PAGES = ['upgrade.html', 'pro.html'];
+const POPUNDER_GAP_MS = 12 * 60 * 60 * 1000;
+const POPUNDER_ARM_DELAY_MS = 30 * 1000;
+
+function storeGet(store, key) { try { return store.getItem(key); } catch (e) { return null; } }
+function storeSet(store, key, val) { try { store.setItem(key, String(val)); } catch (e) {} }
 
 function injectAdZone(key) {
   const cfg = AD_ZONES[key];
@@ -34,12 +42,34 @@ function injectAdZone(key) {
   (document.body || document.documentElement).appendChild(s);
 }
 
-function loadAds() {
-  if (localStorage.getItem('pm_is_pro') === '1') return;
+function adsAllowedHere() {
+  if (storeGet(localStorage, 'pm_is_pro') === '1') return false;
   let page = location.pathname.split('/').pop() || 'index.html';
   if (!page.endsWith('.html')) page += '.html'; // GitHub Pages also serves /pro as pro.html
-  if (AD_FREE_PAGES.includes(page)) return;
+  return !AD_FREE_PAGES.includes(page);
+}
+
+function armPopunder() {
+  if (!adsAllowedHere() || document.getElementById('pm-ad-popunder')) return;
+  const last = Number(storeGet(localStorage, 'pm_pop_last')) || 0;
+  if (Date.now() - last < POPUNDER_GAP_MS) return;
   injectAdZone('popunder');
+  // The popunder opens on the next click; the 12-hour gap starts then
+  document.addEventListener('click', () => storeSet(localStorage, 'pm_pop_last', Date.now()),
+    { once: true, capture: true });
+}
+
+let popunderTimer = null;
+function loadAds() {
+  if (!adsAllowedHere()) return;
+  const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
+  storeSet(sessionStorage, 'pm_pageviews', views);
+  let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
+  if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
+
+  if (views >= 2) { armPopunder(); return; }
+  clearTimeout(popunderTimer);
+  popunderTimer = setTimeout(armPopunder, Math.max(0, start + POPUNDER_ARM_DELAY_MS - Date.now()));
 }
 
 try { loadAds(); } catch (e) { /* never let ads break the site */ }
