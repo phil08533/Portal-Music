@@ -2,5 +2,6 @@ User-agent: *
 Disallow: /download.html
 Disallow: /profile.html
 Disallow: /upgrade.html
+Disallow: /admin/
 
 Sitemap: https://portal-music.com/sitemap-index.xml

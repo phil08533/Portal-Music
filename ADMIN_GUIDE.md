@@ -56,7 +56,40 @@ Then open your browser to:
 
 ---
 
-## ☁️ 3. Syncing to Cloudflare R2 & Deploying Live
+## 👥 3. Managing User Accounts & Pro Members
+
+### One-time setup (about 2 minutes)
+1. Open **Firebase Console → Project Settings → Service accounts**
+   (https://console.firebase.google.com/project/portal-music-3b1a1/settings/serviceaccounts/adminsdk)
+2. Click **Generate new private key → Generate key**.
+3. Rename the downloaded file to `serviceAccountKey.json` and move it into the `admin/` folder.
+4. Run `npm install` (first time only), then `npm run admin`. The terminal prints
+   `👥 User accounts: connected to Firebase project "portal-music-3b1a1"`.
+
+> ⚠️ This key is a master password for your whole Firebase project. It is gitignored — never
+> email it, paste it in chat, or upload it anywhere. If it ever leaks, delete it on that same
+> Firebase page and generate a new one.
+
+### What you can do in the **Users & Pro** tab
+- **Stats**: total accounts, Pro members, new sign-ups (30 days), active users (7 days).
+- **Grant Pro by email**: someone paid via Venmo/Cash App/PayPal? Type their Google email → **Grant Pro**.
+  (They must have signed in on the site at least once.)
+- **Pro switch**: flip Pro on/off for any user.
+- **Details**: see their playlists and keep a private note (e.g. "Paid $5 Venmo 9/29").
+- **Suspend / Restore**: blocks sign-in and signs them out everywhere.
+- **🗑️ Delete**: permanently removes their account, favorites and playlists (type `DELETE` to confirm).
+- **⬇ CSV**: export the current (filtered) user list.
+
+### Is the admin studio safe with GitHub Pages?
+Yes. The studio only runs on your own computer:
+- The Pages deploy workflow strips `admin/`, `scripts/` and internal docs, so nothing admin-related is on portal-music.com.
+- The server only listens on `127.0.0.1` (not reachable from other devices, even on your Wi-Fi).
+- Every API call needs a random token that changes each time you start the studio, so other websites
+  open in your browser can't talk to it.
+
+---
+
+## ☁️ 4. Syncing to Cloudflare R2 & Deploying Live
 
 When you add new MP3 files locally and want them live on your CDN:
 

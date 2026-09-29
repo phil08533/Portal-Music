@@ -17,6 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Only the public website gets deployed. The admin studio, build scripts
+      # and internal docs stay in the repo but are never served on portal-music.com.
+      - name: Remove non-public files
+        run: |
+          rm -rf admin scripts .github node_modules
+          rm -f CLAUDE.md ADMIN_GUIDE.md README.md package.json package-lock.json
+          rm -f "how to add music to portal-music.docx"
+          find . -name '*serviceAccount*.json' -delete
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
