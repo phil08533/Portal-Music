@@ -568,7 +568,7 @@ html.is-pro #pro-nav-btn { display: none !important; }
 /* --- Hero Section --- */
 .hero {
   text-align: center;
-  padding: 4rem 0 2.5rem;
+  padding: 2.25rem 0 2.5rem;
   position: relative;
 }
 
@@ -580,7 +580,8 @@ html.is-pro #pro-nav-btn { display: none !important; }
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  background: radial-gradient(ellipse 55% 100% at 50% 0%, var(--accent-glow), transparent 70%);
+  /* Soft glow centred behind the headline: no hard top edge */
+  background: radial-gradient(ellipse 45% 60% at 50% 45%, var(--accent-glow), transparent 75%);
   pointer-events: none;
   z-index: 0;
 }
@@ -4027,3 +4028,109 @@ body:has(#player-bar.visible) .cookie-banner { bottom: 96px; }
 .featured-artists-box--compact .featured-artist-portrait { flex: none; flex-direction: row; align-items: center; gap: 10px; padding: 4px 14px 4px 4px; border: 1px solid var(--border); border-radius: 999px; }
 .featured-artists-box--compact .featured-artist-portrait-img { width: 40px; height: 40px; aspect-ratio: auto; border-radius: 50%; flex-shrink: 0; font-size: 1.1rem; }
 .featured-artists-box--compact .featured-artist-portrait-name { margin: 0; font-size: 0.88rem; }
+
+/* ============================================
+   Mobile navigation: ☰ menu instead of a cramped second row
+   ============================================ */
+.nav-toggle { display: none; }
+
+@media (max-width: 640px) {
+  header {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 60px;
+    padding: 8px 16px;
+    gap: 8px;
+  }
+  .logo { order: 1; flex: 1; min-width: 0; font-size: 1.15rem; }
+  .logo-img { width: 32px; height: 32px; }
+  #pro-nav-btn { order: 2; }
+  #auth-btn { order: 3; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+
+  .nav-toggle {
+    order: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav-toggle svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-toggle .icon-close { display: none; }
+  header.nav-open .nav-toggle .icon-open { display: none; }
+  header.nav-open .nav-toggle .icon-close { display: block; }
+
+  /* The menu panel: hidden until ☰ is tapped */
+  .nav-links,
+  #theme-picker,
+  .theme-picker { display: none; }
+
+  header.nav-open .nav-links {
+    order: 10;
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0;
+    padding: 6px 0 4px;
+    border-top: 1px solid var(--border);
+  }
+  header.nav-open .nav-links a {
+    padding: 12px 10px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+  /* "More" becomes a plain group of smaller links */
+  header.nav-open .nav-more-btn { display: none; }
+  header.nav-open .nav-more-dropdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: static;
+    min-width: 0;
+    margin-top: 6px;
+    padding: 6px 0 0;
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+  }
+  header.nav-open .nav-more-dropdown a {
+    padding: 10px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  header.nav-open #theme-picker,
+  header.nav-open .theme-picker {
+    order: 11;
+    flex: 0 0 100%;
+    display: block;
+    width: 100%;
+    padding: 8px 0 6px;
+    border-top: 1px solid var(--border);
+  }
+  header.nav-open .theme-picker-btn { width: 100%; padding: 10px; font-size: 0.9rem; }
+  header.nav-open .theme-picker .theme-label { display: inline; }
+  header.nav-open .theme-picker-dropdown { position: static; margin-top: 6px; box-shadow: none; }
+
+  .hero { padding-top: 1.5rem; }
+
+  /* Pro Features stands out as the first item in the "More" group */
+  header.nav-open .nav-more-dropdown a[href$="pro.html"] { color: var(--accent); font-weight: 700; }
+}
+
+/* Very narrow phones: the orange Pro button would squeeze the logo, so it lives in the menu */
+@media (max-width: 400px) {
+  #pro-nav-btn { display: none; }
+  .logo { font-size: 1.05rem; gap: 8px; }
+}
+
+.hero .hero-kicker { color: var(--accent-2); font-weight: 600; margin-bottom: 0.25rem; }

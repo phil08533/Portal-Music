@@ -94,6 +94,29 @@ const CF_ANALYTICS_TOKEN = '';
 // Stripe customer portal: where subscribers update their card or cancel
 const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
 
+// Mobile ☰ menu: collapses the nav links, "More" and the theme picker into one panel
+function setupMobileNav() {
+  const header = document.querySelector('header');
+  if (!header || header.querySelector('.nav-toggle')) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'nav-toggle';
+  btn.setAttribute('aria-label', 'Menu');
+  btn.setAttribute('aria-expanded', 'false');
+  btn.innerHTML =
+    '<svg class="icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>' +
+    '<svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  header.appendChild(btn);
+  const setOpen = open => {
+    header.classList.toggle('nav-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  btn.addEventListener('click', e => { e.stopPropagation(); setOpen(!header.classList.contains('nav-open')); });
+  // Close after choosing a page, or when tapping outside the header
+  header.addEventListener('click', e => { if (e.target.closest('.nav-links a')) setOpen(false); });
+  document.addEventListener('click', e => { if (!header.contains(e.target)) setOpen(false); });
+}
+
 // Broken cover art → show the genre icon on the card's gradient instead of alt text
 function pmCoverFallback(img) {
   const icon = document.createElement('span');
@@ -642,6 +665,7 @@ async function loadSongs() {
 // PAGE SETUP & INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  setupMobileNav();
   initTheme();
 
   // Setup seek bar (mouse + touch)
