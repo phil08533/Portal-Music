@@ -44,6 +44,23 @@ function loadAds() {
 
 try { loadAds(); } catch (e) { /* never let ads break the site */ }
 
+// ============================================
+// ANALYTICS — Cloudflare Web Analytics (free, no cookies, no personal data)
+// ============================================
+// Paste the token from Cloudflare → Analytics & Logs → Web Analytics → portal-music.com
+// (the value after "token": in the snippet Cloudflare shows). Empty = off.
+const CF_ANALYTICS_TOKEN = '';
+
+(function loadAnalytics() {
+  if (!CF_ANALYTICS_TOKEN || document.getElementById('pm-analytics')) return;
+  const s = document.createElement('script');
+  s.id = 'pm-analytics';
+  s.defer = true;
+  s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN, spa: true });
+  (document.head || document.documentElement).appendChild(s);
+})();
+
 // Stripe customer portal: where subscribers update their card or cancel
 const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
 

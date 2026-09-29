@@ -16,8 +16,6 @@ Read README.md first for the architecture. Key rules:
 - After catalog changes run `npm run seo`.
 - `admin/` runs locally only (127.0.0.1 + per-launch token) and is never deployed.
 
-## Open items for the owner
-- [ ] Publish latest `firestore.rules` in Firebase Console
-- [ ] Do one real test subscription, then refund it
-- [ ] Monetag: set popunder frequency cap (~1 per 12–24h); delete unused zones; add `ads.txt` line if prompted
-- [ ] Optional: remove the tracked `covers/` folder from git once R2 is confirmed to hold every cover
+## Owner to-do list
+Keep `TODO.md` up to date: add anything the owner must do in a dashboard or decide,
+and move finished items to its Done section.

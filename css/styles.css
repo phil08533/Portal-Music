@@ -739,9 +739,15 @@ button.chip.active {
 }
 
 .trust-icon {
-  font-size: 1.5rem;
   flex-shrink: 0;
-  margin-top: 2px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: var(--accent-glow);
 }
 
 .trust-item strong {

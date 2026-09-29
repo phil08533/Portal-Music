@@ -24,7 +24,7 @@ python3 -m http.server 8080   # preview the site at http://localhost:8080
 ```
 
 See **ADMIN_GUIDE.md** for uploading music, syncing to R2 and managing users,
-and **workers/stripe-pro/README.md** for the Stripe setup.
+**workers/stripe-pro/README.md** for the Stripe setup, and **TODO.md** for open owner tasks.
 
 ## Files that are never deployed
 
