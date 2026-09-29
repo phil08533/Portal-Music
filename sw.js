@@ -1,6 +1,14 @@
-self.options = {
-    "domain": "3nbf4.com",
-    "zoneId": 10786950
-}
-self.lary = ""
-importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')
+// Portal Music no longer sends push notifications.
+// This replaces the old Monetag push worker: it removes any existing push
+// subscription and unregisters itself so returning visitors stop getting ads
+// as browser notifications.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    try {
+      const sub = await self.registration.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+    } catch (e) { /* ignore */ }
+    await self.registration.unregister();
+  })());
+});

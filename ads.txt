@@ -1,3 +1,4 @@
-# Monetag ad network verification
-# Replace with your Publisher ID from Monetag dashboard -> Sites
-monetag.com, YOUR_MONETAG_PUBLISHER_ID, DIRECT
+# Portal Music — authorized ad sellers
+# Monetag: paste the exact ads.txt line from your Monetag dashboard below
+# (Sites → portal-music.com → ads.txt), then remove the # in front of it.
+# monetag.com, <your publisher id>, DIRECT
