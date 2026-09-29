@@ -29,3 +29,6 @@ dist/
 # Audio and cover files — hosted on Cloudflare R2
 music/
 covers/
+
+# Videos made by the admin studio Reel maker
+social/reels/

@@ -17,7 +17,8 @@ Tick items off as you go.
 - [ ] Upload profile picture + Facebook cover from `social/`, fill in bio/About, add website link.
 - [ ] Switch Instagram to a free Professional (Creator) account.
 - [ ] Post the 3 launch posts (one per day), then invite friends and share to your story.
-- [ ] Start the Mon/Wed/Fri Reel rhythm.
+- [ ] Start the Mon/Wed/Fri Reel rhythm: make the videos in the admin studio's **Reels & Videos** tab
+      (run `git pull && npm install` first so the video engine is downloaded).
 
 ## Monetag (dashboard)
 - [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
