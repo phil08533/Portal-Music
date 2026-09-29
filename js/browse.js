@@ -182,10 +182,49 @@ function applySorting(list) {
   return copy;
 }
 
+// --- Grid painting with "Show more" paging (keeps long lists fast and tidy) ---
+var GRID_PAGE_SIZE = 48;
+var gridList = [];
+var gridShown = 0;
+
+function paintGrid(list, emptyHtml) {
+  var gridEl = document.getElementById('music-grid');
+  gridList = list;
+  window.currentSongsView = list;
+  gridShown = Math.min(list.length, GRID_PAGE_SIZE);
+  // Deep links (?track=) must render far enough down the list to find the track
+  if (trackParam) {
+    var idx = list.findIndex(function (s) { return String(s.id) === String(trackParam); });
+    if (idx >= gridShown) gridShown = idx + 1;
+  }
+  gridEl.innerHTML = list.length ? list.slice(0, gridShown).map(createTrackCard).join('') : emptyHtml;
+  updateShowMore();
+}
+
+function updateShowMore() {
+  var gridEl = document.getElementById('music-grid');
+  var wrap = document.getElementById('grid-show-more');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'grid-show-more';
+    wrap.className = 'grid-show-more';
+    wrap.innerHTML = '<button type="button" class="btn-show-more"></button>';
+    gridEl.insertAdjacentElement('afterend', wrap);
+    wrap.firstChild.addEventListener('click', function () {
+      var next = gridList.slice(gridShown, gridShown + GRID_PAGE_SIZE);
+      gridEl.insertAdjacentHTML('beforeend', next.map(createTrackCard).join(''));
+      gridShown += next.length;
+      updateShowMore();
+    });
+  }
+  var remaining = gridList.length - gridShown;
+  wrap.style.display = remaining > 0 ? '' : 'none';
+  wrap.firstChild.textContent = 'Show more tracks (' + remaining + ' more)';
+}
+
 // --- Render grid based on active filters ---
 function renderFilteredGrid() {
   var bar = document.getElementById('browse-active-bar');
-  var gridEl = document.getElementById('music-grid');
   var countEl = document.getElementById('browse-results-count');
 
   var hasChips  = activeFilters.length > 0;
@@ -194,11 +233,8 @@ function renderFilteredGrid() {
 
   if (!hasChips && !hasUseCase && !hasLength) {
     bar.style.display = 'none';
-    var sortedAll = applySorting(allSongsPage);
-    window.currentSongsView = sortedAll;
-    gridEl.innerHTML = sortedAll.length
-      ? sortedAll.map(createTrackCard).join('')
-      : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No tracks found.</p></div>';
+    paintGrid(applySorting(allSongsPage),
+      '<div class="empty-state"><div class="empty-icon">🎵</div><p>No tracks found.</p></div>');
     return;
   }
 
@@ -218,20 +254,14 @@ function renderFilteredGrid() {
   countEl.textContent = filtered.length + ' track' + (filtered.length !== 1 ? 's' : '') +
     ' · ' + activeCount + ' filter' + (activeCount !== 1 ? 's' : '') + ' active';
 
-  window.currentSongsView = filtered;
-  gridEl.innerHTML = filtered.length
-    ? filtered.map(createTrackCard).join('')
-    : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks match those filters.</p></div>';
+  paintGrid(filtered,
+    '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks match those filters.</p></div>');
 }
 
 // --- Render simple grid (for genre/artist/favorites views) ---
 function renderSimpleGrid(songs) {
-  var sorted = applySorting(songs);
-  window.currentSongsView = sorted;
-  var gridEl = document.getElementById('music-grid');
-  gridEl.innerHTML = sorted.length
-    ? sorted.map(createTrackCard).join('')
-    : '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>';
+  paintGrid(applySorting(songs),
+    '<div class="empty-state"><div class="empty-icon">😔</div><p>No tracks found.</p></div>');
 }
 
 // --- Render subgenre pills for a single genre view ---
@@ -319,7 +349,9 @@ Promise.all([loadGenres(), loadSongs()]).then(function (results) {
   if (filterMode === 'favorites') {
     var favIds = getFavorites();
     titleEl.textContent = '❤️ Favorites';
-    subtitleEl.textContent = 'Your session favorites — clears when you close this tab.';
+    subtitleEl.textContent = localStorage.getItem('pm_user_name') !== null
+      ? 'Your saved tracks, synced to your account.'
+      : 'Saved for this visit. Sign in to keep them on every device.';
     var favSongs = songs.filter(function (s) { return favIds.indexOf(String(s.id)) !== -1; });
     if (favSongs.length === 0) {
       document.getElementById('music-grid').innerHTML =

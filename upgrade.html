@@ -65,7 +65,7 @@
           <div class="upgrade-card-label">Free</div>
           <div class="upgrade-price">$0 <span>/ forever</span></div>
           <ul class="upgrade-features">
-            <li>Download all 442+ tracks</li>
+            <li>Download all 470+ tracks</li>
             <li>Royalty-free, no copyright strikes</li>
             <li>Save favorites</li>
             <li>1 playlist</li>
@@ -81,7 +81,7 @@
           <div class="upgrade-card-label">Pro</div>
           <div class="upgrade-price">$5 <span>/ one-time support</span></div>
           <ul class="upgrade-features">
-            <li>Download all 442+ tracks</li>
+            <li>Download all 470+ tracks</li>
             <li>Royalty-free, no copyright strikes</li>
             <li>Save favorites</li>
             <li>Unlimited playlists</li>
@@ -92,21 +92,25 @@
             <li>Profile page with favorites &amp; history</li>
           </ul>
           <div class="upgrade-payment-options">
-            <button class="btn-upgrade-cta stripe-btn" id="upgrade-stripe-btn" onclick="handleStripeUpgrade()" style="margin-bottom:0.75rem; background: linear-gradient(135deg, #635bff, #4f46e5); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;">
-              <span>💳</span> Pay with Card / Apple Pay / Google Pay
+            <button class="btn-upgrade-cta stripe-btn" id="upgrade-stripe-btn" onclick="handleStripeUpgrade()" style="display:none;margin-bottom:0.75rem;background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;">
+              Pay $5 with card
             </button>
-            <button class="btn-upgrade-cta secondary bmac-btn" id="upgrade-bmac-btn" onclick="handleAltPayment()" style="margin-bottom:1rem; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.88rem;">
-              <span>☕</span> Support via Buy Me a Coffee / PayPal
+            <button class="btn-upgrade-cta" id="upgrade-venmo-btn" onclick="handleAltPayment()" style="margin-bottom:0.75rem;background:#008cff;color:#fff;border:none;">
+              Pay $5 with Venmo
             </button>
           </div>
-          <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.25rem;">Instant activation &bull; One-time support &bull; No recurring subscription required</p>
+          <ol class="upgrade-steps" id="upgrade-steps">
+            <li><strong>Sign in</strong> with Google (top right).</li>
+            <li>Pay $5 and put <strong>your Google email</strong> in the payment note.</li>
+            <li>We turn on Pro for your account, usually within a few hours. It works on every device you sign in on.</li>
+          </ol>
 
           <!-- Input for Activation Code / Success Confirmation -->
           <div id="activation-card" style="text-align:left;background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border);">
             <div id="activation-banner" style="display:none;padding:10px;border-radius:6px;margin-bottom:10px;font-size:0.85rem;line-height:1.4;"></div>
-            <label style="display:block;font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);font-weight:600;">Got an Activation Code or Voucher?</label>
-            <div style="display:flex;gap:8px;">
-              <input type="text" id="pro-code-input" placeholder="e.g. PORTALMUSIC" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);text-transform:uppercase;">
+            <label for="pro-code-input" style="display:block;font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);font-weight:600;">Have an activation code?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <input type="text" id="pro-code-input" placeholder="Enter code" autocomplete="off" style="flex:1 1 120px;min-width:0;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);text-transform:uppercase;">
               <button onclick="activateProCode()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Activate</button>
             </div>
             <p id="pro-code-error" style="color:#ff4757;font-size:0.8rem;margin-top:0.5rem;display:none;"></p>
@@ -166,7 +170,7 @@
   <script>
     // Configuration: Replace with your Stripe Payment Link or Ko-fi/BuyMeACoffee URL
     const STRIPE_CHECKOUT_URL = 'https://buy.stripe.com/test_placeholder'; 
-    const BMAC_CHECKOUT_URL = 'https://account.venmo.com/u/aaephil';
+    const VENMO_URL = 'https://account.venmo.com/u/aaephil';
 
     const VALID_CODES = new Set(['SUPPORTER26', 'PORTALMUSIC', 'PRO2026', 'VIP2026', 'CREATORPASS']);
 
@@ -205,13 +209,15 @@
     window.addEventListener('portalAuthReady', function (e) {
       var note = document.getElementById('upgrade-status-note');
       var stripeBtn = document.getElementById('upgrade-stripe-btn');
-      var bmacBtn = document.getElementById('upgrade-bmac-btn');
+      var venmoBtn = document.getElementById('upgrade-venmo-btn');
+      var steps = document.getElementById('upgrade-steps');
       var inp = document.getElementById('pro-code-input');
 
       if (window._fbIsPro) {
         if (note) note.textContent = 'You are already on Pro. Thank you for your support!';
-        if (stripeBtn) { stripeBtn.textContent = "You're Pro ✓"; stripeBtn.disabled = true; stripeBtn.style.opacity = '0.6'; stripeBtn.style.cursor = 'default'; }
-        if (bmacBtn) bmacBtn.style.display = 'none';
+        if (stripeBtn) stripeBtn.style.display = 'none';
+        if (venmoBtn) { venmoBtn.textContent = "You're Pro ✓"; venmoBtn.disabled = true; venmoBtn.style.background = 'var(--accent)'; venmoBtn.style.cursor = 'default'; }
+        if (steps) steps.style.display = 'none';
         if (inp) inp.disabled = true;
       } else if (window._fbUser) {
         if (note) note.textContent = 'Signed in as ' + (window._fbUser.displayName || window._fbUser.email) + '. Upgrade now to unlock instant downloads & remove ads.';
@@ -222,18 +228,17 @@
       }
     });
 
+    // Card checkout appears automatically once a real Stripe Payment Link is pasted above
+    if (!STRIPE_CHECKOUT_URL.includes('placeholder')) {
+      document.getElementById('upgrade-stripe-btn').style.display = '';
+    }
+
     function handleStripeUpgrade() {
-      if (STRIPE_CHECKOUT_URL.includes('placeholder')) {
-        // If Stripe payment link not yet configured with user's live ID, fallback to Venmo / BMAC or prompt
-        window.open('https://account.venmo.com/u/aaephil', '_blank');
-        showBanner('Redirecting to support checkout. Once complete, enter your code below or use the confirmation link!', true);
-      } else {
-        window.location.href = STRIPE_CHECKOUT_URL;
-      }
+      window.location.href = STRIPE_CHECKOUT_URL;
     }
 
     function handleAltPayment() {
-      window.open(BMAC_CHECKOUT_URL, '_blank');
+      window.open(VENMO_URL, '_blank', 'noopener');
     }
 
     async function activateProCode() {

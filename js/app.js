@@ -7,6 +7,43 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
   document.documentElement.classList.add('is-pro');
 }
 
+// ============================================
+// ADS (Monetag) — the only place ad zones are configured
+// ============================================
+// Chosen from real Monetag stats (Mar–Sep 2026):
+//   Glad tag (10786944), OnClick popunder: ~$2 per 1,000 views, the best earner.
+//   In-page push and push notifications earned ~$0.02–$0.45 per 1,000 and made
+//   the site look spammy, so they're not used.
+// The popunder opens at most once per click-session behind the current tab;
+// the frequency cap is set in the Monetag dashboard. Pro members and the
+// checkout pages never load ads.
+const AD_ZONES = {
+  popunder: { zone: '10786944', src: 'https://al5sm.com/tag.min.js' },
+};
+const AD_FREE_PAGES = ['upgrade.html', 'pro.html'];
+
+function injectAdZone(key) {
+  const cfg = AD_ZONES[key];
+  const id = 'pm-ad-' + key;
+  if (document.getElementById(id)) return; // one copy per page load; it persists across SPA navigation
+  const s = document.createElement('script');
+  s.id = id;
+  s.dataset.zone = cfg.zone;
+  s.src = cfg.src;
+  s.async = true;
+  (document.body || document.documentElement).appendChild(s);
+}
+
+function loadAds() {
+  if (localStorage.getItem('pm_is_pro') === '1') return;
+  let page = location.pathname.split('/').pop() || 'index.html';
+  if (!page.endsWith('.html')) page += '.html'; // GitHub Pages also serves /pro as pro.html
+  if (AD_FREE_PAGES.includes(page)) return;
+  injectAdZone('popunder');
+}
+
+try { loadAds(); } catch (e) { /* never let ads break the site */ }
+
 // --- Genre Config — loaded from data/genres.json ---
 // Populated by loadGenres(); pages should await that before using GENRES.
 let GENRES = {};
@@ -19,7 +56,7 @@ const FAV_KEY = 'pm_favorites'; // sessionStorage — clears on tab close
 // ============================================
 // THEME SYSTEM
 // ============================================
-const THEME_LABELS = { dark:'🌙 Theme', light:'☀️ Theme', sepia:'📜 Theme', obsidian:'💎 Theme', ivory:'👔 Theme', velvet:'🌸 Theme' };
+const THEME_ICONS = { dark:'🌙', light:'☀️', sepia:'📜', obsidian:'💎', ivory:'👔', velvet:'🌸' };
 
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -28,7 +65,7 @@ function setTheme(theme) {
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
   const pickerBtn = document.getElementById('theme-picker-btn');
-  if (pickerBtn) pickerBtn.textContent = THEME_LABELS[theme] || '🎨 Theme';
+  if (pickerBtn) pickerBtn.innerHTML = (THEME_ICONS[theme] || '🎨') + '<span class="theme-label"> Theme</span>';
 }
 
 const PRO_THEMES = ['obsidian', 'ivory', 'velvet'];
@@ -731,18 +768,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Run once immediately
   window.initHeaderElements();
 
-  // Favorites banner dismiss
-  const dismissBtn = document.getElementById('fav-banner-dismiss');
-  if (dismissBtn) {
-    // Auto-hide if dismissed this session
-    if (sessionStorage.getItem('pm_banner_ok')) {
-      const banner = document.getElementById('fav-banner');
-      if (banner) banner.style.display = 'none';
-    }
-    dismissBtn.addEventListener('click', () => {
-      const banner = document.getElementById('fav-banner');
-      if (banner) banner.style.display = 'none';
+  // Favorites banner: a gentle sign-in prompt, never shown to signed-in users
+  const favBanner = document.getElementById('fav-banner');
+  if (favBanner) {
+    const hideBanner = () => { favBanner.style.display = 'none'; };
+    if (sessionStorage.getItem('pm_banner_ok') || localStorage.getItem('pm_user_name') !== null) hideBanner();
+    window.addEventListener('portalAuthReady', e => { if (e.detail && e.detail.user) hideBanner(); });
+    document.getElementById('fav-banner-dismiss')?.addEventListener('click', () => {
+      hideBanner();
       sessionStorage.setItem('pm_banner_ok', '1');
+    });
+    document.getElementById('fav-banner-signin')?.addEventListener('click', () => {
+      if (window._fbSignIn) window._fbSignIn();
     });
   }
 
@@ -872,28 +909,8 @@ async function navigateTo(url, pushState = true) {
         window.initHeaderElements();
       }
 
-      // Ad Monetization: Re-trigger Monetag scripts on SPA load (rate-limited so UX stays smooth)
-      const now = Date.now();
-      window._lastSpaAdTrigger = window._lastSpaAdTrigger || 0;
-      if (localStorage.getItem('pm_is_pro') !== '1' && (now - window._lastSpaAdTrigger > 120000)) {
-        window._lastSpaAdTrigger = now;
-        const mtAdNode = document.getElementById('pm-monetag-ad-script');
-        if (mtAdNode) mtAdNode.remove();
-        const mt = document.createElement('script');
-        mt.id = 'pm-monetag-ad-script';
-        mt.src = 'https://5gvci.com/act/files/tag.min.js?z=10786950';
-        mt.dataset.cfasync = 'false';
-        mt.async = true;
-        document.body.appendChild(mt);
-
-        const mt2AdNode = document.getElementById('pm-monetag-ad-script-2');
-        if (mt2AdNode) mt2AdNode.remove();
-        const mt2 = document.createElement('script');
-        mt2.id = 'pm-monetag-ad-script-2';
-        mt2.src = 'https://nap5k.com/tag.min.js';
-        mt2.dataset.zone = '10803159';
-        document.body.appendChild(mt2);
-      }
+      // Pages reached from an ad-free page (upgrade/pro) pick up ads here
+      try { loadAds(); } catch (e) {}
 
       window.scrollTo(0, 0);
     } else {
