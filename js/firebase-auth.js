@@ -33,6 +33,18 @@ const firebaseConfig = {
 
 const FAV_KEY = 'pm_favorites';
 
+// Subscription details shown on the profile/upgrade pages
+function proInfo(data) {
+  const end = data.proCurrentPeriodEnd;
+  return {
+    source:    data.proSource || null,          // 'stripe' | 'code' | 'admin'
+    status:    data.proStatus || null,          // Stripe status, e.g. 'active', 'past_due', 'canceled'
+    plan:      data.proPlan || null,            // 'month' | 'year'
+    renews:    data.proRenews !== false,
+    periodEnd: end && typeof end.toDate === 'function' ? end.toDate() : null,
+  };
+}
+
 const configReady = Object.values(firebaseConfig).every(v => !String(v).startsWith('REPLACE_'));
 
 if (!configReady) {
@@ -98,6 +110,7 @@ if (!configReady) {
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
         const merged = [...new Set([...cloud, ...local])];
         window._fbIsPro      = data.isPro === true;
+        window._fbProInfo    = proInfo(data);
         window._fbPortalUrl  = data.lsPortalUrl || null;
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
         await setDoc(doc(db, 'users', user.uid), {
@@ -204,6 +217,22 @@ if (!configReady) {
       const songs = (snap.data().songs || []).filter(id => id !== String(songId));
       await updateDoc(ref, { songs });
     } catch { /* ignore */ }
+  };
+
+  // Re-read Pro status from the server, e.g. while waiting for Stripe's webhook
+  // to activate a new subscription. Returns true if the account is Pro.
+  window._fbRefreshPro = async () => {
+    if (!window._fbUser) return false;
+    try {
+      const snap = await getDoc(doc(db, 'users', window._fbUser.uid));
+      const data = snap.exists() ? snap.data() : {};
+      window._fbIsPro = data.isPro === true;
+      window._fbProInfo = proInfo(data);
+      window._renderAuthBtn();
+    } catch (e) {
+      console.warn('[Portal Music] Pro refresh failed:', e.message);
+    }
+    return window._fbIsPro;
   };
 
   // Redeem a single-use Pro code. Firestore rules only allow the Pro update

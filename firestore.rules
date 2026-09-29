@@ -4,8 +4,8 @@ rules_version = '2';
 // Paste this into Firebase Console → Firestore Database → Rules → Publish.
 //
 // - Users can read and edit their own profile, favorites and playlists.
-// - Only the admin studio (service account, which bypasses these rules) can
-//   turn Pro on or off.
+// - Only the admin studio and the Stripe webhook Worker (both use the service
+//   account, which bypasses these rules) can turn Pro on or off.
 // - The one exception: a user can turn on their own Pro by redeeming a valid,
 //   unused single-use code in the same write that marks the code as used.
 service cloud.firestore {
@@ -19,8 +19,10 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    // Written only by the admin studio, the Stripe webhook, or code redemption
     function proFields() {
-      return ['isPro', 'proSource', 'proCode', 'proUpdatedAt'];
+      return ['isPro', 'proSource', 'proCode', 'proUpdatedAt', 'proStatus', 'proPlan', 'proRenews',
+              'proCurrentPeriodEnd', 'stripeCustomerId', 'stripeSubscriptionId'];
     }
 
     function changedKeys() {
