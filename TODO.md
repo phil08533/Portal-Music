@@ -13,6 +13,12 @@ Tick items off as you go.
 - [ ] **Update your local copy** so the admin studio has the latest code:
       `git checkout main && git pull && npm install`
 
+## Social media launch (see `social/LAUNCH.md`)
+- [ ] Upload profile picture + Facebook cover from `social/`, fill in bio/About, add website link.
+- [ ] Switch Instagram to a free Professional (Creator) account.
+- [ ] Post the 3 launch posts (one per day), then invite friends and share to your story.
+- [ ] Start the Mon/Wed/Fri Reel rhythm.
+
 ## Monetag (dashboard)
 - [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
       limits it to once per 12 h and never on a visitor's first page).
