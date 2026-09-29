@@ -175,10 +175,15 @@ Object.entries(byGenre).forEach(function ([genre, genreSongs]) {
   <meta name="description" content="${esc(desc)}">
   <meta name="keywords" content="${esc(keywords)}">
   <link rel="canonical" href="https://portal-music.com/genres/${sl}.html">
-  <link rel="icon" href="/images/portal.png" type="image/png">
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/images/favicon-16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#080812">
   <meta property="og:title" content="Free ${esc(genre)} Music Downloads — Portal Music">
   <meta property="og:description" content="${esc(desc)}">
-  <meta property="og:image" content="https://portal-music.com/images/portal.png">
+  <meta property="og:image" content="https://portal-music.com/images/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <meta property="og:url" content="https://portal-music.com/genres/${sl}.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Portal Music">
@@ -304,10 +309,15 @@ songs.forEach(function (s) {
   <title>${esc(s.title)} — Free Download | Portal Music</title>
   <meta name="description" content="${esc(desc)}">
   <link rel="canonical" href="${canonUrl}">
-  <link rel="icon" href="/images/portal.png" type="image/png">
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/images/favicon-16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#080812">
   <meta property="og:title" content="${esc(s.title)} — Free Download | Portal Music">
   <meta property="og:description" content="${esc(desc)}">
   <meta property="og:image" content="${esc(s.cover)}">
+  <meta name="twitter:card" content="summary">
   <meta property="og:url" content="${canonUrl}">
   <meta property="og:type" content="music.song">
   <meta property="og:site_name" content="Portal Music">
@@ -385,6 +395,50 @@ ${sharedPlayer()}
 });
 
 console.log('Generated ' + songs.length + ' track pages in tracks/');
+
+// ─── Stale track pages → redirects ──────────────────────────────────────────
+// Pages from renamed, re-IDed or deleted tracks become small redirects (to the
+// same track's current page when it still exists, otherwise to Browse), so old
+// links and search results keep working instead of showing outdated content.
+
+var currentPages = new Set(sitemapEntries.map(function (e) { return e.match(/tracks\/([^<]+)</)[1]; }));
+var pageById = {}, pageByTitle = {};
+songs.forEach(function (s) {
+  var page = slug(s.title + '-' + (s.artist || s.subgenre || s.genre || 'Other')) + '-' + s.id + '.html';
+  pageById[s.id] = page;
+  pageByTitle[String(s.title).toLowerCase().replace(/[^a-z0-9]/g, '')] = page;
+});
+
+function decodeEntities(str) {
+  return str.replace(/&#(\d+);/g, function (_, n) { return String.fromCharCode(n); })
+    .replace(/&#x([0-9a-f]+);/gi, function (_, n) { return String.fromCharCode(parseInt(n, 16)); })
+    .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+}
+
+var redirected = 0;
+fs.readdirSync('tracks').forEach(function (file) {
+  if (!file.endsWith('.html') || currentPages.has(file)) return;
+  var old = fs.readFileSync('tracks/' + file, 'utf8');
+  var idMatch = file.match(/-([a-z0-9]+)\.html$/);
+  var titleMatch = old.match(/<h1[^>]*>([^<]+)/) || old.match(/<title>([^<]+?) — /);
+  var title = titleMatch ? decodeEntities(titleMatch[1]).trim() : '';
+  var titleKey = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+  var target = (idMatch && pageById[idMatch[1]]) || pageByTitle[titleKey];
+  var url = target ? '/tracks/' + target : '/browse.html';
+  var name = target && title ? esc(title) : 'Browse Music';
+  var html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+    '  <meta name="robots" content="noindex">\n' +
+    '  <meta http-equiv="refresh" content="0; url=' + url + '">\n' +
+    '  <link rel="canonical" href="https://portal-music.com' + url + '">\n' +
+    '  <title>' + name + ' — Portal Music</title>\n' +
+    '</head>\n<body style="font-family:sans-serif;text-align:center;padding:50px;">\n' +
+    '  <p>This page has moved to <a href="' + url + '">' + name + '</a>. Redirecting…</p>\n' +
+    '</body>\n</html>\n';
+  if (html !== old) { fs.writeFileSync('tracks/' + file, html, 'utf8'); redirected++; }
+});
+if (redirected) console.log('Updated ' + redirected + ' stale track page(s) to redirects');
 
 // ─── Generate sitemap-tracks.xml ────────────────────────────────────────────
 
