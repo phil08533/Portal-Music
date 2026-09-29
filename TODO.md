@@ -20,6 +20,15 @@ Tick items off as you go.
       (10803343–10803346), Cheerful (10803159) and the two untitled ones (11392081, 11392281).
 - [ ] If the site ever shows "Unverified": copy the `ads.txt` line Monetag gives you into `ads.txt`.
 
+## Cloudflare security warnings (dashboard)
+- [ ] **DNS A records:** confirm the four A records for `portal-music.com` are exactly
+      `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` (GitHub Pages).
+      If so, mark each "Dangling A Record" / "Unproxied A Record" warning as resolved. **Don't delete them.**
+- [ ] SSL/TLS → Edge Certificates → **Always Use HTTPS: On**.
+- [ ] GitHub repo → Settings → Pages → **Enforce HTTPS** is ticked.
+- [ ] Skip: Bot Fight Mode, HSTS, AI Labyrinth. security.txt is now in the repo.
+- [ ] **When `security.txt` expires (Sep 2027):** ask Claude to renew it.
+
 ## Stripe (dashboard)
 - [ ] **Branding:** Settings → Branding → upload `images/icon-512.png` as the icon, brand color `#3da800`.
 - [ ] **Emails:** Settings → Customer emails → turn on receipts for successful payments and refunds.
