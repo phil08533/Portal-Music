@@ -24,7 +24,14 @@ function isSunoId(id) {
 
 async function get(url, ms = 20000) {
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Portal Music admin studio)' },
+    // Suno's file server refuses requests that don't look like a normal browser
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
+      'Accept': '*/*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Referer': 'https://suno.com/',
+      'Origin': 'https://suno.com',
+    },
     redirect: 'follow',
     signal: AbortSignal.timeout(ms),
   });
@@ -72,6 +79,7 @@ async function fetchInfo(id) {
         style: m.tags || '',
         duration: Number(m.duration) || 0,
         coverUrl: c.image_large_url || c.image_url || '',
+        audioUrl: c.audio_url || '',
       };
     }
   } catch (e) { /* try the page instead */ }
@@ -91,6 +99,7 @@ async function fetchInfo(id) {
     style: field('tags') || field('display_tags'),
     duration: dur ? Number(dur[1]) : 0,
     coverUrl: metaTag(html, 'og:image'),
+    audioUrl: metaTag(html, 'og:audio') || metaTag(html, 'og:audio:url'),
   };
 }
 
@@ -202,23 +211,54 @@ async function lookup(link, genres) {
     duration: formatDuration(info.duration),
     coverData,
     previewUrl: `${SUNO_CDN}/${id}.mp3`,
+    audioUrl: isSunoUrl(info.audioUrl) ? info.audioUrl : '',
     hasWav: await wavExists(id),
   };
 }
 
-// Download the song's MP3 or WAV from Suno's CDN; returns a Buffer
-async function download(id, ext) {
-  if (!isSunoId(id)) throw new Error('Invalid Suno song ID');
-  if (ext !== 'mp3' && ext !== 'wav') throw new Error('Unsupported format');
-  const res = await get(`${SUNO_CDN}/${id}.${ext}`, 180000);
-  if (!res.ok) {
-    throw new Error(ext === 'wav'
-      ? 'Suno has no WAV for this song yet. In Suno click ⋯ → Download → WAV Audio once, then try again (or attach the WAV in Edit).'
-      : `Could not download the MP3 from Suno (${res.status})`);
-  }
-  const buf = Buffer.from(await res.arrayBuffer());
-  if (ext === 'wav' && buf.slice(0, 4).toString() !== 'RIFF') throw new Error('Suno did not return a valid WAV file');
-  return buf;
+// A real MP3 starts with an ID3 tag or an MPEG frame header. Suno now serves locked
+// (encrypted) audio to most requests; those bytes must never land in the catalog.
+function isMp3(buf) {
+  if (!buf || buf.length < 1000) return false;
+  if (buf.slice(0, 3).toString() === 'ID3') return true;
+  return buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0;
 }
 
-module.exports = { lookup, download, isSunoId, guessGenre };
+// Only ever download from Suno's own servers
+function isSunoUrl(u) {
+  try {
+    const h = new URL(u).hostname;
+    return /(^|\.)suno\.(ai|com)$/.test(h) || u.startsWith(SUNO_CDN + '/');
+  } catch (e) {
+    return false;
+  }
+}
+
+// Download the song's MP3 or WAV from Suno; returns a Buffer.
+// altUrl: the audio link Suno's API gave for this song, tried if the usual one is refused.
+async function download(id, ext, altUrl) {
+  if (!isSunoId(id)) throw new Error('Invalid Suno song ID');
+  if (ext !== 'mp3' && ext !== 'wav') throw new Error('Unsupported format');
+  const urls = [`${SUNO_CDN}/${id}.${ext}`];
+  if (ext === 'mp3' && altUrl && isSunoUrl(altUrl) && !urls.includes(altUrl)) urls.push(altUrl);
+
+  let status = 0;
+  for (const u of urls) {
+    try {
+      const res = await get(u, 180000);
+      status = res.status;
+      if (!res.ok) continue;
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (ext === 'wav' && buf.slice(0, 4).toString() !== 'RIFF') continue;
+      if (ext === 'mp3' && !isMp3(buf)) continue;
+      return buf;
+    } catch (e) { /* try the next link */ }
+  }
+  const err = new Error(ext === 'wav'
+    ? 'Suno has no WAV for this song yet. In Suno click ⋯ → Download → WAV Audio once, then try again (or attach the WAV in Edit).'
+    : `Suno didn't allow the automatic download (${status || 'locked file'}).`);
+  err.code = 'SUNO_DOWNLOAD';
+  return Promise.reject(err);
+}
+
+module.exports = { lookup, download, isSunoId, isMp3, guessGenre };

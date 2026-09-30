@@ -145,10 +145,11 @@ All three are catalog changes: run the SEO rebuild and push to publish.
 ## Adding a song from Suno
 
 1. Upload & Add Track → paste the song's Suno link (Share → Copy link) → **Get song**.
-   Title, style tags, genre (best guess), length and cover fill in; check them.
-2. Tick **Also download the WAV** to offer a WAV on the download page. Suno only has a WAV after you
-   click ⋯ → Download → WAV Audio on that song once; if it says there's none, do that and click Get song again.
+   Title, style tags, genre (best guess), length, artist and cover fill in; check them.
+2. Suno locks its files (since Sept 2026), so get the audio with Suno's own button, which also keeps
+   your commercial rights: click **open this song in Suno ↗** → ⋯ → Download → **MP3** (and **WAV** if
+   you want to offer one). Drop the MP3 in the MP3 box and the WAV in the WAV box. The details stay.
+   (If Suno ever serves the file openly, **Add** grabs it by itself.)
 3. **Add to Music Catalog**, then R2 sync (uploads the MP3/WAV), SEO rebuild, push.
 
 To add or remove a WAV on any track later: Manage Catalog → Edit → WAV download.
-
