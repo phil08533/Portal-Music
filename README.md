@@ -40,3 +40,4 @@ The Pages workflow strips `admin/`, `scripts/`, `workers/`, docs, `package*.json
 | `scripts/migrate-to-r2.js` | One-time: rewrote catalog paths to R2 URLs |
 | `scripts/generate-license-pdf.js` | Rebuilds `downloads/portal-music-license.pdf` |
 | `scripts/feature-random.js` | Picks random tracks to feature on the homepage |
+| `scripts/stamp-assets.js` | Adds `?v=<hash>` to CSS/JS links on deploy so browsers never use stale copies (run by the Pages workflow) |

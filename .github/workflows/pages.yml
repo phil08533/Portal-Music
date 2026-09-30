@@ -17,6 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Add ?v=<content hash> to every CSS/JS link so visitors never run a
+      # stale cached copy after an update
+      - name: Stamp asset versions
+        run: node scripts/stamp-assets.js
+
       # Only the public website gets deployed. The admin studio, build scripts
       # and internal docs stay in the repo but are never served on portal-music.com.
       - name: Remove non-public files
