@@ -449,6 +449,13 @@
             <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:10px;overflow-x:auto;">aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com"</code>
             <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com --content-type audio/mpeg && aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com'); showToast('R2 Sync commands copied to clipboard!', true);">📋 Copy Sync Commands</button>
           </div>
+
+          <div style="background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--card-border);">
+            <strong style="display:block;margin-bottom:4px;">3. Publish to the live site</strong>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">Edits here only change the files on this computer. After step 1, push them to GitHub (run in a terminal in the Portal-Music folder); the site updates about a minute later:</p>
+            <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:10px;overflow-x:auto;">git add -A &amp;&amp; git commit -m "Update catalog" &amp;&amp; git push</code>
+            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('git add -A && git commit -m &quot;Update catalog&quot; && git push'); showToast('Publish command copied to clipboard!', true);">📋 Copy Publish Command</button>
+          </div>
         </div>
       </div>
 
@@ -862,7 +869,7 @@
         });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast('Track updated successfully!');
+        showToast('Saved. To publish: Actions & Sync → Run SEO Rebuild, then push.');
         closeEditModal();
         loadCatalog();
       } catch (err) {
@@ -881,7 +888,7 @@
         });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast(`"${title}" removed from catalog.`);
+        showToast(`"${title}" removed. To publish: Actions & Sync → Run SEO Rebuild, then push.`);
         loadCatalog();
       } catch (err) {
         showToast('Delete failed: ' + err.message, false);
@@ -894,7 +901,7 @@
         const res = await fetch('/api/action/regenerate-seo', { method: 'POST' });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast('✅ SEO Pages & Sitemap rebuilt successfully!');
+        showToast('✅ SEO pages rebuilt. Now push to GitHub (step 3) to publish.');
       } catch (err) {
         showToast('SEO rebuild failed: ' + err.message, false);
       }
