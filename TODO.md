@@ -9,9 +9,6 @@ Tick items off as you go.
 - [ ] **Test subscription:** in an incognito window sign in with a second Google account → Upgrade →
       Monthly → pay → check "Welcome to Pro" → cancel via Manage subscription → refund the $3 in
       Stripe → Payments. If Pro doesn't turn on, screenshot Stripe → Webhooks → memorable-victory-snapshot.
-- [ ] **Turn on analytics:** Cloudflare dashboard → Analytics & Logs → **Web Analytics** → Add a site →
-      `portal-music.com` → copy the `token` value from the snippet → send it to Claude
-      (or paste it into `CF_ANALYTICS_TOKEN` in `js/app.js`).
 - [ ] **Update your local copy** so the admin studio has the latest code:
       `git checkout main && git pull && npm install`
 
@@ -61,6 +58,7 @@ Tick items off as you go.
       limit the popunder to the download page again.
 
 ## Done
+- [x] Cloudflare Web Analytics turned on (token in `js/app.js`); stats at Cloudflare → Analytics → Web analytics
 - [x] Firebase rules published
 - [x] Stripe payment links, customer portal, webhook and Worker set up
 - [x] Pull requests #45 and #46 merged; latest changes pushed to main
