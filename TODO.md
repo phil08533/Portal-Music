@@ -23,6 +23,8 @@ Tick items off as you go.
       (run `git pull && npm install` first so the video engine is downloaded).
 
 ## Monetag (dashboard)
+- [ ] **Ads are OFF** (paused). To turn them back on, set `ADS_ENABLED = true` near the top of
+      `js/app.js` — but first set the frequency cap below, since Monetag's own cap is what limits repeats.
 - [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
       limits it to once per 12 h and never on a visitor's first page).
 - [ ] Delete unused zones on portal-music.com: Epic (10786950), the four Sharp-witted zones

@@ -2,8 +2,8 @@
 
 Read README.md first for the architecture. Key rules:
 
-- **Ads** are configured only in `js/app.js` (`AD_ZONES`, `loadAds`). Never add ad snippets to
-  individual pages. Current choice (from Monetag stats): Glad popunder zone `10786944` on all
+- **Ads** are configured only in `js/app.js` (`ADS_ENABLED`, `AD_ZONES`, `loadAds`). Never add ad snippets to
+  individual pages. **Ads are currently OFF** (`ADS_ENABLED = false`, owner's choice). When on, the setup is (from Monetag stats): Glad popunder zone `10786944` on all
   content pages, armed at most once per 12 h per visitor and never on a visitor's first page
   (after 30 s or on the 2nd page view); none on `upgrade.html` / `pro.html` or for Pro members.
 - **Pro status** can only be set server-side: the admin studio / Stripe Worker (service account)
