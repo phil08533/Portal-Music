@@ -17,7 +17,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
   from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, serverTimestamp, query, orderBy, writeBatch }
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, updateDoc, serverTimestamp, query, orderBy, writeBatch, Timestamp }
   from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // ── Replace with your Firebase project config ──────────────────────────────
@@ -44,9 +44,21 @@ function remapIds(ids, map) {
 }
 
 // Subscription details shown on the profile/upgrade pages
+function toDate(ts) {
+  return ts && typeof ts.toDate === 'function' ? ts.toDate() : null;
+}
+
+// Code/admin Pro can have an end date; Stripe Pro is governed by Stripe alone
+function hasActivePro(data) {
+  if (data.isPro !== true) return false;
+  const expires = data.proSource !== 'stripe' ? toDate(data.proExpiresAt) : null;
+  return !expires || expires > new Date();
+}
+
 function proInfo(data) {
   const end = data.proCurrentPeriodEnd;
   return {
+    expiresAt: data.proSource !== 'stripe' ? toDate(data.proExpiresAt) : null, // null = lifetime
     source:    data.proSource || null,          // 'stripe' | 'code' | 'admin'
     status:    data.proStatus || null,          // Stripe status, e.g. 'active', 'past_due', 'canceled'
     plan:      data.proPlan || null,            // 'month' | 'year'
@@ -120,7 +132,7 @@ if (!configReady) {
         const cloud  = data.favorites || [];
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
         const merged = remapIds([...cloud, ...local], idMap);
-        window._fbIsPro      = data.isPro === true;
+        window._fbIsPro      = hasActivePro(data);
         window._fbProInfo    = proInfo(data);
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
         await setDoc(doc(db, 'users', user.uid), {
@@ -244,7 +256,7 @@ if (!configReady) {
     try {
       const snap = await getDoc(doc(db, 'users', window._fbUser.uid));
       const data = snap.exists() ? snap.data() : {};
-      window._fbIsPro = data.isPro === true;
+      window._fbIsPro = hasActivePro(data);
       window._fbProInfo = proInfo(data);
       window._renderAuthBtn();
     } catch (e) {
@@ -270,15 +282,18 @@ if (!configReady) {
           ? { ok: false, error: 'You already used this code.' }
           : { ok: false, error: 'That code has already been used.' };
       }
+      const months = Math.max(0, parseInt(snap.data().months, 10) || 0);
       const batch = writeBatch(db);
       batch.set(doc(db, 'users', uid), {
         isPro: true, proSource: 'code', proCode: code, proUpdatedAt: serverTimestamp(),
+        // months × 30 days from now, or no end date for lifetime codes (checked by firestore.rules)
+        proExpiresAt: months > 0 ? Timestamp.fromMillis(Date.now() + months * 30 * 86400000) : null,
       }, { merge: true });
       batch.update(codeRef, { redeemedBy: uid, redeemedAt: serverTimestamp() });
       await batch.commit();
       window._fbIsPro = true;
       window._renderAuthBtn();
-      return { ok: true };
+      return { ok: true, months };
     } catch (e) {
       console.error('Code redemption failed:', e);
       return { ok: false, error: 'Couldn\'t redeem that code right now. Please try again or contact us.' };

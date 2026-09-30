@@ -4,6 +4,8 @@ Things only you can do (accounts, dashboards, decisions). Claude keeps this list
 Tick items off as you go.
 
 ## Do soon
+- [ ] **Publish the updated `firestore.rules`** (Pro codes can now last a set number of months):
+      Firebase Console → Firestore Database → Rules → paste the file → Publish.
 - [ ] **Test subscription:** in an incognito window sign in with a second Google account → Upgrade →
       Monthly → pay → check "Welcome to Pro" → cancel via Manage subscription → refund the $3 in
       Stripe → Payments. If Pro doesn't turn on, screenshot Stripe → Webhooks → memorable-victory-snapshot.
