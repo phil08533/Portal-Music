@@ -143,6 +143,7 @@
     <button class="tab-btn" onclick="switchTab('catalog')">📚 Manage Catalog (<span id="tab-count">0</span>)</button>
     <button class="tab-btn" onclick="switchTab('users')">👥 Users & Pro (<span id="users-count">–</span>)</button>
     <button class="tab-btn" onclick="switchTab('reels')">🎬 Reels & Videos</button>
+    <button class="tab-btn" onclick="switchTab('ads')">💰 Ads</button>
     <button class="tab-btn" onclick="switchTab('publish')">🚀 Actions & Sync</button>
   </div>
 
@@ -450,6 +451,49 @@
   </div>
 
   <!-- TAB 3: ACTIONS & SYNC -->
+  <!-- TAB: ADS -->
+  <div id="tab-ads" class="tab-content">
+    <div class="card" style="max-width:720px;">
+      <h2>💰 Ads (Monetag popunder)</h2>
+      <p class="muted" style="white-space:normal;margin-bottom:16px;">Pro members, the Upgrade page and the Pro page never see ads. Changes save here instantly; <strong>push to publish</strong> (Actions &amp; Sync → step 3).</p>
+
+      <label class="checkbox-group" style="margin-bottom:6px;">
+        <input type="checkbox" id="ads-enabled">
+        <span><strong>Ads on</strong></span>
+      </label>
+      <div id="ads-status" style="font-size:0.9rem;margin-bottom:16px;"></div>
+
+      <div class="form-group">
+        <label>Where</label>
+        <select id="ads-where" class="form-control">
+          <option value="all">All pages</option>
+          <option value="download">Download page only (least annoying)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>At most one ad per visitor every … hours</label>
+          <input type="number" id="ads-gap" class="form-control" min="1" max="168">
+        </div>
+        <div class="form-group">
+          <label>Never before … seconds on the site</label>
+          <input type="number" id="ads-delay" class="form-control" min="0" max="600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Monetag zone ID</label>
+        <input type="text" id="ads-zone" class="form-control" inputmode="numeric" placeholder="10786944">
+        <p class="muted" style="white-space:normal;margin-top:6px;">10786944 = the Glad tag, your best earner. Only change this if Monetag gives you a new popunder zone.</p>
+      </div>
+      <button class="btn btn-primary" onclick="saveAds()">💾 Save ad settings</button>
+
+      <p class="muted" style="white-space:normal;margin-top:18px;">
+        ⚠️ Once Monetag's script loads it decides when to pop, so also set the <strong>frequency cap</strong> in the
+        <a href="https://publishers.monetag.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Monetag dashboard</a> (Sites → portal-music.com → Glad tag → edit) to 1 per the same number of hours.
+      </p>
+    </div>
+  </div>
+
   <div id="tab-publish" class="tab-content">
     <div class="grid-layout">
       <div class="card">
@@ -591,6 +635,54 @@
       t.className = isSuccess ? 'success' : 'error';
       t.textContent = msg;
       setTimeout(() => { t.className = ''; }, 3500);
+    }
+
+    async function loadAds() {
+      try {
+        const res = await fetch('/api/ads');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        const a = data.ads;
+        document.getElementById('ads-enabled').checked = !!a.enabled;
+        document.getElementById('ads-where').value = a.where || 'all';
+        document.getElementById('ads-gap').value = a.gapHours;
+        document.getElementById('ads-delay').value = a.delaySeconds;
+        document.getElementById('ads-zone').value = a.zone;
+        showAdsStatus(a);
+      } catch (err) {
+        document.getElementById('ads-status').textContent = 'Could not load ad settings: ' + err.message;
+      }
+    }
+
+    function showAdsStatus(a) {
+      document.getElementById('ads-status').innerHTML = a.enabled
+        ? `🟢 On: ${a.where === 'download' ? 'download page only' : 'all pages'}, at most once every ${a.gapHours} h per visitor.`
+        : '⚪ Off: no ads anywhere on the site.';
+    }
+
+    async function saveAds() {
+      const body = {
+        enabled: document.getElementById('ads-enabled').checked,
+        where: document.getElementById('ads-where').value,
+        gapHours: document.getElementById('ads-gap').value,
+        delaySeconds: document.getElementById('ads-delay').value,
+        zone: document.getElementById('ads-zone').value,
+      };
+      try {
+        const res = await fetch('/api/ads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        document.getElementById('ads-gap').value = result.ads.gapHours;
+        document.getElementById('ads-delay').value = result.ads.delaySeconds;
+        showAdsStatus(result.ads);
+        showToast('Ad settings saved. Push to publish (Actions & Sync → step 3).');
+      } catch (err) {
+        showToast('Save failed: ' + err.message, false);
+      }
     }
 
     function switchTab(name) {
@@ -1498,6 +1590,7 @@
 
     // Initialize
     loadCatalog();
+    loadAds();
     loadUsers();
   </script>
 </body>

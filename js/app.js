@@ -8,71 +8,89 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 }
 
 // ============================================
-// ADS (Monetag) — the only place ad zones are configured
+// ADS (Monetag) — the only place ad code lives
 // ============================================
-// Chosen from real Monetag stats (Mar–Sep 2026):
-//   Glad tag (10786944), OnClick popunder: ~$2 per 1,000 views, the best earner.
-//   In-page push and push notifications earned ~$0.02–$0.45 per 1,000 and made
-//   the site look spammy, so they're not used.
-// To keep it from being annoying, the popunder is only armed:
-//   - at most once every 12 hours per visitor, and
-//   - never on a visitor's first page: only after 30 seconds on the site or on
-//     their second page view.
-// Monetag's own frequency cap (dashboard) applies on top. Pro members and the
-// checkout pages never load ads.
-// Master switch: ads are paused by the owner. Set to true to turn them back on.
-const ADS_ENABLED = false;
-const AD_ZONES = {
-  popunder: { zone: '10786944', src: 'https://al5sm.com/tag.min.js' },
-};
+// The settings (on/off, how often, where) are in data/ads.json and are edited
+// in the admin studio's "Ads" tab. Chosen from real Monetag stats (Mar–Sep 2026):
+// the Glad tag (10786944) OnClick popunder earns ~$2 per 1,000 views; push and
+// in-page push earned almost nothing and looked spammy, so they're not used.
+// The popunder is only armed:
+//   - at most once every `gapHours` per visitor, and
+//   - never on a visitor's first page: only after `delaySeconds` on the site or
+//     on their second page view.
+// Once Monetag's script is loaded it decides when to pop, so its own frequency
+// cap (Monetag dashboard) matters too. Pro members and checkout pages never load ads.
+const AD_SCRIPT_SRC = 'https://al5sm.com/tag.min.js';
 const AD_FREE_PAGES = ['upgrade.html', 'pro.html'];
-const POPUNDER_GAP_MS = 12 * 60 * 60 * 1000;
-const POPUNDER_ARM_DELAY_MS = 30 * 1000;
 
 function storeGet(store, key) { try { return store.getItem(key); } catch (e) { return null; } }
 function storeSet(store, key, val) { try { store.setItem(key, String(val)); } catch (e) {} }
 
-function injectAdZone(key) {
-  const cfg = AD_ZONES[key];
-  const id = 'pm-ad-' + key;
-  if (document.getElementById(id)) return; // one copy per page load; it persists across SPA navigation
-  const s = document.createElement('script');
-  s.id = id;
-  s.dataset.zone = cfg.zone;
-  s.src = cfg.src;
-  s.async = true;
-  (document.body || document.documentElement).appendChild(s);
+function clampNum(v, min, max, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
 }
 
-function adsAllowedHere() {
-  if (!ADS_ENABLED) return false;
-  if (storeGet(localStorage, 'pm_is_pro') === '1') return false;
+let adConfigPromise = null;
+function getAdConfig() {
+  if (!adConfigPromise) {
+    adConfigPromise = fetch('/data/ads.json', { cache: 'no-cache' })
+      .then(r => (r.ok ? r.json() : {}))
+      .catch(() => ({}))
+      .then(c => ({
+        enabled: c.enabled === true,
+        zone: /^\d{5,10}$/.test(String(c.zone)) ? String(c.zone) : '',
+        gapMs: clampNum(c.gapHours, 1, 168, 12) * 3600 * 1000,
+        delayMs: clampNum(c.delaySeconds, 0, 600, 30) * 1000,
+        downloadOnly: c.where === 'download',
+      }));
+  }
+  return adConfigPromise;
+}
+
+function currentPage() {
   let page = location.pathname.split('/').pop() || 'index.html';
   if (!page.endsWith('.html')) page += '.html'; // GitHub Pages also serves /pro as pro.html
-  return !AD_FREE_PAGES.includes(page);
+  return page;
 }
 
-function armPopunder() {
-  if (!adsAllowedHere() || document.getElementById('pm-ad-popunder')) return;
+function adsAllowedHere(cfg) {
+  if (!cfg.enabled || !cfg.zone) return false;
+  if (storeGet(localStorage, 'pm_is_pro') === '1') return false;
+  const page = currentPage();
+  if (AD_FREE_PAGES.includes(page)) return false;
+  return !cfg.downloadOnly || page === 'download.html';
+}
+
+function armPopunder(cfg) {
+  if (!adsAllowedHere(cfg) || document.getElementById('pm-ad-popunder')) return;
   const last = Number(storeGet(localStorage, 'pm_pop_last')) || 0;
-  if (Date.now() - last < POPUNDER_GAP_MS) return;
-  injectAdZone('popunder');
-  // The popunder opens on the next click; the 12-hour gap starts then
+  if (Date.now() - last < cfg.gapMs) return;
+  const s = document.createElement('script');
+  s.id = 'pm-ad-popunder'; // one copy per page load; it persists across SPA navigation
+  s.dataset.zone = cfg.zone;
+  s.src = AD_SCRIPT_SRC;
+  s.async = true;
+  (document.body || document.documentElement).appendChild(s);
+  // The popunder opens on the next click; the gap starts then
   document.addEventListener('click', () => storeSet(localStorage, 'pm_pop_last', Date.now()),
     { once: true, capture: true });
 }
 
 let popunderTimer = null;
 function loadAds() {
-  if (!adsAllowedHere()) return;
-  const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
-  storeSet(sessionStorage, 'pm_pageviews', views);
-  let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
-  if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
+  if (storeGet(localStorage, 'pm_is_pro') === '1' || AD_FREE_PAGES.includes(currentPage())) return;
+  getAdConfig().then(cfg => {
+    if (!adsAllowedHere(cfg)) return;
+    const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
+    storeSet(sessionStorage, 'pm_pageviews', views);
+    let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
+    if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
 
-  if (views >= 2) { armPopunder(); return; }
-  clearTimeout(popunderTimer);
-  popunderTimer = setTimeout(armPopunder, Math.max(0, start + POPUNDER_ARM_DELAY_MS - Date.now()));
+    clearTimeout(popunderTimer);
+    if (views >= 2) { armPopunder(cfg); return; }
+    popunderTimer = setTimeout(() => armPopunder(cfg), Math.max(0, start + cfg.delayMs - Date.now()));
+  }).catch(() => {});
 }
 
 try { loadAds(); } catch (e) { /* never let ads break the site */ }

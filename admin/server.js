@@ -27,6 +27,7 @@ const MUSIC_JSON_PATH = path.join(ROOT_DIR, 'data', 'music.json');
 const GENRES_JSON_PATH = path.join(ROOT_DIR, 'data', 'genres.json');
 const ARTISTS_JSON_PATH = path.join(ROOT_DIR, 'data', 'artists.json');
 const SPOTLIGHT_JSON_PATH = path.join(ROOT_DIR, 'data', 'spotlight.json');
+const ADS_JSON_PATH = path.join(ROOT_DIR, 'data', 'ads.json');
 const MUSIC_DIR = path.join(ROOT_DIR, 'music');
 const COVERS_DIR = path.join(ROOT_DIR, 'covers');
 
@@ -419,6 +420,32 @@ const server = http.createServer(async (req, res) => {
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+  }
+
+  // --- API: Ad settings (read by js/app.js on the live site) ---
+  if (pathname === '/api/ads') {
+    try {
+      if (req.method === 'GET') {
+        return sendJson(200, { success: true, ads: JSON.parse(fs.readFileSync(ADS_JSON_PATH, 'utf8')) });
+      }
+      if (req.method === 'POST') {
+        const data = await parseBody(req);
+        const num = (v, min, max) => Math.min(max, Math.max(min, Math.round(Number(v)) || min));
+        const zone = String(data.zone || '').trim();
+        if (!/^\d{5,10}$/.test(zone)) throw new Error('Zone ID must be the number from Monetag (e.g. 10786944)');
+        const ads = {
+          enabled: data.enabled === true,
+          zone,
+          where: data.where === 'download' ? 'download' : 'all',
+          gapHours: num(data.gapHours, 1, 168),
+          delaySeconds: num(data.delaySeconds, 0, 600),
+        };
+        fs.writeFileSync(ADS_JSON_PATH, JSON.stringify(ads, null, 2) + '\n', 'utf8');
+        return sendJson(200, { success: true, ads });
+      }
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 
