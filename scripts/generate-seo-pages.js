@@ -416,6 +416,9 @@ function decodeEntities(str) {
 }
 
 var redirected = 0;
+// Old track ID → current track ID, so favorites/playlists saved before a
+// re-import still resolve (used by js/firebase-auth.js)
+var idMap = fs.existsSync('data/id-map.json') ? JSON.parse(fs.readFileSync('data/id-map.json', 'utf8')) : {};
 fs.readdirSync('tracks').forEach(function (file) {
   if (!file.endsWith('.html') || currentPages.has(file)) return;
   var old = fs.readFileSync('tracks/' + file, 'utf8');
@@ -425,6 +428,8 @@ fs.readdirSync('tracks').forEach(function (file) {
   var titleKey = title.toLowerCase().replace(/[^a-z0-9]/g, '');
   var target = (idMatch && pageById[idMatch[1]]) || pageByTitle[titleKey];
   var url = target ? '/tracks/' + target : '/browse.html';
+  var newId = target && target.match(/-([a-z0-9]+)\.html$/);
+  if (idMatch && newId && idMatch[1] !== newId[1]) idMap[idMatch[1]] = newId[1];
   var name = target && title ? esc(title) : 'Browse Music';
   var html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
     '  <meta charset="UTF-8">\n' +
@@ -439,6 +444,14 @@ fs.readdirSync('tracks').forEach(function (file) {
   if (html !== old) { fs.writeFileSync('tracks/' + file, html, 'utf8'); redirected++; }
 });
 if (redirected) console.log('Updated ' + redirected + ' stale track page(s) to redirects');
+// Resolve chains (a → b → c) and drop entries that point at the ID itself
+Object.keys(idMap).forEach(function (k) {
+  var v = idMap[k], hops = 0;
+  while (idMap[v] && hops++ < 10) v = idMap[v];
+  if (v === k) delete idMap[k]; else idMap[k] = v;
+});
+fs.writeFileSync('data/id-map.json', JSON.stringify(idMap), 'utf8');
+console.log('Wrote data/id-map.json (' + Object.keys(idMap).length + ' old IDs)');
 
 // ─── Generate sitemap-tracks.xml ────────────────────────────────────────────
 

@@ -4134,3 +4134,38 @@ body:has(#player-bar.visible) .cookie-banner { bottom: 96px; }
 }
 
 .hero .hero-kicker { color: var(--accent-2); font-weight: 600; margin-bottom: 0.25rem; }
+
+/* ============================================
+   Phone layout fixes (overflow audit)
+   ============================================ */
+/* Footer links wrap instead of running off both edges */
+.footer-links { flex-wrap: wrap; justify-content: center; gap: 6px 16px; padding: 0 16px; }
+
+/* New Releases cards never wider than the screen */
+.new-releases-grid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+
+/* Radio: action buttons wrap inside the player card */
+.rp-actions { flex-wrap: wrap; padding-left: 0; padding-right: 0; }
+
+/* Profile card: long names/emails wrap */
+.profile-info { min-width: 0; }
+.profile-email { overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .profile-header { flex-wrap: wrap; padding: 1.25rem; gap: 1rem; }
+  .profile-name { font-size: 1.3rem; }
+  .profile-account-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    margin-left: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .profile-account-actions > * { flex: 1 1 auto; text-align: center; }
+
+  /* Radio: action buttons in a tidy 2 × 2 grid */
+  .rp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+  .rp-actions > * { width: 100%; justify-content: center; text-align: center; }
+}
