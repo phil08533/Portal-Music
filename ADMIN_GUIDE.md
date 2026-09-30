@@ -50,7 +50,8 @@ Then open your browser to:
    - Click **▶ Play** next to any track to preview its audio directly in the dashboard.
 4. **Editing Track Details**:
    - Click **✏️ Edit** on any song to change its title, artist, genre, subgenre, or tags without touching code.
-   - Click **Save Changes** and the catalog updates immediately.
+   - Click **Save Changes**. This updates `data/music.json` on your computer only — to put it on the
+     live site, run **Actions & Sync → Run SEO Rebuild**, then push (step 3 on that tab).
 5. **Deleting Tracks**:
    - Click **🗑️** to safely remove a track from the catalog.
 
