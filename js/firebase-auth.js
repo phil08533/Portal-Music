@@ -33,6 +33,16 @@ const firebaseConfig = {
 
 const FAV_KEY = 'pm_favorites';
 
+// Tracks re-imported under new IDs keep working in saved favorites/playlists
+let idMapPromise = null;
+function loadIdMap() {
+  idMapPromise ||= fetch('/data/id-map.json').then(r => (r.ok ? r.json() : {})).catch(() => ({}));
+  return idMapPromise;
+}
+function remapIds(ids, map) {
+  return [...new Set((ids || []).map(id => map[String(id)] || String(id)))];
+}
+
 // Subscription details shown on the profile/upgrade pages
 function proInfo(data) {
   const end = data.proCurrentPeriodEnd;
@@ -106,9 +116,10 @@ if (!configReady) {
       try {
         const snap   = await getDoc(doc(db, 'users', user.uid));
         const data   = snap.exists() ? snap.data() : {};
+        const idMap  = await loadIdMap();
         const cloud  = data.favorites || [];
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
-        const merged = [...new Set([...cloud, ...local])];
+        const merged = remapIds([...cloud, ...local], idMap);
         window._fbIsPro      = data.isPro === true;
         window._fbProInfo    = proInfo(data);
         sessionStorage.setItem(FAV_KEY, JSON.stringify(merged));
@@ -146,8 +157,16 @@ if (!configReady) {
     if (!window._fbUser) return [];
     try {
       const q    = query(collection(db, 'users', window._fbUser.uid, 'playlists'), orderBy('createdAt'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const [snap, idMap] = await Promise.all([getDocs(q), loadIdMap()]);
+      return snap.docs.map(d => {
+        const data = d.data();
+        const songs = remapIds(data.songs, idMap);
+        // Save the upgraded IDs so this only happens once
+        if (JSON.stringify(songs) !== JSON.stringify(data.songs || [])) {
+          updateDoc(d.ref, { songs }).catch(() => {});
+        }
+        return { id: d.id, ...data, songs };
+      });
     } catch { return []; }
   };
 
