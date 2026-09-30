@@ -97,21 +97,32 @@ const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx
 // Mobile ☰ menu: collapses the nav links, "More" and the theme picker into one panel
 function setupMobileNav() {
   const header = document.querySelector('header');
-  if (!header || header.querySelector('.nav-toggle')) return;
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'nav-toggle';
-  btn.setAttribute('aria-label', 'Menu');
-  btn.setAttribute('aria-expanded', 'false');
-  btn.innerHTML =
-    '<svg class="icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>' +
-    '<svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  header.appendChild(btn);
+  if (!header) return;
   const setOpen = open => {
     header.classList.toggle('nav-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    const b = header.querySelector('.nav-toggle');
+    if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
   };
-  btn.addEventListener('click', e => { e.stopPropagation(); setOpen(!header.classList.contains('nav-open')); });
+
+  // The SPA router replaces the header's contents on every page change,
+  // so the button is re-created whenever it's missing.
+  if (!header.querySelector('.nav-toggle')) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'nav-toggle';
+    btn.setAttribute('aria-label', 'Menu');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML =
+      '<svg class="icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>' +
+      '<svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    btn.addEventListener('click', e => { e.stopPropagation(); setOpen(!header.classList.contains('nav-open')); });
+    header.appendChild(btn);
+  }
+  setOpen(false);
+
+  // The header element itself survives page changes: bind these only once
+  if (header.dataset.mobileNavBound) return;
+  header.dataset.mobileNavBound = '1';
   // Close after choosing a page, or when tapping outside the header
   header.addEventListener('click', e => { if (e.target.closest('.nav-links a')) setOpen(false); });
   document.addEventListener('click', e => { if (!header.contains(e.target)) setOpen(false); });
@@ -990,6 +1001,7 @@ async function navigateTo(url, pushState = true) {
       if (typeof window.initHeaderElements === 'function') {
         window.initHeaderElements();
       }
+      setupMobileNav();
 
       // Pages reached from an ad-free page (upgrade/pro) pick up ads here
       try { loadAds(); } catch (e) {}
