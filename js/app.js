@@ -82,7 +82,7 @@ try { loadAds(); } catch (e) { /* never let ads break the site */ }
 // ============================================
 // Paste the token from Cloudflare → Analytics & Logs → Web Analytics → portal-music.com
 // (the value after "token": in the snippet Cloudflare shows). Empty = off.
-const CF_ANALYTICS_TOKEN = '';
+const CF_ANALYTICS_TOKEN = '2d6415c7cdc24a2db1d02d222422b116';
 
 (function loadAnalytics() {
   if (!CF_ANALYTICS_TOKEN || document.getElementById('pm-analytics')) return;
