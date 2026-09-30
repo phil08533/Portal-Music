@@ -326,7 +326,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const data = await parseBody(req);
       const { title, artist, genre, subgenre, tags, featured, isNewRelease, audioBase64, coverBase64,
-              sunoId, wantWav, duration } = data;
+              sunoId, sunoAudioUrl, wantWav, duration } = data;
 
       if (!title || !genre) throw new Error('Title and Genre are required');
       if (!audioBase64 && !sunoId) throw new Error('Choose an MP3 file or paste a Suno link');
@@ -334,7 +334,7 @@ const server = http.createServer(async (req, res) => {
 
       // Get the audio first so nothing is written if the download fails
       const audioBuffer = sunoId
-        ? await suno.download(sunoId, 'mp3')
+        ? await suno.download(sunoId, 'mp3', sunoAudioUrl)
         : Buffer.from(audioBase64.replace(/^data:audio\/[\w.+-]+;base64,/, ''), 'base64');
       let wavBuffer = null;
       let warning = '';
@@ -397,7 +397,7 @@ const server = http.createServer(async (req, res) => {
 
       return sendJson(200, { success: true, track: newEntry, warning });
     } catch (err) {
-      return sendJson(500, { success: false, error: err.message });
+      return sendJson(500, { success: false, error: err.message, code: err.code || '' });
     }
   }
 

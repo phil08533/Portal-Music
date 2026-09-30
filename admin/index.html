@@ -884,7 +884,9 @@
         alert('Please choose an MP3 file.');
         return;
       }
-      clearSuno();
+      // After a Suno lookup, a dropped MP3 is that song: keep the details already filled in
+      const keepDetails = !!sunoSong;
+      if (keepDetails) document.getElementById('suno-want-wav').checked = false;
       const label = document.getElementById('audio-file-name');
       label.style.display = 'block';
       label.textContent = `Selected: ${file.name} (${(file.size / (1024*1024)).toFixed(1)} MB)`;
@@ -900,7 +902,9 @@
             body: JSON.stringify({ fileName: file.name, base64Data: audioBase64 })
           });
           const parsed = await res.json();
+          if (keepDetails) { showToast('MP3 added. Details from Suno kept, click Add to Music Catalog.'); return; }
           if (parsed.success && parsed.metadata) {
+            clearSuno();
             const m = parsed.metadata;
             if (m.title) document.getElementById('track-title').value = m.title;
             if (m.artist) document.getElementById('track-artist').value = m.artist;
@@ -974,6 +978,29 @@
       } finally {
         btn.disabled = false; btn.textContent = '🔍 Get song';
       }
+    }
+
+    // Fetch a file straight from Suno in this browser; null if blocked or missing
+    async function browserDownload(urls) {
+      for (const u of urls.filter(Boolean)) {
+        try {
+          const res = await fetch(u, { mode: 'cors', referrerPolicy: 'no-referrer' });
+          if (res.ok) {
+            const blob = await res.blob();
+            if (blob.size > 1000) return blob;
+          }
+        } catch (e) { /* blocked by the browser (CORS) or offline */ }
+      }
+      return null;
+    }
+
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(blob);
+      });
     }
 
     function clearSuno() {
@@ -1060,25 +1087,40 @@
 
       if (!title) { alert('Please enter a track title'); return; }
       if (!audioBase64 && !sunoSong) { alert('Paste a Suno link or choose an MP3 file'); return; }
-      const wavFile = sunoSong ? null : document.getElementById('wav-input').files[0];
+      let wavFile = document.getElementById('wav-input').files[0] || null;
       const wantWav = !!sunoSong && document.getElementById('suno-want-wav').checked;
 
       const saveBtn = document.getElementById('save-track-btn');
       saveBtn.disabled = true;
       saveBtn.textContent = sunoSong ? (wantWav ? 'Downloading MP3 + WAV from Suno…' : 'Downloading from Suno…') : 'Saving track...';
 
+      const post = async body => (await fetch('/api/track/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, artist, genre, subgenre, tags, isNewRelease, featured, coverBase64, ...body })
+      })).json();
+
       try {
-        const res = await fetch('/api/track/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title, artist, genre, subgenre, tags, isNewRelease, featured,
-            audioBase64: sunoSong ? null : audioBase64, coverBase64,
-            sunoId: sunoSong ? sunoSong.id : null, wantWav,
-            duration: sunoSong ? sunoSong.duration : ''
-          })
-        });
-        const result = await res.json();
+        let result = await post(sunoSong && !audioBase64
+          ? { sunoId: sunoSong.id, sunoAudioUrl: sunoSong.audioUrl, wantWav, duration: sunoSong.duration }
+          : { audioBase64, duration: sunoSong ? sunoSong.duration : '' });
+
+        // Suno sometimes refuses the studio's own download; your browser usually gets through
+        if (!result.success && result.code === 'SUNO_DOWNLOAD') {
+          saveBtn.textContent = 'Downloading through your browser…';
+          const mp3 = await browserDownload([sunoSong.previewUrl, sunoSong.audioUrl]);
+          if (!mp3) throw new Error(
+            'Suno blocked the download. Click ⋮ on the player above → Download, then drag that MP3 into the box below. Your details stay filled in.');
+          audioBase64 = await blobToDataUrl(mp3);
+          if (wantWav) {
+            const wav = await browserDownload([sunoSong.previewUrl.replace(/\.mp3$/, '.wav')]);
+            if (wav) wavFile = new File([wav], 'track.wav', { type: 'audio/wav' });
+          }
+          result = await post({ audioBase64, duration: sunoSong.duration });
+          if (result.success && wantWav && !wavFile) {
+            result.warning = 'WAV not added: Suno has none for this song yet (⋯ → Download → WAV Audio in Suno), or add it later in Edit.';
+          }
+        }
         if (!result.success) throw new Error(result.error);
 
         let wavNote = result.track.wav ? ' (MP3 + WAV)' : '';
