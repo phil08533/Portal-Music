@@ -216,6 +216,14 @@ async function lookup(link, genres) {
   };
 }
 
+// A real MP3 starts with an ID3 tag or an MPEG frame header. Suno now serves locked
+// (encrypted) audio to most requests; those bytes must never land in the catalog.
+function isMp3(buf) {
+  if (!buf || buf.length < 1000) return false;
+  if (buf.slice(0, 3).toString() === 'ID3') return true;
+  return buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0;
+}
+
 // Only ever download from Suno's own servers
 function isSunoUrl(u) {
   try {
@@ -242,14 +250,15 @@ async function download(id, ext, altUrl) {
       if (!res.ok) continue;
       const buf = Buffer.from(await res.arrayBuffer());
       if (ext === 'wav' && buf.slice(0, 4).toString() !== 'RIFF') continue;
+      if (ext === 'mp3' && !isMp3(buf)) continue;
       return buf;
     } catch (e) { /* try the next link */ }
   }
   const err = new Error(ext === 'wav'
     ? 'Suno has no WAV for this song yet. In Suno click ⋯ → Download → WAV Audio once, then try again (or attach the WAV in Edit).'
-    : `Could not download the MP3 from Suno (${status || 'no response'})`);
+    : `Suno didn't allow the automatic download (${status || 'locked file'}).`);
   err.code = 'SUNO_DOWNLOAD';
   return Promise.reject(err);
 }
 
-module.exports = { lookup, download, isSunoId, guessGenre };
+module.exports = { lookup, download, isSunoId, isMp3, guessGenre };

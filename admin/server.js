@@ -336,6 +336,7 @@ const server = http.createServer(async (req, res) => {
       const audioBuffer = sunoId
         ? await suno.download(sunoId, 'mp3', sunoAudioUrl)
         : Buffer.from(audioBase64.replace(/^data:audio\/[\w.+-]+;base64,/, ''), 'base64');
+      if (!suno.isMp3(audioBuffer)) throw new Error('That file is not a playable MP3. Use the MP3 from Suno\'s own Download button.');
       let wavBuffer = null;
       let warning = '';
       if (sunoId && wantWav) {
