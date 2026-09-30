@@ -119,7 +119,8 @@ When you add new MP3 files locally and want them live on your CDN:
 1. Open the **Actions & Sync** tab in the Admin Studio.
 2. Click **📋 Copy Sync Commands** or run:
    ```bash
-   aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --content-type "audio/mpeg"
+   aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --exclude "*.wav" --content-type "audio/mpeg"
+   aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --exclude "*" --include "*.wav" --content-type "audio/wav"
    aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com"
    ```
 3. Commit and push your catalog changes:
@@ -140,4 +141,14 @@ When you add new MP3 files locally and want them live on your CDN:
   "Show the Spotlight", and click 🌟 next to any track to add it. Untick to hide it.
 
 All three are catalog changes: run the SEO rebuild and push to publish.
+
+## Adding a song from Suno
+
+1. Upload & Add Track → paste the song's Suno link (Share → Copy link) → **Get song**.
+   Title, style tags, genre (best guess), length and cover fill in; check them.
+2. Tick **Also download the WAV** to offer a WAV on the download page. Suno only has a WAV after you
+   click ⋯ → Download → WAV Audio on that song once; if it says there's none, do that and click Get song again.
+3. **Add to Music Catalog**, then R2 sync (uploads the MP3/WAV), SEO rebuild, push.
+
+To add or remove a WAV on any track later: Manage Catalog → Edit → WAV download.
 

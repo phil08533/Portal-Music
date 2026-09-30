@@ -152,8 +152,30 @@
     <div class="grid-layout">
       
       <div class="card">
-        <h2>1. Select Audio File (.mp3)</h2>
-        
+        <h2>1. Paste a Suno link</h2>
+        <div class="form-row" style="align-items:flex-end;">
+          <div class="form-group" style="flex:3;">
+            <input type="url" id="suno-url" class="form-control" placeholder="https://suno.com/song/…" onkeydown="if(event.key==='Enter')lookupSuno()">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <button class="btn btn-primary" id="suno-btn" style="width:100%;" onclick="lookupSuno()">🔍 Get song</button>
+          </div>
+        </div>
+        <div id="suno-result" style="display:none;background:var(--bg);border:1px solid var(--card-border);border-radius:8px;padding:12px;margin-bottom:16px;">
+          <div id="suno-summary" style="font-size:0.85rem;margin-bottom:8px;"></div>
+          <audio id="suno-preview" controls preload="none" style="width:100%;margin-bottom:8px;"></audio>
+          <label class="checkbox-group" style="margin:0;">
+            <input type="checkbox" checked disabled>
+            <span>MP3 (always, the site's player uses it)</span>
+          </label>
+          <label class="checkbox-group" style="margin:0;">
+            <input type="checkbox" id="suno-want-wav">
+            <span>Also download the <strong>WAV</strong> and offer it on the download page</span>
+          </label>
+          <div id="suno-wav-note" class="muted" style="white-space:normal;font-size:0.8rem;margin-top:6px;"></div>
+        </div>
+
+        <p class="muted" style="margin:4px 0 10px;">…or upload files yourself:</p>
         <div class="dropzone" id="audio-dropzone" onclick="document.getElementById('audio-input').click()">
           <div style="font-size:2rem;">🎧</div>
           <strong>Drag & drop an MP3 file here</strong>
@@ -161,6 +183,10 @@
           <input type="file" id="audio-input" accept=".mp3,audio/mpeg">
         </div>
         <p id="audio-file-name" style="font-size:0.85rem;color:var(--accent);margin-bottom:16px;display:none;"></p>
+        <div class="form-group">
+          <label>WAV file (optional, offered as a second download)</label>
+          <input type="file" id="wav-input" class="form-control" accept=".wav,audio/wav,audio/x-wav">
+        </div>
 
         <h2>2. Track Metadata</h2>
         <div class="form-group">
@@ -509,10 +535,11 @@
 
           <div style="background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--card-border);">
             <strong style="display:block;margin-bottom:4px;">2. Sync Assets to Cloudflare R2</strong>
-            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">When you add new audio files to <code>music/</code>, sync them to your Cloudflare R2 bucket:</p>
-            <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:8px;overflow-x:auto;">aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --content-type "audio/mpeg"</code>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">After adding tracks or WAVs, upload the new files to your Cloudflare R2 bucket:</p>
+            <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:8px;overflow-x:auto;">aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --exclude "*.wav" --content-type "audio/mpeg"</code>
+            <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:8px;overflow-x:auto;">aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com" --exclude "*" --include "*.wav" --content-type "audio/wav"</code>
             <code style="display:block;background:#000;padding:8px;border-radius:4px;font-size:0.75rem;margin-bottom:10px;overflow-x:auto;">aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url "https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com"</code>
-            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com --content-type audio/mpeg && aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com'); showToast('R2 Sync commands copied to clipboard!', true);">📋 Copy Sync Commands</button>
+            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com --exclude &quot;*.wav&quot; --content-type audio/mpeg && aws s3 sync music/ s3://portal-music-assets/music/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com --exclude &quot;*&quot; --include &quot;*.wav&quot; --content-type audio/wav && aws s3 sync covers/ s3://portal-music-assets/covers/ --endpoint-url https://5d2f9b493e0a8358e1b201bd9834c99d.r2.cloudflarestorage.com'); showToast('R2 Sync commands copied to clipboard!', true);">📋 Copy Sync Commands</button>
           </div>
 
           <div style="background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--card-border);">
@@ -566,6 +593,15 @@
         <input type="checkbox" id="edit-new">
         <span>Show in New Releases <span class="muted" id="edit-new-note"></span></span>
       </label>
+      <div class="form-group" style="margin-top:12px;">
+        <label>WAV download</label>
+        <div id="edit-wav-status" style="font-size:0.85rem;margin-bottom:6px;"></div>
+        <div class="action-btns">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('edit-wav-input').click()">📎 Attach WAV file</button>
+          <button class="btn btn-secondary btn-sm" id="edit-wav-remove" onclick="removeWav()">Remove WAV</button>
+        </div>
+        <input type="file" id="edit-wav-input" accept=".wav,audio/wav,audio/x-wav" style="display:none;" onchange="attachWav(this.files[0])">
+      </div>
       <div style="display:flex;gap:10px;margin-top:20px;">
         <button class="btn btn-secondary" onclick="closeEditModal()" style="flex:1;">Cancel</button>
         <button class="btn btn-primary" onclick="saveTrackEdit()" style="flex:1;">Save Changes</button>
@@ -848,6 +884,7 @@
         alert('Please choose an MP3 file.');
         return;
       }
+      clearSuno();
       const label = document.getElementById('audio-file-name');
       label.style.display = 'block';
       label.textContent = `Selected: ${file.name} (${(file.size / (1024*1024)).toFixed(1)} MB)`;
@@ -884,6 +921,124 @@
       reader.readAsDataURL(file);
     }
 
+    // --- Suno import ---
+    let sunoSong = null;
+
+    async function lookupSuno() {
+      const link = document.getElementById('suno-url').value.trim();
+      if (!link) { alert('Paste a Suno song link first'); return; }
+      const btn = document.getElementById('suno-btn');
+      btn.disabled = true; btn.textContent = 'Looking up…';
+      try {
+        const res = await fetch('/api/suno/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: link })
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        const song = result.song;
+        sunoSong = song;
+        audioBase64 = null;
+        document.getElementById('audio-file-name').style.display = 'none';
+
+        if (song.title) document.getElementById('track-title').value = song.title;
+        if (song.tags.length) document.getElementById('track-tags').value = song.tags.join(', ');
+        const known = artistsConfig.find(a => a.name.toLowerCase() === String(song.sunoArtist || '').toLowerCase());
+        if (known) document.getElementById('track-artist').value = known.name;
+        if (song.genre && genresConfig[song.genre]) {
+          document.getElementById('track-genre').value = song.genre;
+          onGenreSelect();
+        }
+        if (song.subgenre) document.getElementById('track-subgenre').value = song.subgenre;
+        if (song.coverData) coverBase64 = song.coverData;
+        updateLivePreview();
+
+        document.getElementById('suno-summary').innerHTML =
+          `✅ <strong>${escapeHtml(song.title || 'Untitled')}</strong>` +
+          (song.duration ? ` · ${song.duration}` : '') +
+          (song.style ? `<br><span class="muted" style="white-space:normal;">Style: ${escapeHtml(song.style)}</span>` : '') +
+          (song.genre ? '' : '<br><span style="color:#f5a623;">Pick a genre below, no match was found.</span>');
+        document.getElementById('suno-preview').src = song.previewUrl;
+        const wav = document.getElementById('suno-want-wav');
+        wav.checked = song.hasWav;
+        document.getElementById('suno-wav-note').textContent = song.hasWav
+          ? 'Suno has a WAV for this song.'
+          : 'Suno has no WAV for this song yet. To get one: in Suno click ⋯ → Download → WAV Audio, then click Get song again.';
+        document.getElementById('suno-result').style.display = 'block';
+        showToast('Song found, details filled in. Check them, then Add to Music Catalog.');
+      } catch (err) {
+        sunoSong = null;
+        document.getElementById('suno-result').style.display = 'none';
+        showToast('Suno: ' + err.message, false);
+      } finally {
+        btn.disabled = false; btn.textContent = '🔍 Get song';
+      }
+    }
+
+    function clearSuno() {
+      sunoSong = null;
+      document.getElementById('suno-url').value = '';
+      document.getElementById('suno-result').style.display = 'none';
+      document.getElementById('suno-preview').removeAttribute('src');
+    }
+
+    // --- WAV attach / remove ---
+    async function uploadWav(id, file) {
+      if (!/\.wav$/i.test(file.name)) throw new Error('Choose a .wav file');
+      const res = await fetch('/api/track/wav?id=' + encodeURIComponent(id), {
+        method: 'POST',
+        headers: { 'Content-Type': 'audio/wav' },
+        body: file
+      });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.error);
+      return result.track;
+    }
+
+    function showWavStatus(t) {
+      document.getElementById('edit-wav-status').innerHTML = t.wav
+        ? '✅ This track offers a WAV download.'
+        : '<span class="muted">No WAV. Only the MP3 is offered.</span>';
+      document.getElementById('edit-wav-remove').style.display = t.wav ? '' : 'none';
+    }
+
+    async function attachWav(file) {
+      if (!file) return;
+      const id = document.getElementById('edit-id').value;
+      showToast('Adding WAV…');
+      try {
+        const t = await uploadWav(id, file);
+        const i = catalog.findIndex(x => x.id === id);
+        if (i !== -1) catalog[i] = t;
+        showWavStatus(t);
+        showToast('WAV added. Run the R2 sync, then push to publish.');
+      } catch (err) {
+        showToast('WAV failed: ' + err.message, false);
+      } finally {
+        document.getElementById('edit-wav-input').value = '';
+      }
+    }
+
+    async function removeWav() {
+      const id = document.getElementById('edit-id').value;
+      try {
+        const res = await fetch('/api/track/wav/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        const i = catalog.findIndex(x => x.id === id);
+        if (i !== -1) catalog[i] = result.track;
+        showWavStatus(result.track);
+        showToast('WAV download removed. Push to publish.');
+      } catch (err) {
+        showToast('Remove failed: ' + err.message, false);
+      }
+    }
+
     function handleCoverFile(file) {
       const reader = new FileReader();
       reader.onload = e => {
@@ -904,11 +1059,13 @@
       const featured = document.getElementById('track-featured').checked;
 
       if (!title) { alert('Please enter a track title'); return; }
-      if (!audioBase64) { alert('Please select an audio file'); return; }
+      if (!audioBase64 && !sunoSong) { alert('Paste a Suno link or choose an MP3 file'); return; }
+      const wavFile = sunoSong ? null : document.getElementById('wav-input').files[0];
+      const wantWav = !!sunoSong && document.getElementById('suno-want-wav').checked;
 
       const saveBtn = document.getElementById('save-track-btn');
       saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving track...';
+      saveBtn.textContent = sunoSong ? (wantWav ? 'Downloading MP3 + WAV from Suno…' : 'Downloading from Suno…') : 'Saving track...';
 
       try {
         const res = await fetch('/api/track/add', {
@@ -916,13 +1073,23 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title, artist, genre, subgenre, tags, isNewRelease, featured,
-            audioBase64, coverBase64
+            audioBase64: sunoSong ? null : audioBase64, coverBase64,
+            sunoId: sunoSong ? sunoSong.id : null, wantWav,
+            duration: sunoSong ? sunoSong.duration : ''
           })
         });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
 
-        showToast(`🎉 "${title}" successfully added to catalog!`);
+        let wavNote = result.track.wav ? ' (MP3 + WAV)' : '';
+        if (wavFile) {
+          try { await uploadWav(result.track.id, wavFile); wavNote = ' (MP3 + WAV)'; }
+          catch (e) { result.warning = 'WAV not added: ' + e.message; }
+        }
+        showToast(`🎉 "${title}" added${wavNote}! Next: R2 sync, SEO rebuild, push.`);
+        if (result.warning) setTimeout(() => showToast(result.warning, false), 3500);
+        clearSuno();
+        document.getElementById('wav-input').value = '';
         // Reset form
         document.getElementById('track-title').value = '';
         audioBase64 = null;
@@ -1024,6 +1191,7 @@
       document.getElementById('edit-tags').value = (t.tags || []).join(', ');
       document.getElementById('edit-featured').checked = !!t.featured;
       document.getElementById('edit-new').checked = isNewRelease(t);
+      showWavStatus(t);
       document.getElementById('edit-new-note').textContent = t.added
         ? (isNewRelease(t) ? '(added ' + t.added + ')' : '(added ' + t.added + ', older than ' + NEW_RELEASE_DAYS + ' days)')
         : '';

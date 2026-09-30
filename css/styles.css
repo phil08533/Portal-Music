@@ -4192,3 +4192,16 @@ html.is-pro .creator-toolkit-card a[href="upgrade.html"] { display: none; }
   color: var(--text-muted);
   font-size: 0.95rem;
 }
+
+/* Download page: MP3 + optional WAV */
+.dl-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.dl-btn.dl-btn-alt {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
