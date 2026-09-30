@@ -1,7 +1,7 @@
 {
-  "enabled": false,
+  "enabled": true,
   "zone": "10786944",
-  "where": "all",
+  "where": "download",
   "gapHours": 12,
   "delaySeconds": 30
 }
