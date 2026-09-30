@@ -81,12 +81,23 @@
       ⬇ Download MP3
     </a>
 
-    <!-- Creator Toolkit & Passive Monetization -->
+    <!-- Creator Toolkit -->
     <div class="creator-toolkit-card" style="margin-top:2rem;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;max-width:440px;margin-left:auto;margin-right:auto;">
       <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;color:var(--accent);text-transform:uppercase;margin-bottom:0.4rem;">Creator Toolkit</div>
       <h3 style="font-size:1.02rem;margin:0 0 0.25rem 0;">More for your creative projects</h3>
       
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:0.9rem;">
+        <div class="credit-box">
+          <div class="credit-head">
+            <span style="font-size:1.3rem;">🎵</span>
+            <div>
+              <div style="font-weight:600;font-size:0.88rem;">Credit the music (optional)</div>
+              <div style="font-size:0.76rem;color:var(--text-muted);">Not required, but it really helps us. Paste it in your video description.</div>
+            </div>
+          </div>
+          <textarea id="credit-text" class="credit-text" rows="3" readonly></textarea>
+          <button type="button" id="credit-copy" class="credit-copy">📋 Copy credit</button>
+        </div>
         <a href="upgrade.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);transition:border-color 0.2s;">
           <span style="font-size:1.3rem;">⭐</span>
           <div>
@@ -95,13 +106,6 @@
           </div>
         </a>
 
-        <a href="https://distrokid.com/vip/seven/portalmusic" target="_blank" rel="noopener sponsored" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);transition:border-color 0.2s;">
-          <span style="font-size:1.3rem;">🚀</span>
-          <div>
-            <div style="font-weight:600;font-size:0.88rem;">Release on Spotify & Apple Music</div>
-            <div style="font-size:0.76rem;color:var(--text-muted);">Get 7% off DistroKid artist plans &bull; Keep 100% of royalties</div>
-          </div>
-        </a>
       </div>
     </div>
 
@@ -140,6 +144,34 @@
     var cover = params.get('cover');
 
     document.getElementById('dl-title').textContent = title;
+
+    // Optional attribution text; upgraded with the artist and the track's own page once the catalog loads
+    (function buildCredit() {
+      var box = document.getElementById('credit-text');
+      var btn = document.getElementById('credit-copy');
+      if (!box || !btn) return;
+      function slug(str) { return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+      function render(t, artist, pageUrl) {
+        box.value = 'Music: "' + t + '"' + (artist ? ' by ' + artist : '') + ' — Portal Music\n' +
+          'Free download: ' + (pageUrl || 'https://portal-music.com');
+        box.style.height = 'auto';
+        box.style.height = box.scrollHeight + 2 + 'px'; // show the whole credit, no scrolling
+      }
+      render(title, '', '');
+      fetch('data/music.json').then(function (r) { return r.json(); }).then(function (songs) {
+        var song = songs.find(function (s) { return s.file === file; }) ||
+                   songs.find(function (s) { return s.title === title; });
+        if (!song) return;
+        var who = song.artist || song.subgenre || song.genre || 'Other';
+        render(song.title, song.artist || '', 'https://portal-music.com/tracks/' + slug(song.title + '-' + who) + '-' + song.id + '.html');
+      }).catch(function () {});
+      btn.addEventListener('click', function () {
+        var done = function () { btn.textContent = '✓ Copied!'; setTimeout(function () { btn.textContent = '📋 Copy credit'; }, 2000); };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(box.value).then(done, function () { box.select(); document.execCommand('copy'); done(); });
+        } else { box.select(); document.execCommand('copy'); done(); }
+      });
+    })();
     if (cover) {
       var img = document.getElementById('dl-cover');
       img.src = cover;
