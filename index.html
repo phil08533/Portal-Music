@@ -153,6 +153,15 @@
         <div style="grid-column:1/-1;color:var(--text-muted);font-size:.85rem;">Loading genres…</div>
       </div>
 
+      <!-- Spotlight: custom collection set in the admin studio (hidden when off) -->
+      <div id="spotlight-section" style="display:none;">
+        <div class="section-header">
+          <h2 id="spotlight-title">Spotlight</h2>
+        </div>
+        <p id="spotlight-subtitle" class="spotlight-subtitle"></p>
+        <div class="grid" id="spotlight-grid"></div>
+      </div>
+
       <!-- Featured Artists -->
       <div class="section-header">
         <h2>Featured Artists</h2>
@@ -167,7 +176,7 @@
           <h2>New Releases</h2>
           <a href="browse.html">Browse all →</a>
         </div>
-        <div id="new-releases-grid" class="new-releases-grid"></div>
+        <div id="new-releases-grid" class="grid"></div>
       </div>
 
       <!-- Featured Tracks -->

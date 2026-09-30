@@ -254,7 +254,8 @@ for (const folder of folders) {
         tags:     [],
         file:     assetPath(filePath),
         duration: '',
-        featured: false
+        featured: false,
+        added:    new Date().toISOString().slice(0, 10) // shows under New Releases
       };
       // Look for cover in MP3 tag first, then music folder
       const absPath = path.join(folderPath, file);
@@ -322,7 +323,8 @@ for (const folder of folders) {
           tags:     [],
           file:     assetPath(filePath),
           duration: '',
-          featured: false
+          featured: false,
+          added:    new Date().toISOString().slice(0, 10)
         };
         const absPath = path.join(subPath, file);
         newEntry.cover = extractCoverFromMp3(absPath, id);

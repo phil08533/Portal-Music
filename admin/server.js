@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { exec } = require('child_process');
 const users = require('./users');
 const reels = require('./reels');
+const suno  = require('./suno');
 
 let NodeID3;
 try {
@@ -16,6 +17,7 @@ try {
 const PORT = process.env.ADMIN_PORT || 3030;
 const HOST = '127.0.0.1'; // never expose the studio to your network
 const MAX_BODY_BYTES = 300 * 1024 * 1024;
+const MAX_WAV_BYTES = 400 * 1024 * 1024;
 
 // Fresh secret every launch. It is embedded in the page this server serves and
 // required on every API call, so other websites open in your browser can't
@@ -26,8 +28,23 @@ const ROOT_DIR = path.join(__dirname, '..');
 const MUSIC_JSON_PATH = path.join(ROOT_DIR, 'data', 'music.json');
 const GENRES_JSON_PATH = path.join(ROOT_DIR, 'data', 'genres.json');
 const ARTISTS_JSON_PATH = path.join(ROOT_DIR, 'data', 'artists.json');
+const SPOTLIGHT_JSON_PATH = path.join(ROOT_DIR, 'data', 'spotlight.json');
+const ADS_JSON_PATH = path.join(ROOT_DIR, 'data', 'ads.json');
 const MUSIC_DIR = path.join(ROOT_DIR, 'music');
 const COVERS_DIR = path.join(ROOT_DIR, 'covers');
+
+// "YYYY-MM-DD"; tracks with a recent "added" date appear under New Releases on the homepage
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function readSpotlight() {
+  try {
+    return JSON.parse(fs.readFileSync(SPOTLIGHT_JSON_PATH, 'utf8'));
+  } catch (e) {
+    return { active: false, title: '', subtitle: '', trackIds: [] };
+  }
+}
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -55,6 +72,48 @@ function parseBody(req) {
     });
     req.on('error', reject);
   });
+}
+
+function readRaw(req, limit) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > limit) { reject(new Error('File too large')); req.destroy(); return; }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
+// Clean ID3 tags (removes Suno markers, sets our copyright, site and cover)
+function writeId3(file, { title, artist, genre, coverBase64 }) {
+  if (!NodeID3) return;
+  try {
+    const id3Tags = {
+      title: title.trim(),
+      artist: artist ? artist.trim() : 'Portal Music',
+      album: genre.trim() || 'Portal Music',
+      copyright: `© ${new Date().getFullYear()} Portal Music. Free for public use.`,
+      comment: { language: 'eng', text: 'Free for YouTube, TikTok, and more. No attribution required. https://portal-music.com' },
+      userDefinedText: [
+        { description: 'WEBSITE', value: 'https://portal-music.com' },
+        { description: 'CONTACT', value: 'creatitproductions@gmail.com' },
+      ],
+      encodedBy: '',
+      encoderSettings: '',
+    };
+    if (coverBase64) {
+      const mime = coverBase64.includes('image/png') ? 'image/png' : 'image/jpeg';
+      const rawImg = Buffer.from(coverBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+      id3Tags.image = { mime, type: { id: 3, name: 'front cover' }, description: 'Cover', imageBuffer: rawImg };
+    }
+    NodeID3.write(id3Tags, file);
+  } catch (e) {
+    console.warn('Could not write ID3 tags to MP3:', e.message);
+  }
 }
 
 const server = http.createServer(async (req, res) => {
@@ -193,7 +252,7 @@ const server = http.createServer(async (req, res) => {
       const genres = fs.existsSync(GENRES_JSON_PATH) ? JSON.parse(fs.readFileSync(GENRES_JSON_PATH, 'utf8')) : {};
       const artists = fs.existsSync(ARTISTS_JSON_PATH) ? JSON.parse(fs.readFileSync(ARTISTS_JSON_PATH, 'utf8')) : [];
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ success: true, tracks: music, genres: genres.genres || {}, artists }));
+      return res.end(JSON.stringify({ success: true, tracks: music, genres: genres.genres || {}, artists, spotlight: readSpotlight() }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
@@ -251,12 +310,37 @@ const server = http.createServer(async (req, res) => {
   }
 
   // --- API: Save New Track to Catalog ---
+  // --- API: Look up a Suno link (title, style, cover, WAV availability) ---
+  if (req.method === 'POST' && pathname === '/api/suno/lookup') {
+    try {
+      const { url: link } = await parseBody(req);
+      const genres = fs.existsSync(GENRES_JSON_PATH) ? JSON.parse(fs.readFileSync(GENRES_JSON_PATH, 'utf8')).genres : {};
+      return sendJson(200, { success: true, song: await suno.lookup(link, genres) });
+    } catch (err) {
+      return sendJson(400, { success: false, error: err.message });
+    }
+  }
+
+  // --- API: Add a new track (from an uploaded MP3 or a Suno link) ---
   if (req.method === 'POST' && pathname === '/api/track/add') {
     try {
       const data = await parseBody(req);
-      const { title, artist, genre, subgenre, tags, featured, isNewRelease, audioBase64, audioFileName, coverBase64 } = data;
+      const { title, artist, genre, subgenre, tags, featured, isNewRelease, audioBase64, coverBase64,
+              sunoId, wantWav, duration } = data;
 
       if (!title || !genre) throw new Error('Title and Genre are required');
+      if (!audioBase64 && !sunoId) throw new Error('Choose an MP3 file or paste a Suno link');
+      if (sunoId && !suno.isSunoId(sunoId)) throw new Error('Invalid Suno song ID');
+
+      // Get the audio first so nothing is written if the download fails
+      const audioBuffer = sunoId
+        ? await suno.download(sunoId, 'mp3')
+        : Buffer.from(audioBase64.replace(/^data:audio\/[\w.+-]+;base64,/, ''), 'base64');
+      let wavBuffer = null;
+      let warning = '';
+      if (sunoId && wantWav) {
+        try { wavBuffer = await suno.download(sunoId, 'wav'); } catch (e) { warning = e.message; }
+      }
 
       const id = uid();
       fs.mkdirSync(MUSIC_DIR, { recursive: true });
@@ -272,55 +356,18 @@ const server = http.createServer(async (req, res) => {
         coverUrl = `https://assets.portal-music.com/covers/${coverFilename}`;
       }
 
-      // Save Audio File
+      // Save audio as music/<genre>/<title>.mp3 (+ .wav)
       const safeTitle = title.replace(/[/\\?%*:|"<>]/g, '').trim();
-      const genreFolder = path.join(MUSIC_DIR, genre);
-      fs.mkdirSync(genreFolder, { recursive: true });
-
-      let targetFolder = genreFolder;
-      if (isNewRelease) {
-        targetFolder = path.join(genreFolder, 'Newest Release!');
-        fs.mkdirSync(targetFolder, { recursive: true });
-      }
-
-      const audioBuffer = audioBase64 ? Buffer.from(audioBase64.replace(/^data:audio\/\w+;base64,/, ''), 'base64') : null;
+      const safeGenre = genre.replace(/[/\\?%*:|"<>]/g, '').trim();
+      const targetFolder = path.join(MUSIC_DIR, safeGenre);
+      fs.mkdirSync(targetFolder, { recursive: true });
       const finalFileName = `${safeTitle}.mp3`;
       const targetAudioPath = path.join(targetFolder, finalFileName);
+      fs.writeFileSync(targetAudioPath, audioBuffer);
+      writeId3(targetAudioPath, { title, artist, genre, coverBase64 });
+      if (wavBuffer) fs.writeFileSync(path.join(targetFolder, `${safeTitle}.wav`), wavBuffer);
 
-      if (audioBuffer) {
-        fs.writeFileSync(targetAudioPath, audioBuffer);
-        // Write/clean ID3 metadata tags on the MP3 file (clearing Suno markers, setting copyright & site info)
-        if (NodeID3) {
-          try {
-            const id3Tags = {
-              title: title.trim(),
-              artist: artist ? artist.trim() : 'Portal Music',
-              album: genre.trim() || 'Portal Music',
-              copyright: `\u00a9 ${new Date().getFullYear()} Portal Music. Free for public use.`,
-              comment: { language: 'eng', text: 'Free for YouTube, TikTok, and more. No attribution required. https://portal-music.com' },
-              userDefinedText: [
-                { description: 'WEBSITE', value: 'https://portal-music.com' },
-                { description: 'CONTACT', value: 'creatitproductions@gmail.com' },
-              ],
-              encodedBy: '',
-              encoderSettings: '',
-            };
-            if (coverBase64) {
-              const mime = coverBase64.includes('image/png') ? 'image/png' : 'image/jpeg';
-              const rawImg = Buffer.from(coverBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-              id3Tags.image = { mime, type: { id: 3, name: 'front cover' }, description: 'Cover', imageBuffer: rawImg };
-            }
-            NodeID3.write(id3Tags, targetAudioPath);
-          } catch (e) {
-            console.warn('Could not write ID3 tags to MP3:', e.message);
-          }
-        }
-      }
-
-      const relativeAudioPath = isNewRelease
-        ? `music/${genre}/Newest Release!/${finalFileName}`
-        : `music/${genre}/${finalFileName}`;
-      const fileUrl = `https://assets.portal-music.com/${encodeURI(relativeAudioPath)}`;
+      const assetUrl = file => `https://assets.portal-music.com/${encodeURI(`music/${safeGenre}/${file}`)}`;
 
       // Update Catalog
       const music = fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [];
@@ -331,11 +378,13 @@ const server = http.createServer(async (req, res) => {
         genre: genre.trim(),
         subgenre: subgenre ? subgenre.trim() : genre.trim(),
         tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []),
-        file: fileUrl,
-        duration: '',
+        file: assetUrl(finalFileName),
+        duration: typeof duration === 'string' && /^\d{1,2}:\d{2}$/.test(duration) ? duration : '',
         featured: !!featured,
         cover: coverUrl || `https://assets.portal-music.com/covers/${id}.jpg`
       };
+      if (wavBuffer) newEntry.wav = assetUrl(`${safeTitle}.wav`);
+      if (isNewRelease) newEntry.added = today();
 
       // Add to front of catalog so it appears immediately
       music.unshift(newEntry);
@@ -346,11 +395,53 @@ const server = http.createServer(async (req, res) => {
         if (err) console.error('SEO generation notice:', stderr);
       });
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ success: true, track: newEntry }));
+      return sendJson(200, { success: true, track: newEntry, warning });
     } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ success: false, error: err.message }));
+      return sendJson(500, { success: false, error: err.message });
+    }
+  }
+
+  // --- API: Attach a WAV to an existing track (raw file body) ---
+  if (req.method === 'POST' && pathname === '/api/track/wav') {
+    try {
+      const id = url.searchParams.get('id');
+      const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
+      const track = music.find(t => t.id === id);
+      if (!track) throw new Error('Track not found');
+      const prefix = 'https://assets.portal-music.com/';
+      if (!track.file || !track.file.startsWith(prefix) || !/\.mp3$/i.test(track.file)) {
+        throw new Error('This track\'s MP3 isn\'t on assets.portal-music.com, so the WAV has nowhere to go');
+      }
+      const rel = decodeURI(track.file.slice(prefix.length)).replace(/\.mp3$/i, '.wav');
+      const dest = path.resolve(ROOT_DIR, rel);
+      if (!dest.startsWith(MUSIC_DIR + path.sep)) throw new Error('Unexpected file location');
+
+      const buf = await readRaw(req, MAX_WAV_BYTES);
+      if (buf.slice(0, 4).toString() !== 'RIFF' || buf.slice(8, 12).toString() !== 'WAVE') {
+        throw new Error('That file is not a WAV');
+      }
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, buf);
+      track.wav = prefix + encodeURI(rel);
+      fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
+      return sendJson(200, { success: true, track });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
+    }
+  }
+
+  // --- API: Remove a track's WAV download (keeps the MP3) ---
+  if (req.method === 'POST' && pathname === '/api/track/wav/remove') {
+    try {
+      const { id } = await parseBody(req);
+      const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
+      const track = music.find(t => t.id === id);
+      if (!track) throw new Error('Track not found');
+      delete track.wav;
+      fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
+      return sendJson(200, { success: true, track });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 
@@ -358,7 +449,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && pathname === '/api/track/update') {
     try {
       const data = await parseBody(req);
-      const { id, title, artist, genre, subgenre, tags, featured } = data;
+      const { id, title, artist, genre, subgenre, tags, featured, isNew } = data;
       if (!id) throw new Error('Track ID required');
 
       const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
@@ -373,6 +464,8 @@ const server = http.createServer(async (req, res) => {
         music[idx].tags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(Boolean);
       }
       if (featured !== undefined) music[idx].featured = !!featured;
+      if (isNew === true) music[idx].added = today();
+      if (isNew === false) delete music[idx].added;
 
       fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
 
@@ -397,11 +490,63 @@ const server = http.createServer(async (req, res) => {
 
       fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
 
+      const spotlight = readSpotlight();
+      if (spotlight.trackIds.includes(id)) {
+        spotlight.trackIds = spotlight.trackIds.filter(t => t !== id);
+        fs.writeFileSync(SPOTLIGHT_JSON_PATH, JSON.stringify(spotlight, null, 2) + '\n', 'utf8');
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: true, remaining: music.length }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+  }
+
+  // --- API: Ad settings (read by js/app.js on the live site) ---
+  if (pathname === '/api/ads') {
+    try {
+      if (req.method === 'GET') {
+        return sendJson(200, { success: true, ads: JSON.parse(fs.readFileSync(ADS_JSON_PATH, 'utf8')) });
+      }
+      if (req.method === 'POST') {
+        const data = await parseBody(req);
+        const num = (v, min, max) => Math.min(max, Math.max(min, Math.round(Number(v)) || min));
+        const zone = String(data.zone || '').trim();
+        if (!/^\d{5,10}$/.test(zone)) throw new Error('Zone ID must be the number from Monetag (e.g. 10786944)');
+        const ads = {
+          enabled: data.enabled === true,
+          zone,
+          where: data.where === 'download' ? 'download' : 'all',
+          gapHours: num(data.gapHours, 1, 168),
+          delaySeconds: num(data.delaySeconds, 0, 600),
+        };
+        fs.writeFileSync(ADS_JSON_PATH, JSON.stringify(ads, null, 2) + '\n', 'utf8');
+        return sendJson(200, { success: true, ads });
+      }
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
+    }
+  }
+
+  // --- API: Homepage Spotlight (custom collection, e.g. "Fall Hits") ---
+  if (req.method === 'POST' && pathname === '/api/spotlight') {
+    try {
+      const data = await parseBody(req);
+      const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
+      const known = new Set(music.map(t => t.id));
+      const ids = Array.isArray(data.trackIds) ? data.trackIds : [];
+      const spotlight = {
+        active: !!data.active,
+        title: String(data.title || '').trim().slice(0, 60),
+        subtitle: String(data.subtitle || '').trim().slice(0, 160),
+        trackIds: [...new Set(ids.map(String))].filter(id => known.has(id)).slice(0, 24),
+      };
+      fs.writeFileSync(SPOTLIGHT_JSON_PATH, JSON.stringify(spotlight, null, 2) + '\n', 'utf8');
+      return sendJson(200, { success: true, spotlight });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 

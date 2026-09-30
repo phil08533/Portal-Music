@@ -77,9 +77,14 @@
     <div class="countdown-ring" id="countdown" style="display:none;"></div>
     <p style="color:var(--text-muted);font-size:.9rem;">Your file will download automatically…</p>
 
-    <a id="dl-link" class="dl-btn" style="display:none;" download>
-      ⬇ Download MP3
-    </a>
+    <div class="dl-buttons">
+      <a id="dl-link" class="dl-btn" style="display:none;" download>
+        ⬇ Download MP3
+      </a>
+      <a id="dl-wav" class="dl-btn dl-btn-alt" style="display:none;" download title="Uncompressed studio quality, larger file">
+        ⬇ Download WAV
+      </a>
+    </div>
 
     <!-- Creator Toolkit -->
     <div class="creator-toolkit-card" style="margin-top:2rem;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;max-width:440px;margin-left:auto;margin-right:auto;">
@@ -162,6 +167,7 @@
         var song = songs.find(function (s) { return s.file === file; }) ||
                    songs.find(function (s) { return s.title === title; });
         if (!song) return;
+        if (song.wav) showWav(song.wav);
         var who = song.artist || song.subgenre || song.genre || 'Other';
         render(song.title, song.artist || '', 'https://portal-music.com/tracks/' + slug(song.title + '-' + who) + '-' + song.id + '.html');
       }).catch(function () {});
@@ -179,12 +185,24 @@
       img.style.display = 'block';
     }
 
+    // Tracks with a WAV get a second button once the countdown is done
+    var wavUrl = null, countdownDone = false;
+    function showWav(url) {
+      wavUrl = url;
+      if (!countdownDone) return;
+      var w = document.getElementById('dl-wav');
+      w.href = wavUrl;
+      w.style.display = 'inline-flex';
+    }
+
     var isPro = localStorage.getItem('pm_is_pro') === '1';
     var countEl = document.getElementById('countdown');
     var dlLink = document.getElementById('dl-link');
 
     function triggerDownload() {
       countEl.style.display = 'none';
+      countdownDone = true;
+      if (wavUrl) showWav(wavUrl);
       if (file) {
         var decoded = decodeURIComponent(file);
         dlLink.href = decoded;

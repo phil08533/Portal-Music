@@ -1,0 +1,7 @@
+{
+  "enabled": false,
+  "zone": "10786944",
+  "where": "all",
+  "gapHours": 12,
+  "delaySeconds": 30
+}

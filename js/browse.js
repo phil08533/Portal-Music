@@ -161,9 +161,8 @@ function applySorting(list) {
     });
   } else if (activeSort === 'newest') {
     return copy.sort(function(a, b) {
-      var aNew = (a.file && a.file.indexOf('Newest Release') !== -1) ? 1 : 0;
-      var bNew = (b.file && b.file.indexOf('Newest Release') !== -1) ? 1 : 0;
-      if (aNew !== bNew) return bNew - aNew;
+      var aAdded = a.added || '', bAdded = b.added || '';
+      if (aAdded !== bAdded) return bAdded.localeCompare(aAdded);
       return String(b.id).localeCompare(String(a.id));
     });
   } else if (activeSort === 'shortest') {
