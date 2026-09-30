@@ -473,7 +473,9 @@ function fuzzySearch(songs, query) {
 // ============================================
 // TRACK CARD RENDERER
 // ============================================
-function createTrackCard(song) {
+// queueVar: name of the window list the Play button queues from (default: the page's main view)
+function createTrackCard(song, queueVar) {
+  const queue = typeof queueVar === 'string' ? queueVar : 'currentSongsView';
   const faved = isFavorited(song.id);
   const icon = GENRES[song.genre]?.icon || '🎵';
   const tagsStr = (song.tags || []).slice(0, 3).join(', ');
@@ -512,7 +514,7 @@ function createTrackCard(song) {
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
-    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(\'' + song.id + '\', window.currentSongsView)">' +
+    '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(\'' + song.id + '\', window.' + queue + ')">' +
     (isPlaying && currentSong?.id === song.id ? '⏸ Pause' : '▶ Play') +
     '</button>' +
     '<a href="download.html?file=' + encodeURIComponent(song.file) + '&title=' + encodeURIComponent(song.title) + '&cover=' + encodeURIComponent(song.cover || '') + '" class="btn-dl" title="Download Free MP3" onclick="event.stopPropagation()">Download</a>' +
@@ -666,7 +668,7 @@ async function loadGenres() {
 
 async function loadSongs() {
   try {
-    const res = await fetch('data/music.json');
+    const res = await fetch('data/music.json', { cache: 'no-cache' }); // always pick up the latest catalog
     if (!res.ok) throw new Error('Not found');
     allSongs = await res.json();
     return allSongs;

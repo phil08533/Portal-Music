@@ -192,13 +192,13 @@
         </div>
 
         <label class="checkbox-group">
-          <input type="checkbox" id="track-new-release">
-          <span>Mark as <strong>New Release</strong> (Featured at the top of homepage)</span>
+          <input type="checkbox" id="track-new-release" checked>
+          <span>Show in <strong>New Releases</strong> on the homepage (for 45 days)</span>
         </label>
 
         <label class="checkbox-group">
           <input type="checkbox" id="track-featured">
-          <span>Featured in curated tracks grid</span>
+          <span>Pin to <strong>Featured Tracks</strong> (the rest of that row changes daily)</span>
         </label>
 
         <button class="btn btn-primary" id="save-track-btn" onclick="saveNewTrack()">
@@ -233,12 +233,33 @@
   <!-- TAB 2: CATALOG MANAGER -->
   <div id="tab-catalog" class="tab-content">
     <div class="card">
+      <h2>🌟 Homepage Spotlight</h2>
+      <p class="muted" style="white-space:normal;margin-bottom:12px;">A custom section at the top of the homepage — "Fall Hits", "Halloween Vibes", anything. Add tracks with the 🌟 button in the list below. Changes save instantly; push to publish.</p>
+      <label class="checkbox-group" style="margin-bottom:10px;">
+        <input type="checkbox" id="spotlight-active" onchange="saveSpotlight()">
+        <span>Show the Spotlight on the homepage</span>
+      </label>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="spotlight-title" class="form-control" maxlength="60" placeholder="🍂 Fall Hits" onchange="saveSpotlight()">
+        </div>
+        <div class="form-group">
+          <label>Subtitle (optional)</label>
+          <input type="text" id="spotlight-subtitle" class="form-control" maxlength="160" placeholder="Cozy tracks for autumn videos" onchange="saveSpotlight()">
+        </div>
+      </div>
+      <div id="spotlight-tracks" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+
+    <div class="card">
       <div class="search-bar">
         <input type="text" id="catalog-search" class="form-control" placeholder="🔍 Search catalog by title, artist, genre..." oninput="filterCatalogTable()">
         <select id="catalog-genre-filter" class="form-control" style="width:230px;" onchange="filterCatalogTable()">
           <option value="">All Tracks / Genres</option>
           <option value="__featured__">⭐ Featured Tracks Only</option>
           <option value="__new_release__">🔥 New Releases Only</option>
+          <option value="__spotlight__">🌟 In Spotlight</option>
         </select>
       </div>
 
@@ -495,7 +516,11 @@
       </div>
       <label class="checkbox-group">
         <input type="checkbox" id="edit-featured">
-        <span>Featured Track</span>
+        <span>Pin to Featured Tracks</span>
+      </label>
+      <label class="checkbox-group">
+        <input type="checkbox" id="edit-new">
+        <span>Show in New Releases <span class="muted" id="edit-new-note"></span></span>
       </label>
       <div style="display:flex;gap:10px;margin-top:20px;">
         <button class="btn btn-secondary" onclick="closeEditModal()" style="flex:1;">Cancel</button>
@@ -576,6 +601,60 @@
       document.getElementById('tab-' + name).classList.add('active');
     }
 
+    const NEW_RELEASE_DAYS = 45; // keep in sync with js/home.js
+    let spotlight = { active: false, title: '', subtitle: '', trackIds: [] };
+
+    function isNewRelease(t) {
+      return !!t.added && Date.parse(t.added) >= Date.now() - NEW_RELEASE_DAYS * 86400000;
+    }
+
+    function fillSpotlightForm() {
+      document.getElementById('spotlight-active').checked = !!spotlight.active;
+      document.getElementById('spotlight-title').value = spotlight.title || '';
+      document.getElementById('spotlight-subtitle').value = spotlight.subtitle || '';
+    }
+
+    // Chips only: never rewrite the inputs here, the owner may still be typing
+    function renderSpotlightEditor() {
+      const chips = spotlight.trackIds.map(id => {
+        const t = catalog.find(x => x.id === id);
+        if (!t) return '';
+        return `<span class="badge" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;">${escapeHtml(t.title)}
+          <button class="btn btn-secondary btn-sm" style="padding:0 6px;" onclick="toggleSpotlight('${t.id}')" title="Remove">✕</button></span>`;
+      }).join('');
+      document.getElementById('spotlight-tracks').innerHTML = chips ||
+        '<span class="muted">No tracks yet — click 🌟 next to a track below.</span>';
+    }
+
+    async function saveSpotlight() {
+      spotlight.active = document.getElementById('spotlight-active').checked;
+      spotlight.title = document.getElementById('spotlight-title').value.trim();
+      spotlight.subtitle = document.getElementById('spotlight-subtitle').value.trim();
+      try {
+        const res = await fetch('/api/spotlight', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(spotlight)
+        });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        spotlight.trackIds = result.spotlight.trackIds;
+        renderSpotlightEditor();
+        renderCatalogTable(filteredTracks());
+        const warn = spotlight.active && !spotlight.trackIds.length ? ' (add tracks so it shows)' : '';
+        showToast('Spotlight saved' + warn + '. Push to publish.');
+      } catch (err) {
+        showToast('Spotlight save failed: ' + err.message, false);
+      }
+    }
+
+    function toggleSpotlight(id) {
+      spotlight.trackIds = spotlight.trackIds.includes(id)
+        ? spotlight.trackIds.filter(x => x !== id)
+        : spotlight.trackIds.concat(id);
+      saveSpotlight();
+    }
+
     async function loadCatalog() {
       try {
         const res = await fetch('/api/catalog');
@@ -585,6 +664,9 @@
         catalog = data.tracks;
         genresConfig = data.genres;
         artistsConfig = data.artists;
+        spotlight = data.spotlight || spotlight;
+        fillSpotlightForm();
+        renderSpotlightEditor();
 
         document.getElementById('stats-badge').innerHTML = `<strong>${catalog.length}</strong> Tracks &bull; <strong>${Object.keys(genresConfig).length}</strong> Genres`;
         document.getElementById('tab-count').textContent = catalog.length;
@@ -599,6 +681,7 @@
         filterSelect.innerHTML = '<option value="">All Tracks / Genres</option>' +
           '<option value="__featured__">⭐ Featured Tracks Only</option>' +
           '<option value="__new_release__">🔥 New Releases Only</option>' +
+          '<option value="__spotlight__">🌟 In Spotlight</option>' +
           '<optgroup label="Genres">' +
           Object.keys(genresConfig).map(g => `<option value="${g}">${genresConfig[g].icon || ''} ${g}</option>`).join('') +
           '</optgroup>';
@@ -775,7 +858,7 @@
         return `
           <tr>
             <td><img src="${t.cover || ''}" class="track-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22><rect fill=%22%23333%22 width=%2236%22 height=%2236%22/><text fill=%22%23888%22 x=%2210%22 y=%2224%22>🎵</text></svg>'"></td>
-            <td><strong>${escapeHtml(t.title)}</strong> ${t.featured ? '⭐' : ''}</td>
+            <td><strong>${escapeHtml(t.title)}</strong> ${t.featured ? '<span title="Pinned to Featured">⭐</span>' : ''}${isNewRelease(t) ? ' <span title="New Release">🔥</span>' : ''}${spotlight.trackIds.includes(t.id) ? ' <span title="In Spotlight">🌟</span>' : ''}</td>
             <td>${escapeHtml(t.artist || '—')}</td>
             <td><span class="badge">${t.genre || 'Other'}</span></td>
             <td><span class="badge badge-accent">${escapeHtml(t.subgenre || t.genre || '—')}</span></td>
@@ -787,6 +870,7 @@
             <td>
               <div class="action-btns">
                 <button class="btn btn-secondary btn-sm" onclick="openEditModal('${t.id}')">✏️ Edit</button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleSpotlight('${t.id}')" title="${spotlight.trackIds.includes(t.id) ? 'Remove from' : 'Add to'} the homepage Spotlight">${spotlight.trackIds.includes(t.id) ? '✖🌟' : '🌟'}</button>
                 <button class="btn btn-secondary btn-sm" onclick="openReelMaker('${t.id}')" title="Make a video for social media">🎬</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.id}', '${escapeHtml(t.title)}')">🗑️</button>
               </div>
@@ -823,7 +907,9 @@
         if (g === '__featured__') {
           matchesG = !!t.featured;
         } else if (g === '__new_release__') {
-          matchesG = t.file && t.file.indexOf('Newest Release') !== -1;
+          matchesG = isNewRelease(t);
+        } else if (g === '__spotlight__') {
+          matchesG = spotlight.trackIds.includes(t.id);
         } else if (g) {
           matchesG = t.genre === g;
         }
@@ -845,6 +931,10 @@
       document.getElementById('edit-subgenre').value = t.subgenre || '';
       document.getElementById('edit-tags').value = (t.tags || []).join(', ');
       document.getElementById('edit-featured').checked = !!t.featured;
+      document.getElementById('edit-new').checked = isNewRelease(t);
+      document.getElementById('edit-new-note').textContent = t.added
+        ? (isNewRelease(t) ? '(added ' + t.added + ')' : '(added ' + t.added + ', older than ' + NEW_RELEASE_DAYS + ' days)')
+        : '';
       document.getElementById('edit-modal').classList.add('open');
     }
 
@@ -860,12 +950,16 @@
       const subgenre = document.getElementById('edit-subgenre').value.trim();
       const tags = document.getElementById('edit-tags').value;
       const featured = document.getElementById('edit-featured').checked;
+      const t = catalog.find(x => x.id === id) || {};
+      const wantNew = document.getElementById('edit-new').checked;
+      // Unchanged → leave the date alone; ticked on an old track → reset it to today
+      const isNew = wantNew === isNewRelease(t) ? undefined : wantNew;
 
       try {
         const res = await fetch('/api/track/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, title, artist, genre, subgenre, tags, featured })
+          body: JSON.stringify({ id, title, artist, genre, subgenre, tags, featured, isNew })
         });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);

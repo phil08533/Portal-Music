@@ -49,59 +49,53 @@ function renderArtists() {
     });
 }
 
-// --- New Releases ---
-function renderNewReleases(songs, artists) {
+// --- New Releases: tracks uploaded in the last NEW_RELEASE_DAYS days (admin sets "added") ---
+var NEW_RELEASE_DAYS = 45;
+function renderNewReleases(songs) {
+  var cutoff = Date.now() - NEW_RELEASE_DAYS * 86400000;
   var newSongs = songs.filter(function (s) {
-    return s.file && s.file.indexOf('Newest Release') !== -1;
-  });
+    return s.added && Date.parse(s.added) >= cutoff;
+  }).sort(function (a, b) { return String(b.added).localeCompare(String(a.added)); }).slice(0, 8);
   if (newSongs.length === 0) return;
-
-  var byArtist = {};
-  newSongs.forEach(function (s) {
-    var name = s.artist || 'Portal Music';
-    if (!byArtist[name]) byArtist[name] = [];
-    byArtist[name].push(s);
-  });
-
-  var artistMap = {};
-  artists.forEach(function (a) { artistMap[a.name] = a; });
-
   window.newReleaseSongs = newSongs;
-
-  var html = '';
-  Object.keys(byArtist).forEach(function (artistName) {
-    var tracks = byArtist[artistName].slice(0, 4);
-    var a = artistMap[artistName];
-    html += '<div class="new-release-card">';
-    html += '<div class="new-release-artist-header">';
-    html += '<div class="new-release-artist-img">';
-    if (a && a.hasImage) {
-      html += '<img src="' + a.image + '" alt="' + artistName + '" onerror="this.parentElement.innerHTML=\'🎤\'">';
-    } else {
-      html += '<span>🎤</span>';
-    }
-    html += '</div>';
-    html += '<div class="new-release-artist-info">';
-    html += '<div class="new-release-badge">New Release</div>';
-    html += '<div class="new-release-artist-name">' + artistName + '</div>';
-    if (a) html += '<div class="new-release-artist-genre">' + a.genre + '</div>';
-    html += '</div></div>';
-    html += '<div class="new-release-tracks">';
-    tracks.forEach(function (s) {
-      var isActive = isPlaying && currentSong && currentSong.id === s.id;
-      html += '<div class="new-release-track">' +
-        '<button class="new-release-play-btn btn-play" data-song-id="' + s.id + '" data-icon-only="1" onclick="handlePlayBtn(\'' + s.id + '\', window.newReleaseSongs)">' +
-        (isActive ? '⏸' : '▶') + '</button>' +
-        '<span class="new-release-track-title">' + _esc(s.title) + '</span>' +
-        '</div>';
-    });
-    html += '</div>';
-    html += '<a href="browse.html?artist=' + encodeURIComponent(artistName) + '" class="new-release-view-all">View all by ' + artistName + ' \u2192</a>';
-    html += '</div>';
-  });
-
-  document.getElementById('new-releases-grid').innerHTML = html;
+  document.getElementById('new-releases-grid').innerHTML = newSongs.map(function (s) { return createTrackCard(s, 'newReleaseSongs'); }).join('');
   document.getElementById('new-releases-section').style.display = 'block';
+}
+
+// --- Spotlight: a custom collection ("Fall Hits"…) set in the admin studio ---
+function renderSpotlight(songs) {
+  fetch('data/spotlight.json', { cache: 'no-cache' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (sp) {
+      if (!sp || !sp.active || !Array.isArray(sp.trackIds)) return;
+      var byId = {};
+      songs.forEach(function (s) { byId[s.id] = s; });
+      var list = sp.trackIds.map(function (id) { return byId[id]; }).filter(Boolean);
+      if (!list.length) return;
+      window.spotlightSongs = list;
+      document.getElementById('spotlight-title').textContent = sp.title || 'Spotlight';
+      var sub = document.getElementById('spotlight-subtitle');
+      sub.textContent = sp.subtitle || '';
+      sub.style.display = sp.subtitle ? '' : 'none';
+      document.getElementById('spotlight-grid').innerHTML = list.map(function (s) { return createTrackCard(s, 'spotlightSongs'); }).join('');
+      document.getElementById('spotlight-section').style.display = 'block';
+    })
+    .catch(function () {});
+}
+
+// --- Featured: hand-picked tracks first, topped up with picks that change every day ---
+var FEATURED_COUNT = 8;
+function pickFeatured(songs) {
+  var pinned = songs.filter(function (s) { return s.featured; });
+  var rest = songs.filter(function (s) { return !s.featured; });
+  var d = new Date();
+  var seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  function rand() { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+  for (var i = rest.length - 1; i > 0; i--) {
+    var j = Math.floor(rand() * (i + 1));
+    var t = rest[i]; rest[i] = rest[j]; rest[j] = t;
+  }
+  return pinned.concat(rest).slice(0, Math.max(FEATURED_COUNT, pinned.length));
 }
 
 // --- Recently Played ---
@@ -109,7 +103,8 @@ function renderRecent() {
   var recent = getRecent();
   if (recent.length > 0) {
     document.getElementById('recent-section').style.display = 'block';
-    document.getElementById('recent-grid').innerHTML = recent.map(createTrackCard).join('');
+    window.recentSongs = recent;
+    document.getElementById('recent-grid').innerHTML = recent.map(function (s) { return createTrackCard(s, 'recentSongs'); }).join('');
   }
 }
 
@@ -124,18 +119,15 @@ Promise.all([loadGenres(), loadSongs()]).then(function (results) {
 
   renderGenreGrid(songs);
 
-  var featured = songs.filter(function (s) { return s.featured; });
+  var featured = pickFeatured(songs);
   window.currentSongsView = featured;
   document.getElementById('featured-grid').innerHTML = featured.length
     ? featured.map(createTrackCard).join('')
     : '<div class="empty-state"><div class="empty-icon">🎵</div><p>No featured tracks yet.</p></div>';
 
+  renderSpotlight(songs);
+  renderNewReleases(songs);
   renderRecent();
-
-  fetch('data/artists.json')
-    .then(function (r) { return r.json(); })
-    .then(function (artists) { renderNewReleases(songs, artists); })
-    .catch(function () { renderNewReleases(songs, []); });
 });
 
 renderArtists();

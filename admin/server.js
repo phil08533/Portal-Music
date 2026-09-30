@@ -26,8 +26,22 @@ const ROOT_DIR = path.join(__dirname, '..');
 const MUSIC_JSON_PATH = path.join(ROOT_DIR, 'data', 'music.json');
 const GENRES_JSON_PATH = path.join(ROOT_DIR, 'data', 'genres.json');
 const ARTISTS_JSON_PATH = path.join(ROOT_DIR, 'data', 'artists.json');
+const SPOTLIGHT_JSON_PATH = path.join(ROOT_DIR, 'data', 'spotlight.json');
 const MUSIC_DIR = path.join(ROOT_DIR, 'music');
 const COVERS_DIR = path.join(ROOT_DIR, 'covers');
+
+// "YYYY-MM-DD"; tracks with a recent "added" date appear under New Releases on the homepage
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function readSpotlight() {
+  try {
+    return JSON.parse(fs.readFileSync(SPOTLIGHT_JSON_PATH, 'utf8'));
+  } catch (e) {
+    return { active: false, title: '', subtitle: '', trackIds: [] };
+  }
+}
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -193,7 +207,7 @@ const server = http.createServer(async (req, res) => {
       const genres = fs.existsSync(GENRES_JSON_PATH) ? JSON.parse(fs.readFileSync(GENRES_JSON_PATH, 'utf8')) : {};
       const artists = fs.existsSync(ARTISTS_JSON_PATH) ? JSON.parse(fs.readFileSync(ARTISTS_JSON_PATH, 'utf8')) : [];
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ success: true, tracks: music, genres: genres.genres || {}, artists }));
+      return res.end(JSON.stringify({ success: true, tracks: music, genres: genres.genres || {}, artists, spotlight: readSpotlight() }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
@@ -277,11 +291,7 @@ const server = http.createServer(async (req, res) => {
       const genreFolder = path.join(MUSIC_DIR, genre);
       fs.mkdirSync(genreFolder, { recursive: true });
 
-      let targetFolder = genreFolder;
-      if (isNewRelease) {
-        targetFolder = path.join(genreFolder, 'Newest Release!');
-        fs.mkdirSync(targetFolder, { recursive: true });
-      }
+      const targetFolder = genreFolder;
 
       const audioBuffer = audioBase64 ? Buffer.from(audioBase64.replace(/^data:audio\/\w+;base64,/, ''), 'base64') : null;
       const finalFileName = `${safeTitle}.mp3`;
@@ -317,9 +327,7 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
-      const relativeAudioPath = isNewRelease
-        ? `music/${genre}/Newest Release!/${finalFileName}`
-        : `music/${genre}/${finalFileName}`;
+      const relativeAudioPath = `music/${genre}/${finalFileName}`;
       const fileUrl = `https://assets.portal-music.com/${encodeURI(relativeAudioPath)}`;
 
       // Update Catalog
@@ -336,6 +344,7 @@ const server = http.createServer(async (req, res) => {
         featured: !!featured,
         cover: coverUrl || `https://assets.portal-music.com/covers/${id}.jpg`
       };
+      if (isNewRelease) newEntry.added = today();
 
       // Add to front of catalog so it appears immediately
       music.unshift(newEntry);
@@ -358,7 +367,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && pathname === '/api/track/update') {
     try {
       const data = await parseBody(req);
-      const { id, title, artist, genre, subgenre, tags, featured } = data;
+      const { id, title, artist, genre, subgenre, tags, featured, isNew } = data;
       if (!id) throw new Error('Track ID required');
 
       const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
@@ -373,6 +382,8 @@ const server = http.createServer(async (req, res) => {
         music[idx].tags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(Boolean);
       }
       if (featured !== undefined) music[idx].featured = !!featured;
+      if (isNew === true) music[idx].added = today();
+      if (isNew === false) delete music[idx].added;
 
       fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
 
@@ -397,11 +408,37 @@ const server = http.createServer(async (req, res) => {
 
       fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
 
+      const spotlight = readSpotlight();
+      if (spotlight.trackIds.includes(id)) {
+        spotlight.trackIds = spotlight.trackIds.filter(t => t !== id);
+        fs.writeFileSync(SPOTLIGHT_JSON_PATH, JSON.stringify(spotlight, null, 2) + '\n', 'utf8');
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: true, remaining: music.length }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+  }
+
+  // --- API: Homepage Spotlight (custom collection, e.g. "Fall Hits") ---
+  if (req.method === 'POST' && pathname === '/api/spotlight') {
+    try {
+      const data = await parseBody(req);
+      const music = JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8'));
+      const known = new Set(music.map(t => t.id));
+      const ids = Array.isArray(data.trackIds) ? data.trackIds : [];
+      const spotlight = {
+        active: !!data.active,
+        title: String(data.title || '').trim().slice(0, 60),
+        subtitle: String(data.subtitle || '').trim().slice(0, 160),
+        trackIds: [...new Set(ids.map(String))].filter(id => known.has(id)).slice(0, 24),
+      };
+      fs.writeFileSync(SPOTLIGHT_JSON_PATH, JSON.stringify(spotlight, null, 2) + '\n', 'utf8');
+      return sendJson(200, { success: true, spotlight });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 

@@ -129,3 +129,15 @@ When you add new MP3 files locally and want them live on your CDN:
    git push
    ```
    GitHub Pages will automatically deploy your live site!
+
+## Homepage sections
+
+- **Featured Tracks:** tracks you pin (⭐, "Pin to Featured Tracks" in Edit) always show first; the rest
+  of the row is a fresh random pick every day, so the homepage changes on its own.
+- **New Releases:** fills itself. Uploads with "Show in New Releases" ticked (on by default) appear
+  there for 45 days, newest first. Tick/untick it in Edit to add or remove a track by hand.
+- **Spotlight:** Manage Catalog → 🌟 Homepage Spotlight. Give it a title ("🍂 Fall Hits"), tick
+  "Show the Spotlight", and click 🌟 next to any track to add it. Untick to hide it.
+
+All three are catalog changes: run the SEO rebuild and push to publish.
+
