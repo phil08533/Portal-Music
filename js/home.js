@@ -55,7 +55,7 @@ function renderNewReleases(songs) {
   var cutoff = Date.now() - NEW_RELEASE_DAYS * 86400000;
   var newSongs = songs.filter(function (s) {
     return s.added && Date.parse(s.added) >= cutoff;
-  }).sort(function (a, b) { return String(b.added).localeCompare(String(a.added)); }).slice(0, 8);
+  }).sort(function (a, b) { return String(b.added).localeCompare(String(a.added)); }).slice(0, 12);
   if (newSongs.length === 0) return;
   window.newReleaseSongs = newSongs;
   document.getElementById('new-releases-grid').innerHTML = newSongs.map(function (s) { return createTrackCard(s, 'newReleaseSongs'); }).join('');
