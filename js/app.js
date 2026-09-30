@@ -20,6 +20,8 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 //     their second page view.
 // Monetag's own frequency cap (dashboard) applies on top. Pro members and the
 // checkout pages never load ads.
+// Master switch: ads are paused by the owner. Set to true to turn them back on.
+const ADS_ENABLED = false;
 const AD_ZONES = {
   popunder: { zone: '10786944', src: 'https://al5sm.com/tag.min.js' },
 };
@@ -43,6 +45,7 @@ function injectAdZone(key) {
 }
 
 function adsAllowedHere() {
+  if (!ADS_ENABLED) return false;
   if (storeGet(localStorage, 'pm_is_pro') === '1') return false;
   let page = location.pathname.split('/').pop() || 'index.html';
   if (!page.endsWith('.html')) page += '.html'; // GitHub Pages also serves /pro as pro.html
