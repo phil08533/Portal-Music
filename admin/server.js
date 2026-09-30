@@ -149,8 +149,12 @@ const server = http.createServer(async (req, res) => {
         }
         if (pathname === '/api/users/grant-by-email') {
           if (!body.email) throw new Error('email required');
-          const user = await users.setProByEmail(body.email, body.isPro !== false);
+          const user = await users.setProByEmail(body.email, body.isPro !== false, body.months);
           return sendJson(200, { success: true, user });
+        }
+        if (pathname === '/api/users/expiry') {
+          if (!body.uid) throw new Error('uid required');
+          return sendJson(200, { success: true, ...(await users.adjustProExpiry(body.uid, body)) });
         }
         if (pathname === '/api/users/note') {
           if (!body.uid) throw new Error('uid required');
@@ -163,7 +167,7 @@ const server = http.createServer(async (req, res) => {
           return sendJson(200, { success: true });
         }
         if (pathname === '/api/users/codes/create') {
-          return sendJson(200, { success: true, codes: await users.createCodes(body.count, body.note) });
+          return sendJson(200, { success: true, codes: await users.createCodes(body.count, body.note, body.months) });
         }
         if (pathname === '/api/users/codes/delete') {
           if (!body.code) throw new Error('code required');

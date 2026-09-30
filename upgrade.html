@@ -241,7 +241,9 @@
         if (info.status === 'past_due') parts.push('<strong style="color:#ff4757;">Payment failed — please update your card.</strong>');
         if (STRIPE_PORTAL_URL) parts.push('<a href="' + STRIPE_PORTAL_URL + '" target="_blank" rel="noopener" style="color:var(--accent);">Manage or cancel subscription</a>');
       } else if (info.source === 'code' || info.source === 'admin') {
-        parts.push('Pro was added to your account — no subscription to manage.');
+        parts.push(info.expiresAt
+          ? 'Your Pro access runs until ' + info.expiresAt.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) + '. Subscribe any time to keep it going.'
+          : 'You have lifetime Pro — no subscription to manage.');
       }
       if (parts.length) { el.innerHTML = parts.join('<br>'); el.style.display = 'block'; }
     }
@@ -322,7 +324,10 @@
       if (result.ok) {
         say('');
         err.style.display = 'none';
-        showBanner('🎉 <strong>Welcome to Pro!</strong> Instant downloads, ad-free listening and every Pro feature are now unlocked on all your devices.', true);
+        var length = result.months > 0
+          ? ' for ' + result.months + (result.months === 1 ? ' month' : ' months')
+          : ' for life';
+        showBanner('🎉 <strong>Welcome to Pro' + length + '!</strong> Instant downloads, ad-free listening and every Pro feature are now unlocked on all your devices.', true);
         setTimeout(function () { window.location.href = 'profile.html'; }, 2500);
       } else {
         say(result.error);

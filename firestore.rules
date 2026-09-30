@@ -21,8 +21,8 @@ service cloud.firestore {
 
     // Written only by the admin studio, the Stripe webhook, or code redemption
     function proFields() {
-      return ['isPro', 'proSource', 'proCode', 'proUpdatedAt', 'proStatus', 'proPlan', 'proRenews',
-              'proCurrentPeriodEnd', 'stripeCustomerId', 'stripeSubscriptionId'];
+      return ['isPro', 'proSource', 'proCode', 'proUpdatedAt', 'proExpiresAt', 'proStatus', 'proPlan',
+              'proRenews', 'proCurrentPeriodEnd', 'stripeCustomerId', 'stripeSubscriptionId'];
     }
 
     function changedKeys() {
@@ -33,15 +33,28 @@ service cloud.firestore {
       return /databases/$(database)/documents/proCodes/$(code);
     }
 
+    // A code's months (30-day periods; 0 or missing = lifetime) fix the expiry
+    // the redeemer may write, give or take a day for their device clock.
+    function expiryMatches(months) {
+      let expires = request.resource.data.get('proExpiresAt', null);
+      return months == 0
+        ? expires == null
+        : expires is timestamp
+          && expires > request.time + duration.value(months * 30 - 1, 'd')
+          && expires < request.time + duration.value(months * 30 + 1, 'd');
+    }
+
     // Pro fields may only change as part of redeeming an unused code
     function redeemingCode(uid) {
       let code = request.resource.data.proCode;
+      let codeDoc = get(codePath(code)).data;
       return changedKeys().hasOnly(proFields())
         && request.resource.data.isPro == true
         && request.resource.data.proSource == 'code'
         && request.resource.data.proUpdatedAt == request.time
         && code is string
-        && get(codePath(code)).data.redeemedBy == null
+        && codeDoc.redeemedBy == null
+        && expiryMatches(codeDoc.get('months', 0))
         && getAfter(codePath(code)).data.redeemedBy == uid;
     }
 

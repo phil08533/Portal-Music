@@ -105,6 +105,10 @@ async function listUsers() {
       isPro:        data.isPro === true,
       proSource:    data.proSource || null,
       proUpdatedAt: toIso(data.proUpdatedAt),
+      // Code/admin Pro may end on a date; Stripe Pro follows the subscription
+      proExpiresAt: data.proSource !== 'stripe' ? toIso(data.proExpiresAt) : null,
+      proExpired:   data.isPro === true && data.proSource !== 'stripe' && !!data.proExpiresAt
+                    && new Date(toIso(data.proExpiresAt)) <= new Date(),
       favorites:    Array.isArray(data.favorites) ? data.favorites.length : 0,
       proCode:      data.proCode || null,
       adminNote:    notes.get(u.uid) || data.adminNote || '',
@@ -130,17 +134,49 @@ async function getUserDetail(uid) {
   };
 }
 
-async function setPro(uid, isPro) {
+const DAY_MS = 86400000;
+
+// months: 0 / missing = lifetime; otherwise Pro ends months × 30 days from now
+async function setPro(uid, isPro, months) {
   const { auth, db, admin } = init();
   await auth.getUser(uid); // throws if the account doesn't exist
+  const m = Math.max(0, parseInt(months, 10) || 0);
   await db.collection('users').doc(uid).set({
     isPro: !!isPro,
     proSource: isPro ? 'admin' : null,
+    proExpiresAt: isPro && m ? admin.firestore.Timestamp.fromMillis(Date.now() + m * 30 * DAY_MS) : null,
     proUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
   }, { merge: true });
 }
 
-async function setProByEmail(email, isPro) {
+// Move a code/admin member's end date by whole months (30 days), or make it
+// lifetime (lifetime: true). Adding time to an expired or lifetime member
+// counts from today.
+async function adjustProExpiry(uid, { months, lifetime }) {
+  const { auth, db, admin } = init();
+  await auth.getUser(uid);
+  const ref = db.collection('users').doc(uid);
+  const data = (await ref.get()).data() || {};
+  if (data.proSource === 'stripe') throw new Error('This member pays through Stripe; change their plan in Stripe instead');
+  let expires = null;
+  if (!lifetime) {
+    const delta = parseInt(months, 10) || 0;
+    if (!delta) throw new Error('months required');
+    const current = data.proExpiresAt ? data.proExpiresAt.toMillis() : null;
+    const base = current && current > Date.now() ? current : Date.now();
+    expires = base + delta * 30 * DAY_MS;
+    if (expires <= Date.now()) expires = Date.now(); // removing more than is left ends Pro now
+  }
+  await ref.set({
+    isPro: true,
+    proSource: data.proSource === 'code' ? 'code' : 'admin',
+    proExpiresAt: expires ? admin.firestore.Timestamp.fromMillis(expires) : null,
+    proUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+  return { proExpiresAt: expires ? new Date(expires).toISOString() : null };
+}
+
+async function setProByEmail(email, isPro, months) {
   const { auth } = init();
   let user;
   try {
@@ -148,7 +184,7 @@ async function setProByEmail(email, isPro) {
   } catch {
     throw new Error(`No account found for ${email}. They need to sign in on the site once first.`);
   }
-  await setPro(user.uid, isPro);
+  await setPro(user.uid, isPro, months);
   return { uid: user.uid, email: user.email, displayName: user.displayName || '' };
 }
 
@@ -171,9 +207,10 @@ function randomCode() {
   return `PM-${body.slice(0, 4)}-${body.slice(4)}`;
 }
 
-async function createCodes(count, note) {
+async function createCodes(count, note, months) {
   const { db, admin } = init();
   const n = Math.max(1, Math.min(50, parseInt(count, 10) || 1));
+  const m = Math.max(0, Math.min(120, parseInt(months, 10) || 0)); // 0 = lifetime
   const codes = [];
   const batch = db.batch();
   for (let i = 0; i < n; i++) {
@@ -181,6 +218,7 @@ async function createCodes(count, note) {
     codes.push(code);
     batch.create(db.collection('proCodes').doc(code), {
       note: String(note || '').slice(0, 200),
+      months: m,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       redeemedBy: null,
       redeemedAt: null,
@@ -196,6 +234,7 @@ async function listCodes() {
   const codes = snap.docs.map(d => ({
     code: d.id,
     note: d.get('note') || '',
+    months: d.get('months') || 0,
     createdAt: toIso(d.get('createdAt')),
     redeemedBy: d.get('redeemedBy') || null,
     redeemedAt: toIso(d.get('redeemedAt')),
@@ -241,6 +280,6 @@ async function deleteUser(uid) {
 }
 
 module.exports = {
-  status, listUsers, getUserDetail, setPro, setProByEmail, setNote, setDisabled, deleteUser,
+  status, listUsers, getUserDetail, setPro, setProByEmail, adjustProExpiry, setNote, setDisabled, deleteUser,
   createCodes, listCodes, deleteCode,
 };
