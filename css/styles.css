@@ -4169,3 +4169,19 @@ body:has(#player-bar.visible) .cookie-banner { bottom: 96px; }
   .rp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
   .rp-actions > * { width: 100%; justify-content: center; text-align: center; }
 }
+
+/* Download page: optional credit / attribution box */
+.credit-box { padding: 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
+.credit-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.credit-text {
+  width: 100%; resize: none; overflow: hidden; overflow-wrap: anywhere; font: inherit; font-size: 0.8rem; line-height: 1.45;
+  color: var(--text); background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px;
+}
+.credit-copy {
+  margin-top: 8px; width: 100%; padding: 9px; border-radius: 6px; border: none; cursor: pointer;
+  background: var(--accent); color: var(--btn-on-accent, #000); font-weight: 700; font-size: 0.85rem;
+}
+.credit-copy:hover { filter: brightness(1.06); }
+/* Pro members already have Pro */
+html.is-pro .creator-toolkit-card a[href="upgrade.html"] { display: none; }
