@@ -15,6 +15,9 @@ Read README.md first for the architecture. Key rules:
 - Audio and covers live on Cloudflare R2 (`assets.portal-music.com`); `music/` and `covers/` are
   gitignored locally.
 - After catalog changes run `npm run seo`.
+- **Usage events**: `pmTrack(name, {track, v})` in `js/app.js` writes anonymous events to Firestore `events`
+  (create-only, validated in `firestore.rules`); the admin studio's 📊 Stats tab reads them (`admin/stats.js`).
+  A new event name must be added to both `PM_EVENT_NAMES` and the list in `firestore.rules`.
 - `admin/` runs locally only (127.0.0.1 + per-launch token) and is never deployed.
 
 ## Owner to-do list

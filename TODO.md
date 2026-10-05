@@ -3,9 +3,13 @@
 Things only you can do (accounts, dashboards, decisions). Claude keeps this list updated.
 Tick items off as you go.
 
+## Stats (new)
+- [ ] **Publish the updated `firestore.rules`** (Firebase Console → Firestore Database → Rules → paste the whole
+      file → Publish). Until then the site can't record downloads/visits and the 📊 Stats tab stays empty.
+      (This also turns on Pro codes that last a set number of months.)
+- [ ] After a week, open Admin Studio → 📊 Stats and send Claude the numbers (plus Cloudflare Web Analytics visitors).
+
 ## Do soon
-- [ ] **Publish the updated `firestore.rules`** (Pro codes can now last a set number of months):
-      Firebase Console → Firestore Database → Rules → paste the file → Publish.
 - [ ] **Test subscription:** in an incognito window sign in with a second Google account → Upgrade →
       Monthly → pay → check "Welcome to Pro" → cancel via Manage subscription → refund the $3 in
       Stripe → Payments. If Pro doesn't turn on, screenshot Stripe → Webhooks → memorable-victory-snapshot.

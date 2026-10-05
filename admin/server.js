@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 const users = require('./users');
 const reels = require('./reels');
 const suno  = require('./suno');
+const stats = require('./stats');
 
 let NodeID3;
 try {
@@ -502,6 +503,15 @@ const server = http.createServer(async (req, res) => {
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+  }
+
+  // --- API: Stats (anonymous usage events) ---
+  if (req.method === 'GET' && pathname === '/api/stats') {
+    try {
+      return sendJson(200, { success: true, stats: await stats.getStats(url.searchParams.get('days')) });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 

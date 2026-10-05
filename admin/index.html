@@ -143,6 +143,7 @@
     <button class="tab-btn" onclick="switchTab('catalog')">📚 Manage Catalog (<span id="tab-count">0</span>)</button>
     <button class="tab-btn" onclick="switchTab('users')">👥 Users & Pro (<span id="users-count">–</span>)</button>
     <button class="tab-btn" onclick="switchTab('reels')">🎬 Reels & Videos</button>
+    <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
     <button class="tab-btn" onclick="switchTab('ads')">💰 Ads</button>
     <button class="tab-btn" onclick="switchTab('publish')">🚀 Actions & Sync</button>
   </div>
@@ -482,6 +483,23 @@
   </div>
 
   <!-- TAB 3: ACTIONS & SYNC -->
+  <!-- TAB: STATS -->
+  <div id="tab-stats" class="tab-content">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
+        <h2 style="margin:0;">📊 Stats</h2>
+        <select id="stats-range" class="form-control" style="width:auto;" onchange="loadStats()">
+          <option value="7">Last 7 days</option>
+          <option value="28">Last 28 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="loadStats()">↻ Refresh</button>
+      </div>
+      <p class="muted" style="white-space:normal;margin-bottom:14px;">Anonymous counts from the live site (no names or emails). Page views and countries are in Cloudflare → Analytics → Web analytics.</p>
+      <div id="stats-body"><p class="muted">Open this tab to load stats.</p></div>
+    </div>
+  </div>
+
   <!-- TAB: ADS -->
   <div id="tab-ads" class="tab-content">
     <div class="card" style="max-width:720px;">
@@ -678,6 +696,59 @@
       setTimeout(() => { t.className = ''; }, 3500);
     }
 
+    // --- Stats ---
+    let statsLoaded = false;
+
+    function statTable(title, cols, rows) {
+      const body = rows.length
+        ? rows.map(r => '<tr>' + r.map(c => `<td>${escapeHtml(String(c))}</td>`).join('') + '</tr>').join('')
+        : `<tr><td colspan="${cols.length}" class="muted">Nothing yet</td></tr>`;
+      return `<div style="margin-top:18px;"><h3 style="font-size:0.95rem;margin-bottom:6px;">${title}</h3>
+        <div class="table-container"><table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${body}</tbody></table></div></div>`;
+    }
+
+    function statTile(label, value, note) {
+      return `<div style="background:var(--bg);border:1px solid var(--card-border);border-radius:8px;padding:12px 14px;min-width:150px;flex:1;">
+        <div class="muted" style="font-size:0.78rem;">${label}</div>
+        <div style="font-size:1.5rem;font-weight:700;">${value}</div>
+        ${note ? `<div class="muted" style="font-size:0.75rem;white-space:normal;">${note}</div>` : ''}</div>`;
+    }
+
+    async function loadStats() {
+      const el = document.getElementById('stats-body');
+      el.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const res = await fetch('/api/stats?days=' + document.getElementById('stats-range').value);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        const st = data.stats;
+        statsLoaded = true;
+        const pct = (a, b) => b ? Math.round((a / b) * 100) + '%' : '—';
+        el.innerHTML =
+          (st.truncated ? '<p style="color:#f5a623;">Showing the first 50,000 events only; pick a shorter range.</p>' : '') +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+            statTile('Visitors', st.visitors.total, st.visitors.returning + ' came back on another day') +
+            statTile('Downloads ⭐', st.loop.downloads, st.downloaders.total + ' people, ' + st.downloaders.returning + ' returning') +
+            statTile('Sign-ups', st.totals.signup || 0, '') +
+            statTile('New Pro', st.totals.pro_active || 0, (st.totals.checkout_start || 0) + ' checkouts started') +
+            statTile('Loop: visits from videos', st.loop.videoVisits, st.loop.per100Downloads + ' per 100 downloads · ' + st.loop.creditVisits + ' from credit links') +
+            statTile('Credits copied', st.loop.creditCopies, pct(st.loop.creditCopies, st.loop.downloads) + ' of downloads') +
+          '</div>' +
+          statTable('Funnel', ['Step', 'People', 'of visitors'], st.funnel.map(f => [f.step, f.count, pct(f.count, st.visitors.total)])) +
+          statTable('Where visits came from', ['Source', 'Visits'], st.sources.map(r => [r.src, r.count])) +
+          statTable('Most downloaded', ['Track', 'Downloads'], st.topDownloads.map(r => [r.title, r.count])) +
+          statTable('Most played', ['Track', 'Plays'], st.topPlays.map(r => [r.title, r.count])) +
+          statTable('Landing pages', ['Page', 'Visits'], st.pages.map(r => [r.page, r.count])) +
+          statTable('Download formats', ['Format', 'Downloads'], st.formats.map(r => [r.fmt.toUpperCase(), r.count])) +
+          statTable('Radio stations started', ['Station', 'Starts'], st.radio.map(r => [r.station, r.count])) +
+          statTable('Day by day', ['Day', 'Visitors', 'Plays', 'Downloads', 'Sign-ups', 'New Pro'],
+            st.daily.map(d => [d.day, d.visitors, d.plays, d.downloads, d.signups, d.pro]));
+      } catch (err) {
+        el.innerHTML = `<p style="color:#ff4d6a;">Could not load stats: ${escapeHtml(err.message)}</p>`;
+      }
+    }
+
     async function loadAds() {
       try {
         const res = await fetch('/api/ads');
@@ -732,6 +803,7 @@
       const btn = document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`);
       if (btn) btn.classList.add('active');
       document.getElementById('tab-' + name).classList.add('active');
+      if (name === 'stats' && !statsLoaded) loadStats();
     }
 
     const NEW_RELEASE_DAYS = 45; // keep in sync with js/home.js

@@ -157,6 +157,7 @@
         if (activeCard) activeCard.classList.add('active');
 
         currentStation = stationId;
+        if (window.pmTrack) pmTrack('radio_start', { v: stationId });
         document.getElementById('radio-large-player').style.display = 'block';
         
         let pool = [];
