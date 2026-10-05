@@ -18,6 +18,9 @@ Read README.md first for the architecture. Key rules:
 - **Usage events**: `pmTrack(name, {track, v})` in `js/app.js` writes anonymous events to Firestore `events`
   (create-only, validated in `firestore.rules`); the admin studio's 📊 Stats tab reads them (`admin/stats.js`).
   A new event name must be added to both `PM_EVENT_NAMES` and the list in `firestore.rules`.
+- **Stream overlay**: `overlay.html` is an OBS/Streamlabs Browser Source (plays a free radio station and shows a
+  "Now playing · portal-music.com" card); streamers build their link in the box on `radio.html`. Its station
+  filters must stay in sync with the free stations in `radio.html`. No ads ever run on it.
 - `admin/` runs locally only (127.0.0.1 + per-launch token) and is never deployed.
 
 ## Owner to-do list

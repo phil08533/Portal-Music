@@ -742,6 +742,8 @@
           statTable('Landing pages', ['Page', 'Visits'], st.pages.map(r => [r.page, r.count])) +
           statTable('Download formats', ['Format', 'Downloads'], st.formats.map(r => [r.fmt.toUpperCase(), r.count])) +
           statTable('Radio stations started', ['Station', 'Starts'], st.radio.map(r => [r.station, r.count])) +
+          statTable('Stream overlay (OBS): ' + st.overlay.streamers + ' streamers', ['Station', 'Times started'],
+            st.overlay.stations.map(r => [r.station, r.count])) +
           statTable('Day by day', ['Day', 'Visitors', 'Plays', 'Downloads', 'Sign-ups', 'New Pro'],
             st.daily.map(d => [d.day, d.visitors, d.plays, d.downloads, d.signups, d.pro]));
       } catch (err) {

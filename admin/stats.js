@@ -106,6 +106,8 @@ async function getStats(rangeDays) {
     topPlays: named(countBy(of('play'), e => e.track)),
     formats: countBy(downloads, e => e.v || 'mp3').map(([fmt, count]) => ({ fmt, count })),
     radio: countBy(of('radio_start'), e => e.v).map(([station, count]) => ({ station, count })),
+    overlay: { starts: of('overlay_start').length, streamers: people(of('overlay_start')).total,
+      stations: countBy(of('overlay_start'), e => e.v).map(([station, count]) => ({ station, count })) },
     pages: countBy(visits, e => e.page).slice(0, 10).map(([page, count]) => ({ page, count })),
     daily,
   };

@@ -21,7 +21,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 // Once Monetag's script is loaded it decides when to pop, so its own frequency
 // cap (Monetag dashboard) matters too. Pro members and checkout pages never load ads.
 const AD_SCRIPT_SRC = 'https://al5sm.com/tag.min.js';
-const AD_FREE_PAGES = ['upgrade.html', 'pro.html'];
+const AD_FREE_PAGES = ['upgrade.html', 'pro.html', 'overlay.html'];
 
 function storeGet(store, key) { try { return store.getItem(key); } catch (e) { return null; } }
 function storeSet(store, key, val) { try { store.setItem(key, String(val)); } catch (e) {} }
@@ -122,7 +122,8 @@ const CF_ANALYTICS_TOKEN = '2d6415c7cdc24a2db1d02d222422b116';
 // a random per-browser ID, the page, the track and where the visit came from.
 const PM_EVENTS = { project: 'portal-music-3b1a1', key: 'AIzaSyATZysPXZM50CfB-AXdqhmTdei_4Y26DG8' };
 const PM_EVENT_NAMES = ['visit', 'play', 'download', 'credit_copy', 'share', 'favorite', 'radio_start',
-  'signup', 'playlist_create', 'pro_view', 'checkout_start', 'pro_active', 'custom_click', 'affiliate_click'];
+  'signup', 'playlist_create', 'pro_view', 'checkout_start', 'pro_active', 'custom_click', 'affiliate_click',
+  'overlay_start'];
 
 function pmRandomId(len) {
   const a = new Uint8Array(len);
