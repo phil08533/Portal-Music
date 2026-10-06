@@ -223,6 +223,8 @@
         var labels = song.labels || [];
         var has = {};
         labels.forEach(function (id) { has[id] = true; });
+        var hinted = {};   // tags only one AI model heard: weak evidence, never shown on pages
+        (song.hints || []).forEach(function (id) { hinted[id] = true; });
         var analyzed = labels.length > 0;
         var text = textOf(song);
         var score = 0, possible = 0, reasons = [];
@@ -262,6 +264,7 @@
           var w = FACET_WEIGHT[t.facet] || 1;
           possible += w;
           if (has[f.id]) { score += w; reasons.push(t.label); return; }
+          if (hinted[f.id]) { score += w * 0.4; reasons.push(t.label + ' (close)'); return; }
           // Partial credit: a "Best for" tag whose supporting moods/styles are there (dark + tense → horror)
           if (t.imply && t.imply.length) {
             var support = t.imply.filter(function (id) { return has[id]; }).length;

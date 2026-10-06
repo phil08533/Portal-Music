@@ -73,17 +73,52 @@ test('agreement publishes tags; one model only is just a suggestion', () => {
 
   const s = tagging.decideTrack(ctx, music.find(t => t.id === 'single'));
   assert.ok(!s.labels.includes('sad'), 'one model should not publish');
-  assert.ok(s.suggested.sad, 'but it should be suggested for review');
-  assert.strictEqual(s.status, 'review');
+  assert.ok(s.hints.includes('sad'), 'but it becomes a hidden search hint');
+  assert.strictEqual(s.status, 'auto', 'and it must NOT go to review');
 });
 
-test('tempo without a clear beat is only suggested', () => {
+test('no drums: tempo is "slow", without asking', () => {
   const ambient = boosted(103, {}, {}, { bpm: 140, percussiveRatio: 0.001, beatRegularity: 0.2 });
   const { music, analyses } = catalog([['amb', ambient]]);
   const d = tagging.decideTrack(tagging.loadContext({ music, analyses, tags: dict }), music.find(t => t.id === 'amb'));
   assert.ok(!d.labels.includes('fast'));
-  assert.ok(d.suggested.fast);
-  assert.strictEqual(d.measured.tempoReliable, false);
+  assert.ok(d.labels.includes('slow'));
+  assert.strictEqual(d.status, 'auto');
+});
+
+test('vocals disagreements settle themselves; only true conflicts reach review', () => {
+  // Model A: clearly singing. Model B: leans instrumental, but only a little → A wins
+  const aSure = boosted(110, { instrumental: 0.27, vocals: 0.25 }, { Singing: 0.9 });
+  // Both models equally sure and contradicting → the one case that needs a human
+  const clash = boosted(111, { instrumental: 0.30, vocals: 0.27 }, { Singing: 0.33 });
+  // …unless the track has a named artist (tiebreak: vocals)
+  const clashArtist = JSON.parse(JSON.stringify(clash));
+  const { music, analyses } = catalog([['asure', aSure], ['clash', clash], ['clashA', clashArtist]]);
+  music.find(t => t.id === 'clashA').artist = 'Avilyn Grace';
+  const ctx = tagging.loadContext({ music, analyses, tags: dict });
+  const d1 = tagging.decideTrack(ctx, music.find(t => t.id === 'asure'));
+  assert.ok(d1.labels.includes('vocals') && d1.status === 'auto', JSON.stringify(d1.decided.vocals || d1.notes));
+  const d2 = tagging.decideTrack(ctx, music.find(t => t.id === 'clash'));
+  assert.strictEqual(d2.status, 'review');
+  assert.ok(!d2.labels.includes('vocals') && !d2.labels.includes('instrumental'));
+  const d3 = tagging.decideTrack(ctx, music.find(t => t.id === 'clashA'));
+  assert.ok(d3.labels.includes('vocals') && d3.status === 'auto');
+});
+
+test('calibration: Model B is matched to Model A, so they agree', () => {
+  // 12 "epic" songs: Model A clearly says epic; Model B ranks them highest, but only slightly
+  // above the rest (its scale is squashed). A fixed z-score rule would miss them; calibration doesn't.
+  const special = [];
+  for (let i = 0; i < 12; i++) special.push(['e' + i, boosted(300 + i, { epic: 0.262 + i * 0.0005 }, { 'Soundtrack music': 0.5 })]);
+  const { music, analyses } = catalog(special);
+  const ctx = tagging.loadContext({ music, analyses, tags: dict });
+  const agreed = special.filter(([id]) => tagging.decideTrack(ctx, music.find(t => t.id === id)).labels.includes('epic')).length;
+  assert.strictEqual(agreed, 12, 'all 12 epic songs should be agreed');
+  const rep = tagging.agreementReport(ctx);
+  const epic = rep.tags.find(r => r.id === 'epic');
+  assert.ok(epic && epic.kappa > 0.9, 'models agree on epic: ' + JSON.stringify(epic));
+  const fillerEpic = music.filter(t => t.id.startsWith('n')).filter(t => tagging.decideTrack(ctx, t).labels.includes('epic')).length;
+  assert.strictEqual(fillerEpic, 0, 'no false epics');
 });
 
 test('single-choice facets keep exactly one tag', () => {

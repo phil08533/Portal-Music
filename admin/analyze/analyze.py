@@ -222,11 +222,14 @@ class AstModel:
 # ── Model B: CLAP text ↔ audio ────────────────────────────────────────────
 
 def clap_prompts(tags):
-    """Every tag's text descriptions, plus a neutral 'music' prompt as a baseline."""
-    prompts = {'_baseline': ['music']}
+    """Every tag's text descriptions plus a generic "<label> music" one (prompt ensembling:
+    several phrasings averaged are steadier than any single one), and a neutral baseline."""
+    prompts = {'_baseline': ['music', 'a piece of music']}
     for t in tags:
         if t.get('clap'):
-            prompts[t['id']] = list(t['clap'])
+            label = t['label'].split('(')[0].strip().lower()
+            extra = f'{label} music'
+            prompts[t['id']] = list(t['clap']) + ([extra] if extra not in t['clap'] else [])
     return prompts
 
 
@@ -265,9 +268,14 @@ class ClapScorer:
 
 
 def clap_scores(audio_emb, text_embs):
-    """Cosine similarity per tag (best of its prompts)."""
+    """Cosine similarity per tag against the AVERAGE of its prompt embeddings."""
     import numpy as np
-    return {k: r4(max(float(np.dot(audio_emb, e)) for e in embs)) for k, embs in text_embs.items()}
+    out = {}
+    for k, embs in text_embs.items():
+        mean = np.mean(np.asarray(embs), axis=0)
+        mean = mean / np.linalg.norm(mean)
+        out[k] = r4(float(np.dot(audio_emb, mean)))
+    return out
 
 
 # ── mock engines (pipeline tests only; never published) ───────────────────

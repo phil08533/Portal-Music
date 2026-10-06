@@ -488,7 +488,7 @@
   <div id="tab-tags" class="tab-content">
     <div class="card">
       <h2>🏷️ AI Tags</h2>
-      <p class="muted" style="white-space:normal;margin-bottom:12px;">Two AI models listen to every song. A tag goes on the site automatically only when <strong>both agree</strong> (or it's measured, like tempo and length). Anything only one model hears comes to you for review below. Your decisions always win.</p>
+      <p class="muted" style="white-space:normal;margin-bottom:12px;">Two AI models listen to every song, calibrated to each other. A tag goes on the site only when <strong>both agree</strong> (or it's measured, like tempo and length). Tags only one model hears stay hidden (they just help search a little), and vocals/energy/tempo disagreements settle themselves. <strong>You only review songs where both models are sure and contradict each other</strong>, usually very few. Your decisions always win.</p>
       <div id="tg-setup" style="display:none;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.4);border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;">
         <strong>One-time setup:</strong> in a terminal in the Portal-Music folder run <code>npm run analyze:setup</code>
         (installs the free AI tools and downloads the two models, about 2 GB, takes a while). If it says venv is missing, first run <code>sudo apt install python3-venv</code>.
@@ -500,6 +500,7 @@
         <button class="btn btn-secondary btn-sm" onclick="tgRun('all')">↻ Re-analyze everything</button>
         <button class="btn btn-secondary btn-sm" id="tg-stop" onclick="tgStop()" style="display:none;">■ Stop</button>
         <button class="btn btn-primary btn-sm" style="width:auto;" onclick="tgPublish()">🚀 Publish tags to site</button>
+        <button class="btn btn-secondary btn-sm" onclick="tgAgreement()">🤝 Model agreement</button>
         <button class="btn btn-secondary btn-sm" onclick="tgAccuracy()">🎯 Check accuracy</button>
         <button class="btn btn-secondary btn-sm" onclick="tgTune()">🔧 Auto-tune</button>
       </div>
@@ -771,7 +772,7 @@
         const c = st.counts;
         document.getElementById('tg-counts').innerHTML =
           statTile('Analyzed', c.analyzed + c.mock + ' / ' + c.total, c.errors ? c.errors + ' failed' : (c.mock ? c.mock + ' are TEST data' : '')) +
-          statTile('Needs review', c.review, 'one model only or unsure') +
+          statTile('Needs review', c.review, 'models clearly disagree') +
           statTile('Auto-tagged', c.auto, 'both models agreed') +
           statTile('Approved by you', c.approved, '');
         const p = st.progress || {};
@@ -821,6 +822,27 @@
     }
 
     function tgPct(v) { return v == null ? '—' : Math.round(v * 100) + '%'; }
+
+    // How much the two models agree, tag by tag (no reviewing needed to see this)
+    async function tgAgreement() {
+      try {
+        const { agreement: ag } = await tgApi('agreement');
+        document.getElementById('tg-acc-card').style.display = 'block';
+        const el = document.getElementById('tg-acc');
+        if (!ag.calibrated) {
+          el.innerHTML = `<p class="muted">Analyze at least 30 songs first (${ag.tracks} so far). The models are matched to each other using the whole catalog.</p>`;
+          return;
+        }
+        const word = k => k >= 0.6 ? '🟢 strong' : k >= 0.4 ? '🟡 fair' : k >= 0.2 ? '🟠 weak' : '🔴 poor';
+        const label = f => (tgDict && tgDict.facets[f] ? tgDict.facets[f].label : f);
+        el.innerHTML = `<p style="white-space:normal;">Across ${ag.tracks} songs, when either model hears a tag, the other agrees <strong>${tgPct(ag.overallAgreement)}</strong> of the time.
+          Typical agreement per tag: <strong>${word(ag.medianKappa)}</strong> (κ ${ag.medianKappa}).
+          Only tags both models hear are published, so weak-agreement tags simply appear on fewer songs; they don't create wrong tags.</p>` +
+          statTable('Every tag (weakest first)', ['Tag', 'Group', 'Model A', 'Model B', 'Both', 'Agreement'],
+            ag.tags.map(r => [r.label, label(r.facet), r.songsA, r.songsB, r.both, word(r.kappa) + ' (' + r.kappa + ')']));
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) { showToast(err.message, false); }
+    }
 
     async function tgAccuracy() {
       try {

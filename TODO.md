@@ -9,8 +9,8 @@ Tick items off as you go.
 - [ ] `git pull`, then in the Portal-Music folder: `npm run analyze:setup` (once; if it says venv is missing,
       run `sudo apt install python3-venv` first). Restart `npm run admin`.
 - [ ] Admin → 🏷️ Tags → **Analyze new songs** (first run ≈ 1–2 h; you can stop and continue).
-- [ ] Review ~30 songs (keys A / N), click **Auto-tune**, then **Publish tags to site**, SEO is rebuilt
-      automatically; push.
+- [ ] Click **🤝 Model agreement** and send Claude a screenshot, plus clear the (short) **Needs review**
+      list (keys A / N). Then **Publish tags to site** (SEO pages rebuild automatically) and push.
 
 ## Stats (new)
 - [ ] **Publish the updated `firestore.rules`** (Firebase Console → Firestore Database → Rules → paste the whole

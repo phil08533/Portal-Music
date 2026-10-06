@@ -156,15 +156,19 @@ To add or remove a WAV on any track later: Manage Catalog → Edit → WAV downl
 
 ## AI tags and "Search a sound"
 
-Two free AI models (run on your computer) listen to every song. A tag goes on the site only when
-**both agree** (or it's measured, like tempo and length); anything only one model hears waits for you.
+Two free AI models (run on your computer) listen to every song. They're calibrated to each other per
+tag, and a tag goes on the site only when **both agree** (or it's measured, like tempo and length).
+What only one model hears stays hidden (it just helps search a little); vocals/energy/tempo
+disagreements settle themselves. Tags the models rarely agree on need both to be strongly sure.
+Only songs where both models are confident *and* contradict each other come to you.
 
 1. **Once:** `sudo apt install python3-venv` (if needed), then `npm run analyze:setup` in the
    Portal-Music folder. It installs the tools and downloads the models (~2 GB). Restart the admin.
 2. **🏷️ Tags → ▶ Analyze new songs.** The first run covers all songs (about an hour or two; leave it
    running, you can Stop and it continues later). New uploads are analyzed automatically after that.
-3. **Review** ("Needs review" list): click tags to remove, dashed ones to add, **A** to approve,
-   **N** for next. Approve 20–50 songs, then **🔧 Auto-tune** to fit the AI to your answers.
+3. **🤝 Model agreement** shows how well the two models agree, tag by tag (no reviewing needed).
+   **Review** only holds real conflicts: click tags to remove, dashed ones to add, **A** to approve,
+   **N** for next. Optional: approve 20+ songs and click **🔧 Auto-tune** to fit the AI to your taste.
 4. **🚀 Publish tags to site**, then push. Visitors can then type what they need ("spooky piano under a
    minute, no vocals") on Browse; track pages show tags and similar tracks; "Best for" pages appear in `use/`.
 

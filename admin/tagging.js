@@ -10,8 +10,18 @@
  *   R  rules: "Best for" tags are supported by their `imply` tags
  *      (dark + tense → horror); tempo/length/energy come from measurements
  *
+ *   Calibration: the two models score on different scales, so for every tag
+ *   Model B is set to flag as many songs as Model A expects to have the tag
+ *   ("prevalence matching"). After that, "both say yes" means the same thing
+ *   for every tag, and the agreement report (Cohen's kappa) shows per tag how
+ *   much the two models agree.
+ *
  *   two sources agree        → published automatically ("agree")
- *   one strong source only   → suggested; needs the owner's review
+ *   one source only          → a hidden hint: never shown on pages, only helps
+ *                              search a little; never sent to review
+ *   vocals / energy / tempo  → disagreements are settled automatically (the more
+ *                              confident model, a majority vote, or the measurement)
+ *   review queue             → only when both models are confident AND contradict
  *   owner's review           → always wins (add / remove / approve)
  *
  * Changing tags.json or the thresholds only needs this step, not the audio run.
@@ -33,12 +43,20 @@ const DEFAULTS = {
   // per facet: A votes yes at ≥ astMin; B votes yes at z ≥ clapZ;
   // a single source counts as "strong" at ≥ astStrong / clapStrongZ
   facets: {
-    mood:       { astMin: 0.12, clapZ: 0.9, astStrong: 0.45, clapStrongZ: 2.0 },
-    use:        { astMin: 0.12, clapZ: 0.9, astStrong: 0.45, clapStrongZ: 2.0, implyMin: 2 },
-    style:      { astMin: 0.15, clapZ: 0.9, astStrong: 0.5, clapStrongZ: 2.0 },
-    instrument: { astMin: 0.15, clapZ: 0.9, astStrong: 0.5, clapStrongZ: 2.0 },
+    mood:       { astMin: 0.12, clapZ: 0.9, clapMinZ: 0.3, astStrong: 0.45, clapStrongZ: 2.0 },
+    use:        { astMin: 0.12, clapZ: 0.9, clapMinZ: 0.3, astStrong: 0.45, clapStrongZ: 2.0, implyMin: 2 },
+    style:      { astMin: 0.15, clapZ: 0.9, clapMinZ: 0.3, astStrong: 0.5, clapStrongZ: 2.0 },
+    instrument: { astMin: 0.15, clapZ: 0.9, clapMinZ: 0.3, astStrong: 0.5, clapStrongZ: 2.0 },
   },
+  calibrateMinTracks: 30,
+  minKappa: 0.2,             // tags the models agree on less than this need BOTH to be strongly sure
+  hintMinStrength: 0.8,      // a one-model hint must be at least this confident…
+  maxHints: 6,               // …and a song keeps at most this many    // below this, use the fixed z-score rule instead of calibration
+  minPrevalence: 0.02,       // a tag fits at least 2%…
+  maxPrevalence: 0.5,        // …and at most half of the catalog
   vocalsAst: 0.2,            // Model A says "vocals" at this singing probability
+  vocalsStrongGap: 0.05,     // Model B's vocals-vs-instrumental similarity gap that counts as "sure"
+  vocalsWinRatio: 1.5,       // the more confident model wins by this margin; otherwise review
   tempoMinPercussive: 0.02,  // below this the BPM guess is unreliable (no drums)
   tempoMinRegularity: 0.5,
   similarCount: 8,
@@ -81,7 +99,66 @@ function loadContext(opts = {}) {
   const analyses = opts.analyses || loadAnalyses(music);
   const config = opts.config || loadConfig();
   const tagById = Object.fromEntries(dict.tags.map(t => [t.id, t]));
-  return { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats: catalogStats(dict, analyses, opts.allowMock) };
+  const stats = catalogStats(dict, analyses, opts.allowMock);
+  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats };
+  ctx.calib = calibrate(ctx);
+  return ctx;
+}
+
+// ── calibration: make Model B flag as many songs per tag as Model A does ──
+
+function clapRel(a, tag) {
+  if (!tag.clap || !a.clap || a.clap[tag.id] == null) return null;
+  return a.clap[tag.id] - (a.clap._baseline || 0);
+}
+
+function calibrate(ctx) {
+  const { dict, analyses, config } = ctx;
+  const list = Object.values(analyses).filter(a => usable(a, ctx.allowMock));
+  const N = list.length;
+  const out = {};
+  if (N < config.calibrateMinTracks) return out;
+  for (const t of dict.tags) {
+    const fc = config.facets[t.facet];
+    if (!fc || !t.ast || !t.clap) continue;
+    const A = list.map(a => astScore(a, t) || 0);
+    const B = list.map(a => clapRel(a, t));
+    if (B.some(v => v == null)) continue;
+    const countA = A.filter(v => v >= fc.astMin).length;
+    const prevalence = Math.min(config.maxPrevalence, Math.max(config.minPrevalence, countA / N));
+    const k = Math.max(1, Math.round(prevalence * N));
+    const bThr = B.slice().sort((x, y) => y - x)[k - 1];
+    // How much the two models agree on this tag (Cohen's kappa)
+    let both = 0, onlyA = 0, onlyB = 0;
+    for (let i = 0; i < N; i++) {
+      const ya = A[i] >= fc.astMin, yb = B[i] >= bThr;
+      if (ya && yb) both++; else if (ya) onlyA++; else if (yb) onlyB++;
+    }
+    const nA = both + onlyA, nB = both + onlyB, neither = N - both - onlyA - onlyB;
+    const po = (both + neither) / N;
+    const pe = (nA / N) * (nB / N) + ((N - nA) / N) * ((N - nB) / N);
+    const kappa = pe < 1 ? (po - pe) / (1 - pe) : 1;
+    out[t.id] = { prevalence, bThr, nA, nB, both, kappa };
+  }
+  return out;
+}
+
+// Per-tag agreement between the two models, for the 🏷️ Tags tab
+function agreementReport(ctx) {
+  const rows = Object.entries(ctx.calib).map(([id, c]) => ({
+    id, label: (ctx.tagById[id] || {}).label || id, facet: (ctx.tagById[id] || {}).facet,
+    songsA: c.nA, songsB: c.nB, both: c.both, kappa: Math.round(c.kappa * 100) / 100,
+  }));
+  const flagged = rows.reduce((s, r) => s + Math.max(r.songsA, r.songsB), 0);
+  const agreed = rows.reduce((s, r) => s + r.both, 0);
+  const kappas = rows.map(r => r.kappa);
+  return {
+    calibrated: rows.length > 0,
+    tracks: Object.values(ctx.analyses).filter(a => usable(a, ctx.allowMock)).length,
+    overallAgreement: flagged ? agreed / flagged : null,
+    medianKappa: kappas.length ? kappas.sort((x, y) => x - y)[Math.floor(kappas.length / 2)] : null,
+    tags: rows.sort((x, y) => x.kappa - y.kappa),
+  };
 }
 
 // ── catalog statistics (for z-scores and energy percentiles) ──────────────
@@ -109,7 +186,12 @@ function catalogStats(dict, analyses, allowMock) {
   const dspKeys = ['loudnessDb', 'percussiveRatio', 'onsetRate', 'brightnessHz', 'bpm'];
   const sorted = {};
   for (const k of dspKeys) sorted[k] = list.map(a => a.dsp[k]).filter(v => typeof v === 'number').sort((x, y) => x - y);
-  return { clap, sorted, count: list.length };
+  // Model B's raw "vocals minus instrumental" gap is biased (one prompt may always score higher),
+  // so decisions use the gap relative to the catalog's typical gap
+  const gaps = list.filter(a => a.clap && a.clap.vocals != null && a.clap.instrumental != null)
+    .map(a => a.clap.vocals - a.clap.instrumental).sort((x, y) => x - y);
+  const vocalGapMedian = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0;
+  return { clap, sorted, count: list.length, vocalGapMedian };
 }
 
 function percentile(sortedValues, v) {
@@ -166,8 +248,12 @@ function decideTrack(ctx, track, opts = {}) {
     if ((r.bpmMin == null || bpm >= r.bpmMin) && (r.bpmMax == null || bpm < r.bpmMax)) {
       const why = `${Math.round(bpm)} BPM`;
       if (tempoReliable) decided[t.id] = { conf: 'measured', score: 1, why };
-      else { suggested[t.id] = { score: 0.5, why: why + ' (no clear beat, please check)' }; notes.push('tempo unsure'); }
+      else if (a.dsp.percussiveRatio >= config.tempoMinPercussive) decided[t.id] = { conf: 'measured', score: 0.6, why: why + ' (rough)' };
     }
+  }
+  // No drums at all: the BPM guess is meaningless, but it *feels* slow
+  if (!tempoReliable && a.dsp.percussiveRatio < config.tempoMinPercussive && tagById.slow) {
+    decided.slow = { conf: 'measured', score: 0.6, why: 'no steady beat' };
   }
 
   // Multi-label facets: A + B (+ rules for "Best for")
@@ -178,8 +264,13 @@ function decideTrack(ctx, track, opts = {}) {
     for (const t of byFacet[facet] || []) {
       const A = astScore(a, t), B = clapZ(a, t, stats);
       const votes = [];
-      if (A != null && A >= fc.astMin) votes.push('A');
-      if (B != null && B >= fc.clapZ) votes.push('B');
+      const cal = ctx.calib[t.id];
+      // A tag the two models rarely agree on is unreliable: then only strong certainty from both counts
+      const shaky = cal && cal.kappa < config.minKappa;
+      if (A != null && A >= (shaky ? fc.astStrong : fc.astMin)) votes.push('A');
+      const bYes = B != null && (shaky ? B >= fc.clapStrongZ
+        : cal ? clapRel(a, t) >= cal.bThr && B >= fc.clapMinZ : B >= fc.clapZ);
+      if (bYes) votes.push('B');
       if (facet === 'use' && t.imply && t.imply.length) {
         const hits = t.imply.filter(id => decided[id]).length;
         if (hits >= Math.min(fc.implyMin || 2, t.imply.length)) votes.push('R');
@@ -195,7 +286,8 @@ function decideTrack(ctx, track, opts = {}) {
       if (s.votes.length >= 2 && kept < (dict.facets[facet] || {}).max) {
         decided[s.t.id] = { conf: 'agree', score: Math.min(1, s.strength), why: s.why };
         kept++;
-      } else if (s.votes.length === 1 && s.strength >= 1) {
+      } else if (s.votes.length === 1 && s.strength >= config.hintMinStrength) {
+        // one confident model only: a hidden hint (helps search a little, never shown, never reviewed)
         suggested[s.t.id] = { score: Math.min(1, s.strength / 2), why: s.why + ' (one model only)' };
       }
     }
@@ -205,11 +297,22 @@ function decideTrack(ctx, track, opts = {}) {
   const vocalLabels = ['Singing', 'Male singing', 'Female singing', 'Rapping', 'Vocal music', 'Choir', 'Child singing', 'Synthetic singing'];
   const aVocal = Math.max(0, ...vocalLabels.map(l => (a.ast || {})[l] || 0));
   const vA = a.ast ? (aVocal >= config.vocalsAst ? 'vocals' : 'instrumental') : null;
-  const zI = clapZ(a, tagById.instrumental || {}, stats), zV = clapZ(a, tagById.vocals || {}, stats);
-  const vB = zI != null && zV != null ? (zV > zI ? 'vocals' : 'instrumental') : null;
+  const gap = a.clap && a.clap.vocals != null && a.clap.instrumental != null
+    ? (a.clap.vocals - a.clap.instrumental) - stats.vocalGapMedian : null;
+  const vB = gap != null ? (gap > 0 ? 'vocals' : 'instrumental') : null;
   const vocalWhy = `A singing ${aVocal.toFixed(2)}${vB ? `, B prefers ${vB}` : ''}`;
   if (vA && vB && vA === vB) decided[vA] = { conf: 'agree', score: 1, why: vocalWhy };
-  else if (vA || vB) { suggested[vA || vB] = { score: 0.5, why: vocalWhy + ' (models disagree)' }; notes.push('vocals unsure'); }
+  else if (vA && vB) {
+    // How sure is each model? (distance from its own decision line)
+    const thr = config.vocalsAst;
+    const aConf = vA === 'vocals' ? (aVocal - thr) / thr : (thr - aVocal) / thr;
+    const bConf = Math.abs(gap) / config.vocalsStrongGap;
+    const ratio = config.vocalsWinRatio;
+    if (aConf >= bConf * ratio) decided[vA] = { conf: 'resolved', score: 0.8, why: vocalWhy + ' → Model A was surer' };
+    else if (bConf >= aConf * ratio) decided[vB] = { conf: 'resolved', score: 0.8, why: vocalWhy + ' → Model B was surer' };
+    else if (track.artist && tagById.vocals) decided.vocals = { conf: 'resolved', score: 0.6, why: vocalWhy + ' → named artist, so vocals' };
+    else { suggested[vA] = { score: 0.5, why: vocalWhy }; suggested[vB] = { score: 0.5, why: vocalWhy }; notes.push('vocals: the two models disagree'); }
+  } else if (vA || vB) decided[vA || vB] = { conf: 'resolved', score: 0.6, why: vocalWhy + ' (one model available)' };
 
   const sorted = stats.sorted;
   const energyIndex = ['loudnessDb', 'percussiveRatio', 'onsetRate', 'brightnessHz', 'bpm']
@@ -227,7 +330,7 @@ function decideTrack(ctx, track, opts = {}) {
   const eBest = Object.entries(eVotes).sort((x, y) => y[1].length - x[1].length)[0];
   const eWhy = `energy ${Math.round(energyIndex * 100)}/100 (${eBest[1].join('+')})`;
   if (eBest[1].length >= 2) decided[eBest[0]] = { conf: 'agree', score: 1, why: eWhy };
-  else { suggested[eM] = { score: 0.5, why: eWhy + ' (only measured)' }; notes.push('energy unsure'); }
+  else decided[eM] = { conf: 'measured', score: 0.6, why: eWhy + ' (models split, measurement wins)' };
 
   // A suggested genre move: the strongest agreed style's site genre
   const topStyle = Object.entries(decided).filter(([id]) => (tagById[id] || {}).facet === 'style')
@@ -252,13 +355,15 @@ function decideTrack(ctx, track, opts = {}) {
     }
   }
 
-  // Only flag what matters: unsure vocals/energy/tempo, a genre move, or a very confident single model.
-  // Weaker hints stay visible in the review screen but don't put the track in the queue.
-  const strongHint = Object.values(suggested).some(x => x.score >= 0.7);
-  const needsReview = review.status !== 'approved' && (notes.length > 0 || strongHint || !!genreSuggestion);
+  // Review only real conflicts (both models confident and contradicting). One-model hints and
+  // genre suggestions never put a song in the queue.
+  const needsReview = review.status !== 'approved' && notes.length > 0;
+  const multi = id => ['mood', 'style', 'instrument', 'use'].includes((tagById[id] || {}).facet);
   return {
     id: track.id,
     labels: Object.keys(decided),
+    hints: Object.keys(suggested).filter(id => multi(id) && !decided[id])
+      .sort((x, y) => suggested[y].score - suggested[x].score).slice(0, config.maxHints),
     decided, suggested, notes,
     measured: { bpm: Math.round(bpm), tempoReliable, key: a.dsp.key, durationSec: Math.round(dur), duration: fmtDuration(dur) },
     genreSuggestion: review.genre ? null : genreSuggestion,
@@ -312,6 +417,7 @@ function publish(opts = {}) {
     if (!d) continue;
     const before = JSON.stringify([t.labels, t.bpm, t.key, t.duration, t.durationSec, t.genre]);
     t.labels = d.labels;
+    if (d.hints.length) t.hints = d.hints; else delete t.hints;
     t.bpm = d.measured.bpm;
     t.key = d.measured.key;
     t.durationSec = d.measured.durationSec;
@@ -356,6 +462,7 @@ function setReview(trackId, review) {
 
 function accuracy(ctx, config) {
   const cfgCtx = config ? { ...ctx, config } : ctx;
+  if (config) cfgCtx.calib = calibrate(cfgCtx);      // thresholds changed → recalibrate Model B
   const perFacet = {};
   const perTag = {};
   let tracks = 0;
@@ -419,6 +526,6 @@ function tune(opts = {}) {
 }
 
 module.exports = {
-  DEFAULTS, loadContext, decideTrack, decideAll, publish, setReview, accuracy, tune, similarTracks,
+  DEFAULTS, loadContext, decideTrack, decideAll, publish, setReview, accuracy, tune, similarTracks, agreementReport,
   ANALYSIS_DIR,
 };

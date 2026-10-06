@@ -545,6 +545,9 @@ const server = http.createServer(async (req, res) => {
         const notAnalyzed = ctx.music.filter(t => !decisions[t.id]).map(t => ({ id: t.id, title: t.title, error: (ctx.analyses[t.id] || {}).error || null }));
         return sendJson(200, { success: true, items, notAnalyzed });
       }
+      if (req.method === 'GET' && pathname === '/api/tags/agreement') {
+        return sendJson(200, { success: true, agreement: tagging.agreementReport(tagging.loadContext({ allowMock })) });
+      }
       if (req.method === 'GET' && pathname === '/api/tags/accuracy') {
         return sendJson(200, { success: true, accuracy: tagging.accuracy(tagging.loadContext({ allowMock })) });
       }

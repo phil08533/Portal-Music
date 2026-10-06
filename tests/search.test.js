@@ -88,6 +88,16 @@ test('ranking prefers matching tags and explains why', () => {
   assert.strictEqual(S.search(songs, 'nigth walk').results[0].song.id, 'c');
 });
 
+test('one-model hints count a little, below agreed tags', () => {
+  const songs = [
+    { id: 'agreed', title: 'A', genre: 'Pop', labels: ['romantic'] },
+    { id: 'hint', title: 'B', genre: 'Pop', labels: ['happy'], hints: ['romantic'] },
+    { id: 'none', title: 'C', genre: 'Pop', labels: ['happy'] },
+  ];
+  const r = S.search(songs, 'romantic').results.map(x => x.song.id);
+  assert.deepStrictEqual(r, ['agreed', 'hint']);
+});
+
 test('chips describe what was understood', () => {
   const c = S.search([], 'creepy piano under 45 seconds not sad').chips.map(x => x.label);
   for (const want of ['Scary', 'Piano', 'not Sad', 'under 45 s']) assert.ok(c.includes(want), want + ' in ' + c);
