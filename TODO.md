@@ -8,7 +8,7 @@ Tick items off as you go.
       Firebase Console → Firestore Database → Rules → paste the whole file → Publish.
 - [ ] `git pull`, then in the Portal-Music folder: `npm run analyze:setup` (once; if it says venv is missing,
       run `sudo apt install python3-venv` first). Restart `npm run admin`.
-- [ ] Admin → 🏷️ Tags → **Analyze new songs** (first run ≈ 1–2 h; you can stop and continue).
+- [ ] Admin → 🏷️ Tags → **Analyze new songs**, with the admin address NOT ending in `?mock=1` (that is test mode: random fake scores). First run ≈ 1–2 h; you can stop and continue.
 - [ ] Click **🤝 Model agreement** and send Claude a screenshot, plus clear the (short) **Needs review**
       list (keys A / N). Then **Publish tags to site** (SEO pages rebuild automatically) and push.
 

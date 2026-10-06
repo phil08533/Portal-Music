@@ -598,7 +598,8 @@ const server = http.createServer(async (req, res) => {
           return sendJson(200, { success: true, review, decision: track ? tagging.decideTrack(ctx, track) : null });
         }
         if (pathname === '/api/tags/publish') {
-          const result = tagging.publish({ allowMock });
+          if (allowMock) throw new Error('Test mode: fake scores are never published. Open the admin without ?mock=1 for real results.');
+          const result = tagging.publish();
           exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, () => {});
           return sendJson(200, { success: true, result });
         }
