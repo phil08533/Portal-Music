@@ -183,3 +183,21 @@ test('tuning improves agreement with approved answers', () => {
   assert.ok(res.after.facets.mood.f1 > res.before.facets.mood.f1, `mood F1 ${res.before.facets.mood.f1} → ${res.after.facets.mood.f1}`);
   assert.ok(res.config.mood.astMin <= 0.08);
 });
+
+test('batch upload: the AI picks the genre and a matching subgenre', () => {
+  const lofi = boosted(400, { lofi: 0.46, chill: 0.45 }, { 'Hip hop music': 0.5, 'Electronic music': 0.5, 'Tender music': 0.4 });
+  lofi.review = { status: 'pending', add: [], remove: [], autoGenre: true };
+  const { music, analyses } = catalog([['lofi', lofi]]);
+  music.find(t => t.id === 'lofi').genre = 'Pop';   // the batch default
+  const genres = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'genres.json'), 'utf8')).genres;
+  const ctx = tagging.loadContext({ music, analyses, tags: dict, genres });
+  const d = tagging.decideTrack(ctx, music.find(t => t.id === 'lofi'));
+  assert.ok(d.labels.includes('lofi'), 'lofi agreed: ' + d.labels);
+  assert.deepStrictEqual(d.genreAuto, { genre: 'Electronic', subgenre: 'Lo-Fi' });
+  assert.strictEqual(d.status, 'auto');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pm-tag-'));
+  tagging.publish({ music, analyses, tags: dict, genres, musicPath: path.join(dir, 'm.json'), similarPath: path.join(dir, 's.json') });
+  const t = JSON.parse(fs.readFileSync(path.join(dir, 'm.json'), 'utf8')).find(x => x.id === 'lofi');
+  assert.strictEqual(t.genre, 'Electronic');
+  assert.strictEqual(t.subgenre, 'Lo-Fi');
+});

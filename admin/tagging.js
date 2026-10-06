@@ -36,6 +36,7 @@ const ROOT = path.join(__dirname, '..');
 const MUSIC_JSON = path.join(ROOT, 'data', 'music.json');
 const TAGS_JSON = path.join(ROOT, 'data', 'tags.json');
 const SIMILAR_JSON = path.join(ROOT, 'data', 'similar.json');
+const GENRES_JSON = path.join(ROOT, 'data', 'genres.json');
 const ANALYSIS_DIR = path.join(__dirname, 'analysis');
 const CONFIG_JSON = path.join(ANALYSIS_DIR, 'config.json');
 
@@ -100,7 +101,8 @@ function loadContext(opts = {}) {
   const config = opts.config || loadConfig();
   const tagById = Object.fromEntries(dict.tags.map(t => [t.id, t]));
   const stats = catalogStats(dict, analyses, opts.allowMock);
-  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats };
+  const genres = opts.genres || readJson(GENRES_JSON, { genres: {} }).genres;
+  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres };
   ctx.calib = calibrate(ctx);
   return ctx;
 }
@@ -335,8 +337,13 @@ function decideTrack(ctx, track, opts = {}) {
   // A suggested genre move: the strongest agreed style's site genre
   const topStyle = Object.entries(decided).filter(([id]) => (tagById[id] || {}).facet === 'style')
     .sort((x, y) => y[1].score - x[1].score)[0];
-  const genreSuggestion = topStyle && tagById[topStyle[0]].genre && tagById[topStyle[0]].genre !== track.genre
-    ? tagById[topStyle[0]].genre : null;
+  const styleGenre = topStyle && tagById[topStyle[0]].genre;
+  const genreSuggestion = styleGenre && styleGenre !== track.genre ? styleGenre : null;
+  // Batch uploads marked "let the AI pick": the genre (and a matching subgenre) is set automatically
+  const reviewInfo = a.review || {};
+  const genreAuto = reviewInfo.autoGenre && !reviewInfo.genre && styleGenre
+    ? { genre: styleGenre, subgenre: pickSubgenre(styleGenre, Object.keys(decided).filter(id => (tagById[id] || {}).facet === 'style').map(id => tagById[id]), ctx) }
+    : null;
 
   // The owner's review always wins
   const review = a.review || {};
@@ -366,10 +373,23 @@ function decideTrack(ctx, track, opts = {}) {
       .sort((x, y) => suggested[y].score - suggested[x].score).slice(0, config.maxHints),
     decided, suggested, notes,
     measured: { bpm: Math.round(bpm), tempoReliable, key: a.dsp.key, durationSec: Math.round(dur), duration: fmtDuration(dur) },
-    genreSuggestion: review.genre ? null : genreSuggestion,
+    genreSuggestion: review.genre || genreAuto ? null : genreSuggestion,
+    genreAuto,
     status: review.status === 'approved' ? 'approved' : needsReview ? 'review' : 'auto',
     mock: !!a.mock,
   };
+}
+
+// The site subgenre that best matches the agreed styles (e.g. lofi → "Lo-Fi"), else the genre itself
+function pickSubgenre(genre, styleTags, ctx) {
+  const subs = ((ctx.genres || {})[genre] || {}).subgenres || [];
+  const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const t of styleTags) {
+    for (const sub of subs) {
+      if ([norm(t.label), norm(t.id)].some(n => n && (norm(sub).includes(n) || n.includes(norm(sub))))) return sub;
+    }
+  }
+  return subs.includes(genre) ? genre : (subs[0] || genre);
 }
 
 function decideAll(ctx, opts = {}) {
@@ -427,6 +447,15 @@ function publish(opts = {}) {
       t.genre = g;
       if (!t.subgenre || t.subgenre === t.genre) t.subgenre = g;
     }
+    if (d.genreAuto) {             // batch upload: the AI picked the genre; lock it in as if approved
+      t.genre = d.genreAuto.genre;
+      t.subgenre = d.genreAuto.subgenre;
+      if (!opts.dryRun && !opts.analyses) {
+        const file = path.join(ANALYSIS_DIR, t.id + '.json');
+        const a = readJson(file, null);
+        if (a) { a.review = { ...(a.review || {}), genre: t.genre, autoGenre: false }; writeJson(file, a, false); }
+      }
+    }
     if (JSON.stringify([t.labels, t.bpm, t.key, t.duration, t.durationSec, t.genre]) !== before) changed++;
   }
   if (!opts.dryRun) {
@@ -454,8 +483,18 @@ function setReview(trackId, review) {
     at: Date.now(),
   };
   if (review.genre) a.review.genre = String(review.genre).slice(0, 60);
+  if (a.review.autoGenre === undefined && (readJson(file, {}).review || {}).autoGenre) a.review.autoGenre = true;
   writeJson(file, a, false);
   return a.review;
+}
+
+// Batch uploads: "let the AI pick the genre" (applied when its tags are published)
+function markAutoGenre(trackId) {
+  fs.mkdirSync(ANALYSIS_DIR, { recursive: true });
+  const file = path.join(ANALYSIS_DIR, trackId + '.json');
+  const a = readJson(file, {}) || {};
+  a.review = { status: 'pending', add: [], remove: [], ...(a.review || {}), autoGenre: true };
+  writeJson(file, a, false);
 }
 
 // ── accuracy: auto decisions vs the owner's approved tracks ───────────────
@@ -526,6 +565,6 @@ function tune(opts = {}) {
 }
 
 module.exports = {
-  DEFAULTS, loadContext, decideTrack, decideAll, publish, setReview, accuracy, tune, similarTracks, agreementReport,
+  DEFAULTS, loadContext, decideTrack, decideAll, publish, setReview, markAutoGenre, accuracy, tune, similarTracks, agreementReport,
   ANALYSIS_DIR,
 };

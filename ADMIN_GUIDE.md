@@ -175,3 +175,14 @@ Only songs where both models are confident *and* contradict each other come to y
 To add or rename tags, edit `data/tags.json` (or ask Claude), then Publish again. Only new *clap*
 descriptions need `admin/analyze/.venv/bin/python admin/analyze/analyze.py --rescore` (takes seconds).
 
+## Batch upload (a whole folder)
+
+Upload & Add Track → **📦 Batch upload**: drag in a folder (subfolders included) or pick files.
+- Each MP3 is paired with a **WAV** and a **cover image** of the same name; otherwise a `cover.jpg`/`folder.jpg`
+  in its folder, otherwise the cover inside the MP3. Titles come from the file names (export leftovers like
+  "-final" or "v2" are removed), or from the MP3's own title; edit any title in the list before uploading.
+- Songs already in the catalog (same title) are skipped, and no upload ever overwrites another song's file.
+- Leave **🤖 Let the AI pick each song's genre** on: after the upload the AI analyzes the whole batch once,
+  tags every song and moves it into its genre/subgenre (the genre you picked is used when it isn't sure).
+- Then: R2 sync (Actions & Sync step 2, uploads the files), and push.
+

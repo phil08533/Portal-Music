@@ -151,6 +151,53 @@
 
   <!-- TAB 1: UPLOAD -->
   <div id="tab-upload" class="tab-content active">
+    <div class="card">
+      <h2>📦 Batch upload: a whole folder at once</h2>
+      <p class="muted" style="white-space:normal;margin-bottom:10px;">Drop a folder of MP3s (subfolders too). Each MP3 is matched with a WAV and a cover of the same name, or a <code>cover.jpg</code> in its folder, or the cover inside the MP3. Titles come from the file names; you can edit them below. After uploading, the AI analyzes the whole batch once, tags every song and sorts it into its genre.</p>
+      <div class="dropzone" id="batch-dropzone" style="padding:18px;">
+        <div style="font-size:1.6rem;">📂</div>
+        <strong>Drag a folder (or many MP3s) here</strong>
+        <div class="action-btns" style="justify-content:center;margin-top:8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();document.getElementById('batch-folder').click()">Choose a folder…</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();document.getElementById('batch-files').click()">Choose files…</button>
+        </div>
+        <input type="file" id="batch-folder" webkitdirectory directory multiple style="display:none;">
+        <input type="file" id="batch-files" multiple accept=".mp3,.wav,.jpg,.jpeg,.png,.webp,audio/mpeg,audio/wav,image/*" style="display:none;">
+      </div>
+      <div id="batch-panel" style="display:none;margin-top:12px;">
+        <div class="form-row" style="align-items:flex-end;flex-wrap:wrap;">
+          <div class="form-group">
+            <label>Genre</label>
+            <select id="batch-genre" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label>Artist (optional, for all)</label>
+            <input type="text" id="batch-artist" class="form-control" list="artists-datalist" placeholder="Leave empty to read it from the MP3">
+          </div>
+        </div>
+        <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="batch-ai-genre" checked>
+          <span>🤖 Let the AI pick each song's genre (the genre above is used when it isn't sure)</span></label>
+        <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="batch-new" checked>
+          <span>Show in <strong>New Releases</strong> (45 days)</span></label>
+        <label class="checkbox-group" style="margin:0 0 10px;"><input type="checkbox" id="batch-skip-dupes" checked>
+          <span>Skip songs whose title is already in the catalog</span></label>
+        <div class="table-container" style="max-height:360px;overflow:auto;">
+          <table>
+            <thead><tr><th>#</th><th>Title</th><th>Files</th><th>Status</th><th></th></tr></thead>
+            <tbody id="batch-rows"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn btn-primary" id="batch-start" style="width:auto;" onclick="batchStart()">⬆ Upload all</button>
+          <button class="btn btn-secondary btn-sm" onclick="batchClear()">Clear list</button>
+          <span id="batch-summary" class="muted" style="font-size:0.85rem;"></span>
+        </div>
+        <div id="batch-progress" style="display:none;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:8px;">
+          <div id="batch-bar" style="height:100%;width:0;background:var(--accent);transition:width .3s;"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-layout">
       
       <div class="card">
@@ -1235,6 +1282,8 @@
 
         genreSelect.innerHTML = Object.keys(genresConfig).map(g => `<option value="${g}">${genresConfig[g].icon || ''} ${g}</option>`).join('');
         editGenreSelect.innerHTML = genreSelect.innerHTML;
+        const batchGenre = document.getElementById('batch-genre');
+        if (batchGenre && !batchGenre.options.length) batchGenre.innerHTML = genreSelect.innerHTML;
         filterSelect.innerHTML = '<option value="">All Tracks / Genres</option>' +
           '<option value="__featured__">⭐ Featured Tracks Only</option>' +
           '<option value="__new_release__">🔥 New Releases Only</option>' +
@@ -1353,6 +1402,176 @@
       };
       reader.readAsDataURL(file);
     }
+
+    // --- 📦 Batch upload ---
+    let batchItems = [];
+    let batchRunning = false;
+    const BATCH_COVER_NAMES = ['cover', 'folder', 'front', 'artwork', 'album', 'albumart'];
+
+    function batchBase(name) { return name.replace(/\.[^.]+$/, '').toLowerCase().trim(); }
+    function batchDir(f) { const p = f.webkitRelativePath || f._path || ''; return p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : ''; }
+
+    // "my_song-final (1).mp3" → "My Song Final"
+    function batchCleanTitle(name) {
+      let t = name.replace(/\.[^.]+$/, '')
+        .replace(/[\[(](?:\d+|v\d+|final|master(?:ed)?|remaster(?:ed)?|copy|edit|mix|suno[^)\]]*)[\])]/gi, ' ')
+        .replace(/[_]+/g, ' ').replace(/\s+-\s+|\s*-\s*$/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      // export leftovers at the end: "-final", " v2", "master", "demo", "export 3"…
+      for (let k = 0; k < 3; k++) t = t.replace(/[\s-]+(?:final|master(?:ed)?|v\d+|version\s*\d+|demo|export(?:ed)?|bounce|mixdown|copy|edit|take\s*\d+)\s*\d*$/i, '').trim();
+      if (t === t.toLowerCase() || t === t.toUpperCase()) t = t.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+      return t || name;
+    }
+
+    function batchAddFiles(files) {
+      files = [...files].filter(f => !f.name.startsWith('.'));
+      const known = new Set(batchItems.map(it => it.mp3.name + ':' + it.mp3.size));
+      const catalogTitles = new Set(catalog.map(t => String(t.title).trim().toLowerCase()));
+      const byDir = {};
+      for (const f of files) (byDir[batchDir(f)] = byDir[batchDir(f)] || []).push(f);
+      let added = 0;
+      for (const [dir, list] of Object.entries(byDir)) {
+        const images = list.filter(f => /\.(jpe?g|png|webp)$/i.test(f.name));
+        const folderCover = images.find(f => BATCH_COVER_NAMES.includes(batchBase(f.name)));
+        for (const mp3 of list.filter(f => /\.mp3$/i.test(f.name))) {
+          if (known.has(mp3.name + ':' + mp3.size)) continue;
+          const base = batchBase(mp3.name);
+          const title = batchCleanTitle(mp3.name);
+          batchItems.push({
+            mp3, dir,
+            wav: list.find(f => /\.wav$/i.test(f.name) && batchBase(f.name) === base) || null,
+            cover: images.find(f => batchBase(f.name) === base) || folderCover || null,
+            title, edited: false,
+            status: catalogTitles.has(title.toLowerCase()) ? 'dupe' : 'ready',
+          });
+          added++;
+        }
+      }
+      if (!added) { showToast('No new MP3 files found there.', false); return; }
+      document.getElementById('batch-panel').style.display = 'block';
+      batchRender();
+      showToast(`${added} song${added === 1 ? '' : 's'} added to the batch.`);
+    }
+
+    // Drag & drop folders: walk the dropped directory tree
+    async function batchReadEntry(entry, prefix, out) {
+      if (entry.isFile) {
+        const file = await new Promise((res, rej) => entry.file(res, rej));
+        file._path = prefix + file.name;
+        out.push(file);
+      } else if (entry.isDirectory) {
+        const reader = entry.createReader();
+        let batch;
+        do {
+          batch = await new Promise((res, rej) => reader.readEntries(res, rej));
+          for (const e of batch) await batchReadEntry(e, prefix + entry.name + '/', out);
+        } while (batch.length);
+      }
+    }
+
+    function batchRender() {
+      const label = { ready: '⏳ ready', dupe: '⚠ already in catalog', uploading: '⬆ uploading…', done: '✅ added', skipped: '↷ skipped', error: '✗ ' };
+      document.getElementById('batch-rows').innerHTML = batchItems.map((it, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><input class="form-control" style="padding:4px 8px;font-size:0.85rem;" value="${escapeHtml(it.title)}" ${it.status === 'done' ? 'disabled' : ''}
+               onchange="batchItems[${i}].title=this.value.trim()||batchItems[${i}].title;batchItems[${i}].edited=true"></td>
+          <td style="font-size:0.8rem;white-space:nowrap;">🎵 ${(it.mp3.size / 1048576).toFixed(1)} MB${it.wav ? ' · WAV ✓' : ''}${it.cover ? ' · 🖼 ✓' : ''}</td>
+          <td style="font-size:0.8rem;">${label[it.status] || ''}${it.status === 'error' ? escapeHtml(it.error || '') : ''}</td>
+          <td>${it.status === 'done' || batchRunning ? '' : `<button class="btn btn-secondary btn-sm" onclick="batchItems.splice(${i},1);batchRender()">✕</button>`}</td>
+        </tr>`).join('');
+      const c = s => batchItems.filter(it => it.status === s).length;
+      document.getElementById('batch-summary').textContent =
+        `${batchItems.length} songs · ${batchItems.filter(it => it.wav).length} with WAV · ${batchItems.filter(it => it.cover).length} with a cover file` +
+        (c('dupe') ? ` · ${c('dupe')} already in catalog` : '') + (c('done') ? ` · ${c('done')} added` : '');
+    }
+
+    function batchClear() {
+      if (batchRunning) return;
+      batchItems = [];
+      document.getElementById('batch-panel').style.display = 'none';
+      document.getElementById('batch-folder').value = '';
+      document.getElementById('batch-files').value = '';
+    }
+
+    async function batchStart() {
+      if (batchRunning) return;
+      const skipDupes = document.getElementById('batch-skip-dupes').checked;
+      const todo = batchItems.filter(it => it.status === 'ready' || it.status === 'error' || (it.status === 'dupe' && !skipDupes));
+      for (const it of batchItems) if (it.status === 'dupe' && skipDupes) it.status = 'skipped';
+      if (!todo.length) { showToast('Nothing to upload.', false); batchRender(); return; }
+      batchRunning = true;
+      const btn = document.getElementById('batch-start');
+      btn.disabled = true;
+      document.getElementById('batch-progress').style.display = 'block';
+      const genre = document.getElementById('batch-genre').value;
+      const artist = document.getElementById('batch-artist').value.trim();
+      const aiGenre = document.getElementById('batch-ai-genre').checked;
+      const isNewRelease = document.getElementById('batch-new').checked;
+      const newIds = [];
+      for (let i = 0; i < todo.length; i++) {
+        const it = todo[i];
+        it.status = 'uploading'; batchRender();
+        btn.textContent = `Uploading ${i + 1} of ${todo.length}…`;
+        try {
+          const audio = await blobToDataUrl(it.mp3);
+          const cover = it.cover ? await blobToDataUrl(it.cover) : null;
+          const res = await fetch('/api/track/add', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: it.title, keepTitle: it.edited, artist, genre, subgenre: genre, tags: '',
+              isNewRelease, featured: false, audioBase64: audio, coverBase64: cover,
+              preferId3: true, autoGenre: aiGenre, batch: { skipDuplicates: skipDupes },
+            })
+          });
+          const result = await res.json();
+          if (!result.success) throw new Error(result.error);
+          if (result.skipped) { it.status = 'skipped'; }
+          else {
+            newIds.push(result.track.id);
+            it.title = result.track.title;
+            if (it.wav) { try { await uploadWav(result.track.id, it.wav); } catch (e) { it.error = 'WAV: ' + e.message; } }
+            it.status = 'done';
+          }
+        } catch (err) {
+          it.status = 'error'; it.error = err.message;
+        }
+        document.getElementById('batch-bar').style.width = Math.round(((i + 1) / todo.length) * 100) + '%';
+        batchRender();
+      }
+      batchRunning = false;
+      btn.disabled = false;
+      btn.textContent = '⬆ Upload all';
+      loadCatalog();
+      if (!newIds.length) { showToast('No new songs were added.', false); return; }
+      // One AI run for the whole batch (tags + genres), then pages are rebuilt automatically
+      let note = '';
+      try {
+        const r = await tgApi('run', { mode: 'ids', ids: newIds });
+        note = r.result === 'started' ? ' The AI is now tagging and sorting them (see 🏷️ Tags).'
+          : r.result === 'busy' ? ' The AI is busy; click "Analyze new songs" in 🏷️ Tags when it finishes.' : '';
+      } catch (e) {
+        note = ' (AI tagging isn\'t set up yet, so they keep the genre you picked.)';
+        fetch('/api/action/regenerate-seo', { method: 'POST' });
+      }
+      const failed = batchItems.filter(it => it.status === 'error').length;
+      showToast(`✅ ${newIds.length} songs added${failed ? `, ${failed} failed (see list)` : ''}.${note} Next: R2 sync, then push.`);
+    }
+
+    document.getElementById('batch-folder').addEventListener('change', e => batchAddFiles(e.target.files));
+    document.getElementById('batch-files').addEventListener('change', e => batchAddFiles(e.target.files));
+    (function () {
+      const dz = document.getElementById('batch-dropzone');
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+      dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+      dz.addEventListener('drop', async e => {
+        e.preventDefault(); dz.classList.remove('dragover');
+        const entries = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+        if (!entries.length) return batchAddFiles(e.dataTransfer.files);
+        const files = [];
+        for (const en of entries) await batchReadEntry(en, '', files);
+        batchAddFiles(files);
+      });
+    })();
 
     // --- Suno import ---
     let sunoSong = null;

@@ -69,11 +69,17 @@ function stop() {
   return status();
 }
 
-// After an upload: analyze just that song, then publish its tags and rebuild pages
+// After uploads: analyze those songs (one run for a whole batch), then publish and rebuild pages
 function analyzeNewTrack(id) {
+  return analyzeIds([id]);
+}
+
+function analyzeIds(ids) {
+  ids = (ids || []).map(String).filter(id => /^[a-z0-9]{6,40}$/i.test(id));
+  if (!ids.length) return 'nothing';
   if (!pythonPath()) return 'not-installed';
-  if (running()) return 'busy';          // the next "Analyze new songs" run will pick it up
-  start({ mode: 'ids', ids: [id] }, code => {
+  if (running()) return 'busy';          // the next "Analyze new songs" run will pick them up
+  start({ mode: 'ids', ids }, code => {
     if (code !== 0) return;
     try {
       tagging.publish();
@@ -87,4 +93,4 @@ function logTail(lines = 30) {
   try { return fs.readFileSync(LOG, 'utf8').split('\n').slice(-lines).join('\n'); } catch (e) { return ''; }
 }
 
-module.exports = { status, start, stop, analyzeNewTrack, logTail, pythonPath };
+module.exports = { status, start, stop, analyzeNewTrack, analyzeIds, logTail, pythonPath };

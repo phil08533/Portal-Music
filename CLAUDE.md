@@ -29,6 +29,8 @@ Read README.md first for the architecture. Key rules:
   vocals/energy/tempo itself and only queues true conflicts for review (owner review wins), and writes `labels`/`bpm`/`key`/`durationSec` into `data/music.json` + `data/similar.json`.
   `js/search.js` turns typed requests into tags on the browse page. Track pages and `use/<tag>.html` are built
   from the tags by `npm run seo`. Tests: `npm test`. Never publish `--mock` analyses.
+  Batch uploads (admin 📦) send `batch`/`preferId3`/`autoGenre` to `/api/track/add`, then one analyzer run for
+  all new ids; `autoGenre` lets the AI set genre/subgenre on publish and then locks it in the review.
 - `admin/` runs locally only (127.0.0.1 + per-launch token) and is never deployed.
 
 ## Owner to-do list

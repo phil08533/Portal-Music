@@ -329,7 +329,11 @@ const server = http.createServer(async (req, res) => {
     try {
       const data = await parseBody(req);
       const { title, artist, genre, subgenre, tags, featured, isNewRelease, audioBase64, coverBase64,
-              sunoId, sunoAudioUrl, wantWav, duration } = data;
+              sunoId, sunoAudioUrl, wantWav, duration,
+              // batch upload: read title/artist/cover from the MP3, let the AI pick the genre,
+              // and leave tagging + page rebuilding for one run at the end of the batch
+              preferId3, keepTitle, autoGenre, batch } = data;
+      let finalTitle = title, finalArtist = artist, finalCover = coverBase64;
 
       if (!title || !genre) throw new Error('Title and Genre are required');
       if (!audioBase64 && !sunoId) throw new Error('Choose an MP3 file or paste a Suno link');
@@ -340,6 +344,21 @@ const server = http.createServer(async (req, res) => {
         ? await suno.download(sunoId, 'mp3', sunoAudioUrl)
         : Buffer.from(audioBase64.replace(/^data:audio\/[\w.+-]+;base64,/, ''), 'base64');
       if (!suno.isMp3(audioBuffer)) throw new Error('That file is not a playable MP3. Use the MP3 from Suno\'s own Download button.');
+      if (preferId3 && NodeID3) {
+        try {
+          const id3 = NodeID3.read(audioBuffer) || {};
+          if (id3.title && !keepTitle) finalTitle = String(id3.title).trim();
+          if (id3.artist && !finalArtist && !/suno/i.test(id3.artist)) finalArtist = String(id3.artist).trim();
+          if (!finalCover && id3.image && id3.image.imageBuffer) {
+            finalCover = `data:${id3.image.mime || 'image/jpeg'};base64,${id3.image.imageBuffer.toString('base64')}`;
+          }
+        } catch (e) { /* tags are optional */ }
+      }
+      if (batch) {
+        const existing = (fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [])
+          .some(t => String(t.title).trim().toLowerCase() === String(finalTitle).trim().toLowerCase());
+        if (existing && batch.skipDuplicates) return sendJson(200, { success: true, skipped: true, reason: 'already in the catalog' });
+      }
       let wavBuffer = null;
       let warning = '';
       if (sunoId && wantWav) {
@@ -352,23 +371,27 @@ const server = http.createServer(async (req, res) => {
 
       // Save Cover Art
       let coverUrl = '';
-      if (coverBase64) {
-        const coverBuffer = Buffer.from(coverBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-        const coverExt = coverBase64.includes('image/png') ? '.png' : '.jpg';
+      if (finalCover) {
+        const coverBuffer = Buffer.from(finalCover.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        const coverExt = finalCover.includes('image/png') ? '.png' : '.jpg';
         const coverFilename = `${id}${coverExt}`;
         fs.writeFileSync(path.join(COVERS_DIR, coverFilename), coverBuffer);
         coverUrl = `https://assets.portal-music.com/covers/${coverFilename}`;
       }
 
       // Save audio as music/<genre>/<title>.mp3 (+ .wav)
-      const safeTitle = title.replace(/[/\\?%*:|"<>]/g, '').trim();
+      let safeTitle = finalTitle.replace(/[/\\?%*:|"<>]/g, '').trim();
       const safeGenre = genre.replace(/[/\\?%*:|"<>]/g, '').trim();
       const targetFolder = path.join(MUSIC_DIR, safeGenre);
       fs.mkdirSync(targetFolder, { recursive: true });
+      // Never overwrite another song's file that happens to have the same title
+      for (let n = 2; fs.existsSync(path.join(targetFolder, `${safeTitle}.mp3`)) || fs.existsSync(path.join(targetFolder, `${safeTitle}.wav`)); n++) {
+        safeTitle = `${finalTitle.replace(/[/\\?%*:|"<>]/g, '').trim()} (${n})`;
+      }
       const finalFileName = `${safeTitle}.mp3`;
       const targetAudioPath = path.join(targetFolder, finalFileName);
       fs.writeFileSync(targetAudioPath, audioBuffer);
-      writeId3(targetAudioPath, { title, artist, genre, coverBase64 });
+      writeId3(targetAudioPath, { title: finalTitle, artist: finalArtist, genre, coverBase64: finalCover });
       if (wavBuffer) fs.writeFileSync(path.join(targetFolder, `${safeTitle}.wav`), wavBuffer);
 
       const assetUrl = file => `https://assets.portal-music.com/${encodeURI(`music/${safeGenre}/${file}`)}`;
@@ -377,8 +400,8 @@ const server = http.createServer(async (req, res) => {
       const music = fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [];
       const newEntry = {
         id,
-        title: title.trim(),
-        artist: artist ? artist.trim() : null,
+        title: finalTitle.trim(),
+        artist: finalArtist ? finalArtist.trim() : null,
         genre: genre.trim(),
         subgenre: subgenre ? subgenre.trim() : genre.trim(),
         tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []),
@@ -394,12 +417,17 @@ const server = http.createServer(async (req, res) => {
       music.unshift(newEntry);
       fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
 
-      // Regenerate SEO pages automatically
-      exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
-        if (err) console.error('SEO generation notice:', stderr);
-      });
+      // Let the AI choose the genre once it has listened (kept as a review flag until published)
+      if (autoGenre) tagging.markAutoGenre(id);
 
-      const autoTag = tagRunner.analyzeNewTrack(id);   // 'started' | 'busy' | 'not-installed'
+      // A batch rebuilds pages and runs the AI once at the end, not after every song
+      let autoTag = 'batch';
+      if (!batch) {
+        exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
+          if (err) console.error('SEO generation notice:', stderr);
+        });
+        autoTag = tagRunner.analyzeNewTrack(id);   // 'started' | 'busy' | 'not-installed'
+      }
       return sendJson(200, { success: true, track: newEntry, warning, autoTag });
     } catch (err) {
       return sendJson(500, { success: false, error: err.message, code: err.code || '' });
@@ -554,6 +582,11 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'POST') {
         const data = await parseBody(req);
         if (pathname === '/api/tags/run') {
+          if (data.mode === 'ids') {
+            const result = tagRunner.analyzeIds(data.ids);
+            if (result === 'not-installed') throw new Error('The analyzer isn\'t installed yet. In the Portal-Music folder run: npm run analyze:setup');
+            return sendJson(200, { success: true, result, ...tagRunner.status() });
+          }
           return sendJson(200, { success: true, ...tagRunner.start({ mode: data.mode, limit: data.limit, mock: !!data.mock }) });
         }
         if (pathname === '/api/tags/stop') return sendJson(200, { success: true, ...tagRunner.stop() });
