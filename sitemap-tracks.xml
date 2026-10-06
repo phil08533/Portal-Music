@@ -80,6 +80,54 @@
   </url>
 
   <url>
+    <loc>https://portal-music.com/use/</loc>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/sci-fi.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/gaming.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/meditation.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/game-dev.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/study.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/sad-scene.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/tech.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/tracks/the-snow-music-box-creatitproductions-murexau8fke5.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
