@@ -3,9 +3,13 @@
 Things only you can do (accounts, dashboards, decisions). Claude keeps this list updated.
 Tick items off as you go.
 
+## Stats (new)
+- [ ] **Publish the updated `firestore.rules`** (Firebase Console → Firestore Database → Rules → paste the whole
+      file → Publish). Until then the site can't record downloads/visits and the 📊 Stats tab stays empty.
+      (This also turns on Pro codes that last a set number of months.)
+- [ ] After a week, open Admin Studio → 📊 Stats and send Claude the numbers (plus Cloudflare Web Analytics visitors).
+
 ## Do soon
-- [ ] **Publish the updated `firestore.rules`** (Pro codes can now last a set number of months):
-      Firebase Console → Firestore Database → Rules → paste the file → Publish.
 - [ ] **Test subscription:** in an incognito window sign in with a second Google account → Upgrade →
       Monthly → pay → check "Welcome to Pro" → cancel via Manage subscription → refund the $3 in
       Stripe → Payments. If Pro doesn't turn on, screenshot Stripe → Webhooks → memorable-victory-snapshot.
@@ -20,8 +24,8 @@ Tick items off as you go.
       (run `git pull && npm install` first so the video engine is downloaded).
 
 ## Monetag (dashboard)
-- [ ] **Ads are OFF** (paused). To turn them back on: Admin Studio → 💰 Ads → tick "Ads on" (try
-      "Download page only" first) → Save → push. Set the frequency cap below first.
+- [ ] Ads run on the **download page only** now (Admin Studio → 💰 Ads to change). Set the Monetag
+      frequency cap below so the popunder can't repeat more than once per 12–24 h.
 - [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
       limits it to once per 12 h and never on a visitor's first page).
 - [ ] Delete unused zones on portal-music.com: Epic (10786950), the four Sharp-witted zones

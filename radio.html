@@ -68,6 +68,7 @@
       <div class="radio-header">
         <h1>Portal <span>Radio</span></h1>
         <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto;">Select a station for continuous, randomized playback of totally free music.</p>
+        <p style="margin-top: 0.6rem;"><a href="#stream-setup" onclick="document.getElementById('stream-setup').scrollIntoView({ behavior: 'smooth' }); return false;" style="color: var(--accent); font-weight: 600;">🎥 Streamer? Put it on your stream with a "Now playing" card ↓</a></p>
       </div>
 
       <div class="station-grid" id="station-grid">
@@ -91,8 +92,77 @@
         </div>
       </div>
 
+      <!-- Streamers: OBS / Streamlabs overlay (overlay.html) -->
+      <section class="stream-setup" id="stream-setup">
+        <h2>🎥 Streaming? Put Portal Radio on your stream</h2>
+        <p class="stream-setup-sub">Free background music that's safe for Twitch, YouTube and Kick, plus a "Now playing" card for your viewers. Works in OBS and Streamlabs.</p>
+        <div class="stream-setup-grid">
+          <label>Music
+            <select id="ov-station" onchange="pmOverlayUrl()">
+              <option value="all">🌌 Everything</option>
+              <option value="focus">🧠 Deep Focus</option>
+              <option value="energy">⚡ High Energy</option>
+              <option value="chill">🍷 Late Night Chill</option>
+              <option value="epic">🐉 Epic Adventures</option>
+              <option value="country">🤠 Backroads</option>
+            </select>
+          </label>
+          <label>Card position
+            <select id="ov-pos" onchange="pmOverlayUrl()">
+              <option value="bl">Bottom left</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+              <option value="tr">Top right</option>
+            </select>
+          </label>
+          <label>Style
+            <select id="ov-theme" onchange="pmOverlayUrl()">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+          <label>Show the card
+            <select id="ov-show" onchange="pmOverlayUrl()">
+              <option value="always">Always</option>
+              <option value="change">12 s after each new song</option>
+            </select>
+          </label>
+          <label>Volume
+            <input type="range" id="ov-vol" min="0" max="100" value="40" oninput="pmOverlayUrl()">
+          </label>
+        </div>
+        <div class="stream-setup-url">
+          <input type="text" id="ov-url" readonly onclick="this.select()">
+          <button type="button" id="ov-copy" onclick="pmCopyOverlay()">📋 Copy link</button>
+          <a id="ov-preview" href="overlay.html" target="_blank" rel="noopener">Preview ↗</a>
+        </div>
+        <ol class="stream-setup-steps">
+          <li>In OBS, click <strong>+</strong> under Sources → <strong>Browser</strong> → OK.</li>
+          <li>Paste the link into <strong>URL</strong>. Set Width <strong>1920</strong> and Height <strong>1080</strong>.</li>
+          <li>Tick <strong>Control audio via OBS</strong> so you can set the music volume in your mixer. Click OK.</li>
+          <li>The music starts by itself. To skip a song, right-click the source → <strong>Refresh</strong>.</li>
+        </ol>
+      </section>
+
     </div>
   <script>
+    // Builds the streamer's personal overlay link (see overlay.html)
+    window.pmOverlayUrl = function () {
+      var val = function (id) { return document.getElementById(id).value; };
+      var url = 'https://portal-music.com/overlay.html?station=' + val('ov-station') + '&pos=' + val('ov-pos') +
+        '&theme=' + val('ov-theme') + '&show=' + val('ov-show') + '&vol=' + val('ov-vol');
+      document.getElementById('ov-url').value = url;
+      document.getElementById('ov-preview').href = url.replace('https://portal-music.com/', '');
+      return url;
+    };
+    window.pmCopyOverlay = function () {
+      var btn = document.getElementById('ov-copy');
+      var done = function () { btn.textContent = '✓ Copied'; setTimeout(function () { btn.textContent = '📋 Copy link'; }, 2000); };
+      var url = window.pmOverlayUrl();
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done, done);
+      else { document.getElementById('ov-url').select(); document.execCommand('copy'); done(); }
+    };
+    if (document.getElementById('ov-url')) window.pmOverlayUrl();
 
     (function() {
       // Clean up previous instances if they exist
@@ -157,6 +227,7 @@
         if (activeCard) activeCard.classList.add('active');
 
         currentStation = stationId;
+        if (window.pmTrack) pmTrack('radio_start', { v: stationId });
         document.getElementById('radio-large-player').style.display = 'block';
         
         let pool = [];

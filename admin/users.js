@@ -280,6 +280,6 @@ async function deleteUser(uid) {
 }
 
 module.exports = {
-  status, listUsers, getUserDetail, setPro, setProByEmail, adjustProExpiry, setNote, setDisabled, deleteUser,
+  init, status, listUsers, getUserDetail, setPro, setProByEmail, adjustProExpiry, setNote, setDisabled, deleteUser,
   createCodes, listCodes, deleteCode,
 };

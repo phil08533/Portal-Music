@@ -455,9 +455,13 @@ console.log('Wrote data/id-map.json (' + Object.keys(idMap).length + ' old IDs)'
 
 // ─── Generate sitemap-tracks.xml ────────────────────────────────────────────
 
+var genreEntries = Object.keys(byGenre).map(function (genre) {
+  return '  <url>\n    <loc>https://portal-music.com/genres/' + slug(genre) + '.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>';
+});
+
 var tracksSitemap = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n' +
-  sitemapEntries.join('\n\n') +
+  genreEntries.concat(sitemapEntries).join('\n\n') +
   '\n\n</urlset>\n';
 
 fs.writeFileSync('sitemap-tracks.xml', tracksSitemap, 'utf8');

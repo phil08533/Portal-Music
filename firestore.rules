@@ -83,6 +83,29 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.proCode == code;
     }
 
+    // Anonymous usage events (js/app.js pmTrack) for the admin studio's Stats tab.
+    // Visitors may only create small, well-formed events stamped with the server
+    // time; nobody can read, change or delete them except the admin studio.
+    function optStr(d, field, max) {
+      return !(field in d) || (d[field] is string && d[field].size() <= max);
+    }
+
+    match /events/{eventId} {
+      allow create: if eventId.size() <= 32
+        && request.resource.data.keys().hasAll(['name', 'aid', 'ts'])
+        && request.resource.data.keys().hasOnly(['name', 'aid', 'src', 'page', 'pro', 'track', 'v', 'ts'])
+        && request.resource.data.name in ['visit', 'play', 'download', 'credit_copy', 'share', 'favorite',
+             'radio_start', 'signup', 'playlist_create', 'pro_view', 'checkout_start', 'pro_active',
+             'custom_click', 'affiliate_click', 'overlay_start']
+        && request.resource.data.aid is string && request.resource.data.aid.size() <= 32
+        && request.resource.data.ts == request.time
+        && optStr(request.resource.data, 'src', 40)
+        && optStr(request.resource.data, 'page', 80)
+        && optStr(request.resource.data, 'track', 40)
+        && optStr(request.resource.data, 'v', 40)
+        && (!('pro' in request.resource.data) || request.resource.data.pro is bool);
+    }
+
     // Everything else (including adminNotes) is admin-only.
   }
 }

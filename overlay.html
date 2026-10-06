@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Portal Radio — Stream Overlay</title>
+  <!--
+    OBS / Streamlabs "Browser Source" for streamers (set up on radio.html):
+    plays a Portal Radio station and shows a "Now playing" card that credits
+    portal-music.com on stream.
+      ?station=all|focus|energy|chill|epic|country   which music
+      &pos=bl|br|tl|tr                                card corner (1920×1080 source)
+      &theme=dark|light   &vol=0-100   &show=always|change (card hides 12 s after each new song)
+  -->
+  <script src="js/app.js"></script>
+  <style>
+    html, body { margin: 0; background: transparent; overflow: hidden; }
+    body { width: 100vw; height: 100vh; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+    .np {
+      position: fixed; display: flex; align-items: center; gap: 18px;
+      max-width: 680px; padding: 16px 26px 16px 16px; border-radius: 18px;
+      background: rgba(10, 10, 18, 0.82); color: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .np.light { background: rgba(255, 255, 255, 0.92); color: #111; border-color: rgba(0, 0, 0, 0.1); }
+    .np.bl { left: 40px; bottom: 40px; }   .np.br { right: 40px; bottom: 40px; }
+    .np.tl { left: 40px; top: 40px; }      .np.tr { right: 40px; top: 40px; }
+    .np.hidden { opacity: 0; transform: translateY(12px); }
+
+    .np-cover {
+      width: 76px; height: 76px; border-radius: 12px; object-fit: cover; flex: none;
+      background: linear-gradient(135deg, #3a7bd5, #8e44ad);
+    }
+    .np-text { min-width: 0; }
+    .np-label { font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
+    .np-title {
+      font-size: 30px; font-weight: 700; line-height: 1.15;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 540px;
+    }
+    .np-credit { font-size: 19px; opacity: 0.85; margin-top: 2px; }
+    .np-credit strong { color: #9be15d; font-weight: 700; }
+    .np.light .np-credit strong { color: #2f8f2f; }
+
+    /* Only in a normal browser tab, where autoplay is blocked (OBS plays on its own) */
+    .start {
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+      background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 22px; cursor: pointer; text-align: center;
+    }
+    .start.show { display: flex; }
+  </style>
+</head>
+<body>
+  <div class="np hidden" id="np">
+    <img class="np-cover" id="np-cover" alt="">
+    <div class="np-text">
+      <div class="np-label">♪ Now playing</div>
+      <div class="np-title" id="np-title">Portal Radio</div>
+      <div class="np-credit" id="np-credit">Free music · <strong>portal-music.com</strong></div>
+    </div>
+  </div>
+  <div class="start" id="start">▶ Click to start Portal Radio<br><small>(OBS starts it automatically)</small></div>
+
+  <script>
+    (function () {
+      // Keep in sync with the free stations in radio.html
+      var STATIONS = {
+        all:     function () { return true; },
+        focus:   function (s) { return ['Electronic', 'Ambient & Chill', 'Classical'].indexOf(s.genre) !== -1; },
+        energy:  function (s) { return ['Rock', 'Hip-Hop', 'Pop'].indexOf(s.genre) !== -1; },
+        chill:   function (s) { return ['Jazz', 'R&B / Soul', 'Acoustic'].indexOf(s.genre) !== -1; },
+        epic:    function (s) { return s.genre === 'Cinematic'; },
+        country: function (s) { return s.genre === 'Country & Folk'; },
+      };
+      var q = new URLSearchParams(location.search);
+      var station = STATIONS[q.get('station')] ? q.get('station') : 'all';
+      var pos = /^(bl|br|tl|tr)$/.test(q.get('pos')) ? q.get('pos') : 'bl';
+      var vol = Math.max(0, Math.min(100, parseInt(q.get('vol'), 10)));
+      var showOnChange = q.get('show') === 'change';
+
+      var card = document.getElementById('np');
+      card.classList.add(pos);
+      if (q.get('theme') === 'light') card.classList.add('light');
+
+      var player = new Audio();
+      player.volume = (isNaN(vol) ? 40 : vol) / 100;
+      var list = [], i = 0, hideTimer = null, skips = 0;
+
+      function shuffle(a) {
+        for (var j = a.length - 1; j > 0; j--) {
+          var k = Math.floor(Math.random() * (j + 1)), t = a[j]; a[j] = a[k]; a[k] = t;
+        }
+        return a;
+      }
+
+      function showCard(song) {
+        document.getElementById('np-title').textContent = song.title;
+        document.getElementById('np-credit').innerHTML = '';
+        var credit = document.getElementById('np-credit');
+        if (song.artist) credit.appendChild(document.createTextNode(song.artist + ' · '));
+        var site = document.createElement('strong');
+        site.textContent = 'portal-music.com';
+        credit.appendChild(site);
+        var cover = document.getElementById('np-cover');
+        cover.style.visibility = song.cover ? 'visible' : 'hidden';
+        if (song.cover) cover.src = song.cover;
+        card.classList.remove('hidden');
+        clearTimeout(hideTimer);
+        if (showOnChange) hideTimer = setTimeout(function () { card.classList.add('hidden'); }, 12000);
+      }
+
+      function play() {
+        if (!list.length) return;
+        if (i >= list.length) { list = shuffle(list); i = 0; }
+        var song = list[i];
+        player.src = song.file;
+        player.play().then(function () {
+          skips = 0;
+          document.getElementById('start').classList.remove('show');
+          showCard(song);
+          if (window.pmTrackOnce) pmTrackOnce('play', song.id, { track: song.id, v: 'overlay' });
+        }).catch(function (err) {
+          if (err && err.name === 'NotAllowedError') {
+            document.getElementById('start').classList.add('show'); // a normal tab needs one click first
+          } else {
+            next();
+          }
+        });
+      }
+
+      function next() {
+        i++;
+        if (++skips > 5) { skips = 0; setTimeout(play, 5000); return; } // network trouble: retry gently
+        play();
+      }
+
+      player.addEventListener('ended', function () { i++; play(); });
+      player.addEventListener('error', next);
+      document.getElementById('start').addEventListener('click', play);
+
+      fetch('data/music.json', { cache: 'no-cache' })
+        .then(function (r) { return r.json(); })
+        .then(function (songs) {
+          list = shuffle(songs.filter(function (s) { return s.file && STATIONS[station](s); }));
+          if (window.pmTrack) pmTrack('overlay_start', { v: station });
+          play();
+        })
+        .catch(function () {
+          document.getElementById('np-title').textContent = 'Could not load music, check the connection';
+          card.classList.remove('hidden');
+        });
+    })();
+  </script>
+</body>
+</html>

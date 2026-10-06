@@ -21,7 +21,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 // Once Monetag's script is loaded it decides when to pop, so its own frequency
 // cap (Monetag dashboard) matters too. Pro members and checkout pages never load ads.
 const AD_SCRIPT_SRC = 'https://al5sm.com/tag.min.js';
-const AD_FREE_PAGES = ['upgrade.html', 'pro.html'];
+const AD_FREE_PAGES = ['upgrade.html', 'pro.html', 'overlay.html'];
 
 function storeGet(store, key) { try { return store.getItem(key); } catch (e) { return null; } }
 function storeSet(store, key, val) { try { store.setItem(key, String(val)); } catch (e) {} }
@@ -80,12 +80,14 @@ function armPopunder(cfg) {
 let popunderTimer = null;
 function loadAds() {
   if (storeGet(localStorage, 'pm_is_pro') === '1' || AD_FREE_PAGES.includes(currentPage())) return;
+  // Count every page of the visit, so "never on the first page" also works when
+  // ads only run on the download page
+  const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
+  storeSet(sessionStorage, 'pm_pageviews', views);
+  let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
+  if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
   getAdConfig().then(cfg => {
     if (!adsAllowedHere(cfg)) return;
-    const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
-    storeSet(sessionStorage, 'pm_pageviews', views);
-    let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
-    if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
 
     clearTimeout(popunderTimer);
     if (views >= 2) { armPopunder(cfg); return; }
@@ -111,6 +113,90 @@ const CF_ANALYTICS_TOKEN = '2d6415c7cdc24a2db1d02d222422b116';
   s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN, spa: true });
   (document.head || document.documentElement).appendChild(s);
 })();
+
+// ============================================
+// USAGE EVENTS — anonymous counts for the admin studio's Stats tab
+// ============================================
+// Downloads, plays, sign-ups, upgrades… written straight to Firestore's REST API
+// (no SDK, so it works on every page, including the generated track pages).
+// firestore.rules only lets visitors *create* small, well-formed events; nobody
+// can read them except the admin studio. No names, emails or IPs are stored: just
+// a random per-browser ID, the page, the track and where the visit came from.
+const PM_EVENTS = { project: 'portal-music-3b1a1', key: 'AIzaSyATZysPXZM50CfB-AXdqhmTdei_4Y26DG8' };
+const PM_EVENT_NAMES = ['visit', 'play', 'download', 'credit_copy', 'share', 'favorite', 'radio_start',
+  'signup', 'playlist_create', 'pro_view', 'checkout_start', 'pro_active', 'custom_click', 'affiliate_click',
+  'overlay_start'];
+
+function pmRandomId(len) {
+  const a = new Uint8Array(len);
+  crypto.getRandomValues(a);
+  return Array.from(a, b => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
+}
+
+function pmAnonId() {
+  let id = storeGet(localStorage, 'pm_aid');
+  if (!id) { id = pmRandomId(16); storeSet(localStorage, 'pm_aid', id); }
+  return id;
+}
+
+// Where this visit came from: ?ref= (e.g. "credit" from a video description),
+// ?utm_source=, the referring site, or "direct". Remembered for the whole visit.
+function pmSource() {
+  let src = storeGet(sessionStorage, 'pm_src');
+  if (src) return src;
+  const q = new URLSearchParams(location.search);
+  src = q.get('ref') || q.get('utm_source') || '';
+  if (!src && document.referrer) {
+    try {
+      const h = new URL(document.referrer).hostname.replace(/^www\./, '');
+      if (h && h !== location.hostname.replace(/^www\./, '')) src = h;
+    } catch (e) {}
+  }
+  src = (src || 'direct').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 40) || 'direct';
+  storeSet(sessionStorage, 'pm_src', src);
+  return src;
+}
+
+function pmTrack(name, opts) {
+  try {
+    if (!PM_EVENT_NAMES.includes(name)) return;
+    // Local previews don't count (set localStorage pm_track_local=1 to test)
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && storeGet(localStorage, 'pm_track_local') !== '1') return;
+    opts = opts || {};
+    const str = v => ({ stringValue: String(v) });
+    const fields = {
+      name: str(name),
+      aid: str(pmAnonId()),
+      src: str(pmSource()),
+      page: str((location.pathname.split('/').pop() || 'index.html').slice(0, 80)),
+      pro: { booleanValue: storeGet(localStorage, 'pm_is_pro') === '1' },
+    };
+    if (opts.track) fields.track = str(String(opts.track).slice(0, 40));
+    if (opts.v) fields.v = str(String(opts.v).slice(0, 40));
+    const base = `projects/${PM_EVENTS.project}/databases/(default)/documents`;
+    fetch(`https://firestore.googleapis.com/v1/${base}:commit?key=${PM_EVENTS.key}`, {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ writes: [{
+        update: { name: `${base}/events/${pmRandomId(20)}`, fields },
+        updateTransforms: [{ fieldPath: 'ts', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false },
+      }] }),
+    }).catch(() => {});
+  } catch (e) { /* tracking must never break the site */ }
+}
+
+// Once per browser per item per visit (plays, favorites…)
+function pmTrackOnce(name, key, opts) {
+  const k = 'pm_ev_' + name + '_' + key;
+  if (storeGet(sessionStorage, k)) return;
+  storeSet(sessionStorage, k, '1');
+  pmTrack(name, opts);
+}
+
+window.pmTrack = pmTrack;
+try { pmTrackOnce('visit', 'session'); } catch (e) {}
 
 // Stripe customer portal: where subscribers update their card or cancel
 const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/dRm3cw4Bx2Wuel88Tx5Ne00';
@@ -204,6 +290,7 @@ let isPlaying = false;
 
 function playSong(song, forceQueue = null) {
   currentSong = song;
+  if (song && song.id) pmTrackOnce('play', song.id, { track: song.id });
   window.currentSong = song; // expose for radio action buttons
   // Set the current queue. If not provided, we just play this song.
   if (forceQueue) {
@@ -368,7 +455,7 @@ function toggleFavorite(songId) {
   let favs = getFavorites();
   const idx = favs.indexOf(String(songId));
   if (idx >= 0) favs.splice(idx, 1);
-  else favs.push(String(songId));
+  else { favs.push(String(songId)); pmTrackOnce('favorite', songId, { track: songId }); }
   sessionStorage.setItem(FAV_KEY, JSON.stringify(favs));
   if (typeof window._fbSaveFavorites === 'function') window._fbSaveFavorites(favs);
   _updateFavBtnsFor(String(songId));
@@ -542,6 +629,7 @@ function createTrackCard(song, queueVar) {
 }
 
 function shareTrack(id, title) {
+  pmTrack('share', { track: id });
   const url = 'https://portal-music.com/browse.html?track=' + encodeURIComponent(id);
   const text = '"' + title + '" \u2013 free music from Portal Music';
   if (navigator.share) {
@@ -981,6 +1069,11 @@ window.addEventListener('popstate', () => {
 });
 
 async function navigateTo(url, pushState = true) {
+  // An ad script can't be unloaded, so leaving a page that has one (the download
+  // page, when ads are "download page only") does a full page load instead.
+  const leavingAdPage = document.getElementById('pm-ad-popunder') &&
+    new URL(url, location.href).pathname.split('/').pop() !== currentPage();
+  if (leavingAdPage) { location.href = url; return; }
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error('Failed to load page');

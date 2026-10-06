@@ -4205,3 +4205,40 @@ html.is-pro .creator-toolkit-card a[href="upgrade.html"] { display: none; }
   color: var(--accent);
   border: 2px solid var(--accent);
 }
+
+/* Radio page: OBS stream overlay setup */
+.stream-setup {
+  margin: 2.5rem auto 0;
+  max-width: 760px;
+  padding: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: left;
+}
+.stream-setup h2 { font-size: 1.2rem; margin: 0 0 0.4rem; }
+.stream-setup-sub { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1rem; }
+.stream-setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.stream-setup-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--text-muted); }
+.stream-setup-grid select,
+.stream-setup-url input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+.stream-setup-url { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 1rem; }
+.stream-setup-url input { flex: 1 1 260px; min-width: 0; font-family: monospace; font-size: 0.8rem; }
+.stream-setup-url button {
+  padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer;
+  font: inherit; font-weight: 700; background: var(--accent); color: var(--btn-on-accent);
+}
+.stream-setup-url a { font-size: 0.88rem; color: var(--accent); }
+.stream-setup-steps { margin: 1rem 0 0; padding-left: 1.2rem; font-size: 0.88rem; line-height: 1.7; color: var(--text); }

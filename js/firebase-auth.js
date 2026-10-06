@@ -128,6 +128,7 @@ if (!configReady) {
       try {
         const snap   = await getDoc(doc(db, 'users', user.uid));
         const data   = snap.exists() ? snap.data() : {};
+        if (!snap.exists() && window.pmTrack) window.pmTrack('signup'); // first sign-in creates the account
         const idMap  = await loadIdMap();
         const cloud  = data.favorites || [];
         const local  = JSON.parse(sessionStorage.getItem(FAV_KEY) || '[]');
@@ -190,6 +191,7 @@ if (!configReady) {
         songs:     [],
         createdAt: serverTimestamp(),
       });
+      if (window.pmTrack) window.pmTrack('playlist_create');
       return ref.id;
     } catch (e) {
       console.error('[Portal Music] Playlist create failed:', e.message);

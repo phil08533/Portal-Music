@@ -144,6 +144,11 @@
 
   <script>
     var params = new URLSearchParams(window.location.search);
+    var dlTrackId = ''; // set once the catalog loads
+    // Fallback event key when the track isn't in the catalog: the file's name
+    function fileKey() {
+      try { return decodeURIComponent(file).split('/').pop().replace(/\.mp3$/i, '').slice(0, 40); } catch (e) { return ''; }
+    }
     var file  = params.get('file');
     var title = params.get('title') || 'Track';
     var cover = params.get('cover');
@@ -157,8 +162,9 @@
       if (!box || !btn) return;
       function slug(str) { return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
       function render(t, artist, pageUrl) {
+        // ?ref=credit tells the Stats tab when a video description sends people here
         box.value = 'Music: "' + t + '"' + (artist ? ' by ' + artist : '') + ' — Portal Music\n' +
-          'Free download: ' + (pageUrl || 'https://portal-music.com');
+          'Free download: ' + (pageUrl || 'https://portal-music.com/') + '?ref=credit';
         box.style.height = 'auto';
         box.style.height = box.scrollHeight + 2 + 'px'; // show the whole credit, no scrolling
       }
@@ -167,11 +173,13 @@
         var song = songs.find(function (s) { return s.file === file; }) ||
                    songs.find(function (s) { return s.title === title; });
         if (!song) return;
+        dlTrackId = song.id;
         if (song.wav) showWav(song.wav);
         var who = song.artist || song.subgenre || song.genre || 'Other';
         render(song.title, song.artist || '', 'https://portal-music.com/tracks/' + slug(song.title + '-' + who) + '-' + song.id + '.html');
       }).catch(function () {});
       btn.addEventListener('click', function () {
+        pmTrack('credit_copy', { track: dlTrackId || '' });
         var done = function () { btn.textContent = '✓ Copied!'; setTimeout(function () { btn.textContent = '📋 Copy credit'; }, 2000); };
         if (navigator.clipboard && window.isSecureContext) {
           navigator.clipboard.writeText(box.value).then(done, function () { box.select(); document.execCommand('copy'); done(); });
@@ -187,6 +195,9 @@
 
     // Tracks with a WAV get a second button once the countdown is done
     var wavUrl = null, countdownDone = false;
+    document.getElementById('dl-wav').addEventListener('click', function () {
+      pmTrack('download', { track: dlTrackId || fileKey(), v: 'wav' });
+    });
     function showWav(url) {
       wavUrl = url;
       if (!countdownDone) return;
@@ -201,6 +212,7 @@
 
     function triggerDownload() {
       countEl.style.display = 'none';
+      if (file) pmTrack('download', { track: dlTrackId || fileKey(), v: 'mp3' });
       countdownDone = true;
       if (wavUrl) showWav(wavUrl);
       if (file) {
