@@ -24,8 +24,8 @@ Tick items off as you go.
       (run `git pull && npm install` first so the video engine is downloaded).
 
 ## Monetag (dashboard)
-- [ ] **Ads are OFF** (paused). To turn them back on: Admin Studio → 💰 Ads → tick "Ads on" (try
-      "Download page only" first) → Save → push. Set the frequency cap below first.
+- [ ] Ads run on the **download page only** now (Admin Studio → 💰 Ads to change). Set the Monetag
+      frequency cap below so the popunder can't repeat more than once per 12–24 h.
 - [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
       limits it to once per 12 h and never on a visitor's first page).
 - [ ] Delete unused zones on portal-music.com: Epic (10786950), the four Sharp-witted zones

@@ -80,12 +80,14 @@ function armPopunder(cfg) {
 let popunderTimer = null;
 function loadAds() {
   if (storeGet(localStorage, 'pm_is_pro') === '1' || AD_FREE_PAGES.includes(currentPage())) return;
+  // Count every page of the visit, so "never on the first page" also works when
+  // ads only run on the download page
+  const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
+  storeSet(sessionStorage, 'pm_pageviews', views);
+  let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
+  if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
   getAdConfig().then(cfg => {
     if (!adsAllowedHere(cfg)) return;
-    const views = (Number(storeGet(sessionStorage, 'pm_pageviews')) || 0) + 1;
-    storeSet(sessionStorage, 'pm_pageviews', views);
-    let start = Number(storeGet(sessionStorage, 'pm_session_start')) || 0;
-    if (!start) { start = Date.now(); storeSet(sessionStorage, 'pm_session_start', start); }
 
     clearTimeout(popunderTimer);
     if (views >= 2) { armPopunder(cfg); return; }
@@ -1067,6 +1069,11 @@ window.addEventListener('popstate', () => {
 });
 
 async function navigateTo(url, pushState = true) {
+  // An ad script can't be unloaded, so leaving a page that has one (the download
+  // page, when ads are "download page only") does a full page load instead.
+  const leavingAdPage = document.getElementById('pm-ad-popunder') &&
+    new URL(url, location.href).pathname.split('/').pop() !== currentPage();
+  if (leavingAdPage) { location.href = url; return; }
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error('Failed to load page');
