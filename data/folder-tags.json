@@ -1,0 +1,16 @@
+{
+  "_about": "Tags every song gets from its genre/subgenre folder (your own choice, no AI). \"*\" = any other subgenre of that genre. Used by admin/tagging.js.",
+  "Rock": { "*": ["rock"], "Hair Metal": ["rock", "metal"], "Cinematic Rock": ["rock", "cinematic"], "Punk Rock": ["rock", "punk"] },
+  "Jazz": { "*": ["jazz"], "Calm Jazz": ["jazz", "chill"] },
+  "Hip-Hop": { "*": ["hiphop"] },
+  "Electronic": { "*": ["electronic"], "Chillhop": ["lofi", "chill"], "Lo-Fi": ["lofi"], "Dream Pop": ["electronic", "dreamy"] },
+  "Cinematic": { "*": ["cinematic"], "Fantasy": ["cinematic", "fantasy"], "Space": ["cinematic", "sci-fi"], "Cinematic Epic": ["cinematic", "epic"] },
+  "Classical": { "*": ["classical"], "Medieval": ["medieval", "fantasy"] },
+  "Country & Folk": { "*": ["country"], "Bluegrass": ["bluegrass", "country"], "Western": ["country", "western-scene"] },
+  "Ambient & Chill": { "*": ["peaceful"], "Meditative": ["meditation", "peaceful"], "Uplifting": ["inspiring"], "Ambient": ["ambient"] },
+  "Pop": { "*": ["pop"], "Indie Pop": ["pop", "indie"] },
+  "Acoustic": { "*": ["acoustic"] },
+  "R&B / Soul": { "*": ["rnb"] },
+  "Dark & Suspense": { "*": ["dark"], "Horror": ["horror", "dark"], "Suspenseful": ["tense"], "Unsettling": ["dark", "tense"] },
+  "Playful & Mood": { "*": [], "Playful": ["playful"], "Sad": ["sad"], "Melancholy": ["melancholy"] }
+}

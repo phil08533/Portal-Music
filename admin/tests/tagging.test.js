@@ -242,3 +242,20 @@ test('the agreement report leaves out tags Model A never heard', () => {
   assert.ok(rep.unheard > 0);
   assert.ok(rep.tags.every(r => r.songsA > 0));
 });
+
+test('songs get tags from their genre folder, with no AI needed', () => {
+  const { music, analyses } = catalog([['pr', neutral(104), 'Rock'], ['cr', neutral(105), 'Classical']]);
+  music.find(t => t.id === 'pr').subgenre = 'Punk Rock';
+  music.find(t => t.id === 'cr').subgenre = 'Romantic';
+  const ctx = tagging.loadContext({ music, analyses, tags: dict });
+  const pr = tagging.decideTrack(ctx, music.find(t => t.id === 'pr'));
+  assert.ok(pr.labels.includes('rock') && pr.labels.includes('punk'), pr.labels);
+  assert.strictEqual(pr.decided.punk.conf, 'folder');
+  const cr = tagging.decideTrack(ctx, music.find(t => t.id === 'cr'));
+  assert.ok(cr.labels.includes('classical') && !cr.labels.includes('romantic'), 'Romantic era, not the mood: ' + cr.labels);
+  // AI-picked genres (batch upload) don't count as your folder
+  const auto = { ...neutral(106), review: { status: 'pending', add: [], remove: [], autoGenre: true } };
+  const c2 = catalog([['ag', auto, 'Rock']]);
+  const ctx2 = tagging.loadContext({ music: c2.music, analyses: c2.analyses, tags: dict });
+  assert.ok(!tagging.decideTrack(ctx2, c2.music.find(t => t.id === 'ag')).labels.includes('rock'));
+});
