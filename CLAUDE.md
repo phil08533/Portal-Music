@@ -26,7 +26,7 @@ Read README.md first for the architecture. Key rules:
   labels for Model A, CLAP prompts for Model B). `admin/analyze/analyze.py` (owner's PC, Python venv) saves raw
   scores to `admin/analysis/<id>.json`; `admin/tagging.js` calibrates Model B to Model A per tag (prevalence
   matching), gives every song the tags of its genre/subgenre folder (`data/folder-tags.json`, owner's own choice), publishes other tags only when two sources agree (A+B, A+the song's genre folder for styles, or Model A
-  alone at the confidence level verified ≥90% right against the genre folders), switches Model B off when it scores
+  alone at the confidence level verified ≥90% right against the genre folders), adds a style when both models rank the song in their top 10% only for tags where that rule matches the genre folders ≥80% (`rankRuleCheck`), switches Model B off when it scores
   every tag the same (the analyzer also self-tests CLAP and falls back through `CLAP_MODELS`), keeps one-model hits as hidden `hints`, settles
   vocals/energy/tempo itself and only queues true conflicts for review (owner review wins), and writes `labels`/`bpm`/`key`/`durationSec` into `data/music.json` + `data/similar.json`.
   `js/search.js` turns typed requests into tags on the browse page. Track pages and `use/<tag>.html` are built

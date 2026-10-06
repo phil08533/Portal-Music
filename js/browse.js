@@ -423,9 +423,11 @@ window.pmSearchRun = function (query, pool) {
   if (!input || !box) return;
   var mode = null, items = [], active = -1;
 
+  var MIN_SONGS = 3;   // tags with fewer songs aren't offered (still searchable by typing)
   function counts() {
     var c = {};
     (allSongsPage || []).forEach(function (s) { (s.labels || []).forEach(function (l) { c[l] = (c[l] || 0) + 1; }); });
+    Object.keys(c).forEach(function (k) { if (c[k] < MIN_SONGS) delete c[k]; });
     return c;
   }
   function songsWord(n) { return n + (n === 1 ? ' song' : ' songs'); }

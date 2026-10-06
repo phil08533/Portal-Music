@@ -259,3 +259,21 @@ test('songs get tags from their genre folder, with no AI needed', () => {
   const ctx2 = tagging.loadContext({ music: c2.music, analyses: c2.analyses, tags: dict });
   assert.ok(!tagging.decideTrack(ctx2, c2.music.find(t => t.id === 'ag')).labels.includes('rock'));
 });
+
+test('top-rank rule: a style both models rank highly is added only where your folders verify it', () => {
+  const music = [], analyses = {};
+  for (let i = 0; i < 60; i++) {
+    const techno = i < 12, a = neutral(i);
+    music.push({ id: 's' + i, title: 't' + i, genre: techno ? 'Electronic' : 'Jazz' });
+    a.ast.Techno = techno ? 0.09 : 0.01;              // never "sure", but clearly ranked
+    a.clap.techno = techno ? 0.4 : a.clap.techno;     // Model B agrees on the ranking
+    a.ast.Gospel = i % 5 === 0 ? 0.09 : 0.01;          // ranked high on songs in the wrong folders
+    if (i % 5 === 0) a.clap.gospel = 0.4;
+    analyses['s' + i] = a;
+  }
+  const ctx = tagging.loadContext({ music, analyses, tags: dict });
+  assert.ok(ctx.rankRule.techno.on, JSON.stringify(ctx.rankRule.techno));
+  assert.ok(!ctx.rankRule.gospel.on, 'gospel never matches a folder, so the rule stays off');
+  assert.ok(tagging.decideTrack(ctx, music[0]).labels.includes('techno'));
+  assert.ok(!tagging.decideTrack(ctx, music[15]).labels.includes('gospel'));
+});
