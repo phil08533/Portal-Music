@@ -15,7 +15,7 @@ if (typeof localStorage !== 'undefined' && localStorage.getItem('pm_is_pro') ===
 // the Glad tag (10786944) OnClick popunder earns ~$2 per 1,000 views; push and
 // in-page push earned almost nothing and looked spammy, so they're not used.
 // The popunder is only armed:
-//   - at most once every `gapHours` per visitor, and
+//   - at most once every `gapHours` per visitor (0 = every page load, e.g. every download), and
 //   - never on a visitor's first page: only after `delaySeconds` on the site or
 //     on their second page view.
 // Once Monetag's script is loaded it decides when to pop, so its own frequency
@@ -40,7 +40,7 @@ function getAdConfig() {
       .then(c => ({
         enabled: c.enabled === true,
         zone: /^\d{5,10}$/.test(String(c.zone)) ? String(c.zone) : '',
-        gapMs: clampNum(c.gapHours, 1, 168, 12) * 3600 * 1000,
+        gapMs: clampNum(c.gapHours, 0, 168, 12) * 3600 * 1000,
         delayMs: clampNum(c.delaySeconds, 0, 600, 30) * 1000,
         downloadOnly: c.where === 'download',
       }));

@@ -530,7 +530,7 @@ const server = http.createServer(async (req, res) => {
           enabled: data.enabled === true,
           zone,
           where: data.where === 'download' ? 'download' : 'all',
-          gapHours: num(data.gapHours, 1, 168),
+          gapHours: num(data.gapHours, 0, 168), // 0 = every time
           delaySeconds: num(data.delaySeconds, 0, 600),
         };
         fs.writeFileSync(ADS_JSON_PATH, JSON.stringify(ads, null, 2) + '\n', 'utf8');
