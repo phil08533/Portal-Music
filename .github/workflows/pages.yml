@@ -26,7 +26,7 @@ jobs:
       # and internal docs stay in the repo but are never served on portal-music.com.
       - name: Remove non-public files
         run: |
-          rm -rf admin scripts workers social covers music .github node_modules
+          rm -rf admin scripts workers social covers music tests .github node_modules
           rm -f CLAUDE.md ADMIN_GUIDE.md README.md TODO.md package.json package-lock.json firestore.rules
           rm -f "how to add music to portal-music.docx"
           find . -name '*serviceAccount*.json' -delete

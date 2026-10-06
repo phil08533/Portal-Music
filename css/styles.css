@@ -4242,3 +4242,56 @@ html.is-pro .creator-toolkit-card a[href="upgrade.html"] { display: none; }
 }
 .stream-setup-url a { font-size: 0.88rem; color: var(--accent); }
 .stream-setup-steps { margin: 1rem 0 0; padding-left: 1.2rem; font-size: 0.88rem; line-height: 1.7; color: var(--text); }
+
+/* Browse: "Search a sound" */
+.search-understood {
+  margin: 0.6rem 0 0.2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.su-chip {
+  display: inline-block;
+  margin: 2px 3px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--btn-on-accent);
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+.su-chip.su-not { background: transparent; color: var(--text); border: 1px dashed var(--border); text-decoration: line-through; }
+.search-examples { margin: 0.6rem 0 0.2rem; font-size: 0.82rem; color: var(--text-muted); }
+.search-examples button {
+  margin: 2px 3px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.search-examples button:hover { border-color: var(--accent); }
+.match-why { margin-top: 4px; font-size: 0.72rem; color: var(--accent); font-weight: 600; }
+
+/* Track pages: AI tags */
+.track-tags { margin: 0.8rem 0 1rem; display: flex; flex-direction: column; gap: 6px; }
+.track-tag-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.track-tag-facet { font-size: 0.75rem; color: var(--text-muted); min-width: 84px; text-transform: uppercase; letter-spacing: 0.04em; }
+.track-tag {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.track-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+/* "Best for" pages: FAQ */
+.seo-faq { margin-top: 2.5rem; }
+.seo-faq h3 { font-size: 1rem; margin: 1rem 0 0.25rem; }
+.seo-faq p { color: var(--text-muted); margin: 0; }

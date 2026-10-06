@@ -7,6 +7,8 @@ const users = require('./users');
 const reels = require('./reels');
 const suno  = require('./suno');
 const stats = require('./stats');
+const tagging = require('./tagging');
+const tagRunner = require('./tag-runner');
 
 let NodeID3;
 try {
@@ -327,7 +329,11 @@ const server = http.createServer(async (req, res) => {
     try {
       const data = await parseBody(req);
       const { title, artist, genre, subgenre, tags, featured, isNewRelease, audioBase64, coverBase64,
-              sunoId, sunoAudioUrl, wantWav, duration } = data;
+              sunoId, sunoAudioUrl, wantWav, duration,
+              // batch upload: read title/artist/cover from the MP3, let the AI pick the genre,
+              // and leave tagging + page rebuilding for one run at the end of the batch
+              preferId3, keepTitle, autoGenre, batch } = data;
+      let finalTitle = title, finalArtist = artist, finalCover = coverBase64;
 
       if (!title || !genre) throw new Error('Title and Genre are required');
       if (!audioBase64 && !sunoId) throw new Error('Choose an MP3 file or paste a Suno link');
@@ -338,6 +344,21 @@ const server = http.createServer(async (req, res) => {
         ? await suno.download(sunoId, 'mp3', sunoAudioUrl)
         : Buffer.from(audioBase64.replace(/^data:audio\/[\w.+-]+;base64,/, ''), 'base64');
       if (!suno.isMp3(audioBuffer)) throw new Error('That file is not a playable MP3. Use the MP3 from Suno\'s own Download button.');
+      if (preferId3 && NodeID3) {
+        try {
+          const id3 = NodeID3.read(audioBuffer) || {};
+          if (id3.title && !keepTitle) finalTitle = String(id3.title).trim();
+          if (id3.artist && !finalArtist && !/suno/i.test(id3.artist)) finalArtist = String(id3.artist).trim();
+          if (!finalCover && id3.image && id3.image.imageBuffer) {
+            finalCover = `data:${id3.image.mime || 'image/jpeg'};base64,${id3.image.imageBuffer.toString('base64')}`;
+          }
+        } catch (e) { /* tags are optional */ }
+      }
+      if (batch) {
+        const existing = (fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [])
+          .some(t => String(t.title).trim().toLowerCase() === String(finalTitle).trim().toLowerCase());
+        if (existing && batch.skipDuplicates) return sendJson(200, { success: true, skipped: true, reason: 'already in the catalog' });
+      }
       let wavBuffer = null;
       let warning = '';
       if (sunoId && wantWav) {
@@ -350,23 +371,27 @@ const server = http.createServer(async (req, res) => {
 
       // Save Cover Art
       let coverUrl = '';
-      if (coverBase64) {
-        const coverBuffer = Buffer.from(coverBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-        const coverExt = coverBase64.includes('image/png') ? '.png' : '.jpg';
+      if (finalCover) {
+        const coverBuffer = Buffer.from(finalCover.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        const coverExt = finalCover.includes('image/png') ? '.png' : '.jpg';
         const coverFilename = `${id}${coverExt}`;
         fs.writeFileSync(path.join(COVERS_DIR, coverFilename), coverBuffer);
         coverUrl = `https://assets.portal-music.com/covers/${coverFilename}`;
       }
 
       // Save audio as music/<genre>/<title>.mp3 (+ .wav)
-      const safeTitle = title.replace(/[/\\?%*:|"<>]/g, '').trim();
+      let safeTitle = finalTitle.replace(/[/\\?%*:|"<>]/g, '').trim();
       const safeGenre = genre.replace(/[/\\?%*:|"<>]/g, '').trim();
       const targetFolder = path.join(MUSIC_DIR, safeGenre);
       fs.mkdirSync(targetFolder, { recursive: true });
+      // Never overwrite another song's file that happens to have the same title
+      for (let n = 2; fs.existsSync(path.join(targetFolder, `${safeTitle}.mp3`)) || fs.existsSync(path.join(targetFolder, `${safeTitle}.wav`)); n++) {
+        safeTitle = `${finalTitle.replace(/[/\\?%*:|"<>]/g, '').trim()} (${n})`;
+      }
       const finalFileName = `${safeTitle}.mp3`;
       const targetAudioPath = path.join(targetFolder, finalFileName);
       fs.writeFileSync(targetAudioPath, audioBuffer);
-      writeId3(targetAudioPath, { title, artist, genre, coverBase64 });
+      writeId3(targetAudioPath, { title: finalTitle, artist: finalArtist, genre, coverBase64: finalCover });
       if (wavBuffer) fs.writeFileSync(path.join(targetFolder, `${safeTitle}.wav`), wavBuffer);
 
       const assetUrl = file => `https://assets.portal-music.com/${encodeURI(`music/${safeGenre}/${file}`)}`;
@@ -375,8 +400,8 @@ const server = http.createServer(async (req, res) => {
       const music = fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [];
       const newEntry = {
         id,
-        title: title.trim(),
-        artist: artist ? artist.trim() : null,
+        title: finalTitle.trim(),
+        artist: finalArtist ? finalArtist.trim() : null,
         genre: genre.trim(),
         subgenre: subgenre ? subgenre.trim() : genre.trim(),
         tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []),
@@ -392,12 +417,18 @@ const server = http.createServer(async (req, res) => {
       music.unshift(newEntry);
       fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
 
-      // Regenerate SEO pages automatically
-      exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
-        if (err) console.error('SEO generation notice:', stderr);
-      });
+      // Let the AI choose the genre once it has listened (kept as a review flag until published)
+      if (autoGenre) tagging.markAutoGenre(id);
 
-      return sendJson(200, { success: true, track: newEntry, warning });
+      // A batch rebuilds pages and runs the AI once at the end, not after every song
+      let autoTag = 'batch';
+      if (!batch) {
+        exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, (err, stdout, stderr) => {
+          if (err) console.error('SEO generation notice:', stderr);
+        });
+        autoTag = tagRunner.analyzeNewTrack(id);   // 'started' | 'busy' | 'not-installed'
+      }
+      return sendJson(200, { success: true, track: newEntry, warning, autoTag });
     } catch (err) {
       return sendJson(500, { success: false, error: err.message, code: err.code || '' });
     }
@@ -503,6 +534,79 @@ const server = http.createServer(async (req, res) => {
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+  }
+
+  // --- API: 🏷️ Tags (AI tagging: run, review, publish, accuracy) ---
+  if (pathname.startsWith('/api/tags/')) {
+    try {
+      const allowMock = url.searchParams.get('mock') === '1';
+      if (req.method === 'GET' && pathname === '/api/tags/status') {
+        const ctx = tagging.loadContext({ allowMock });
+        const decisions = tagging.decideAll(ctx);
+        const counts = { total: ctx.music.length, analyzed: 0, errors: 0, mock: 0, auto: 0, review: 0, approved: 0 };
+        for (const t of ctx.music) {
+          const a = ctx.analyses[t.id];
+          if (!a) continue;
+          if (a.error) counts.errors++;
+          else if (a.mock) counts.mock++;
+          else counts.analyzed++;
+          if (decisions[t.id]) counts[decisions[t.id].status]++;
+        }
+        return sendJson(200, { success: true, ...tagRunner.status(), counts, log: tagRunner.logTail(8) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/dict') {
+        return sendJson(200, { success: true, dict: JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'data', 'tags.json'), 'utf8')) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/queue') {
+        const ctx = tagging.loadContext({ allowMock });
+        const decisions = tagging.decideAll(ctx);
+        const items = ctx.music.filter(t => decisions[t.id]).map(t => {
+          const d = decisions[t.id];
+          return {
+            id: t.id, title: t.title, artist: t.artist, genre: t.genre, file: t.file, cover: t.cover,
+            status: d.status, notes: d.notes, measured: d.measured, genreSuggestion: d.genreSuggestion, mock: d.mock,
+            decided: d.decided, suggested: d.suggested,
+            review: (ctx.analyses[t.id] || {}).review || null,
+          };
+        });
+        const notAnalyzed = ctx.music.filter(t => !decisions[t.id]).map(t => ({ id: t.id, title: t.title, error: (ctx.analyses[t.id] || {}).error || null }));
+        return sendJson(200, { success: true, items, notAnalyzed });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/agreement') {
+        return sendJson(200, { success: true, agreement: tagging.agreementReport(tagging.loadContext({ allowMock })) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/accuracy') {
+        return sendJson(200, { success: true, accuracy: tagging.accuracy(tagging.loadContext({ allowMock })) });
+      }
+      if (req.method === 'POST') {
+        const data = await parseBody(req);
+        if (pathname === '/api/tags/run') {
+          if (data.mode === 'ids') {
+            const result = tagRunner.analyzeIds(data.ids);
+            if (result === 'not-installed') throw new Error('The analyzer isn\'t installed yet. In the Portal-Music folder run: npm run analyze:setup');
+            return sendJson(200, { success: true, result, ...tagRunner.status() });
+          }
+          return sendJson(200, { success: true, ...tagRunner.start({ mode: data.mode, limit: data.limit, mock: !!data.mock }) });
+        }
+        if (pathname === '/api/tags/stop') return sendJson(200, { success: true, ...tagRunner.stop() });
+        if (pathname === '/api/tags/review') {
+          if (!data.id) throw new Error('Track ID required');
+          const review = tagging.setReview(String(data.id), data);
+          const ctx = tagging.loadContext({ allowMock });
+          const track = ctx.music.find(t => t.id === data.id);
+          return sendJson(200, { success: true, review, decision: track ? tagging.decideTrack(ctx, track) : null });
+        }
+        if (pathname === '/api/tags/publish') {
+          const result = tagging.publish({ allowMock });
+          exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, () => {});
+          return sendJson(200, { success: true, result });
+        }
+        if (pathname === '/api/tags/tune') return sendJson(200, { success: true, ...tagging.tune({ allowMock }) });
+      }
+      return sendJson(404, { success: false, error: 'Unknown tags action' });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 

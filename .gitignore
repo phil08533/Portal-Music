@@ -32,3 +32,9 @@ covers/
 
 # Videos made by the admin studio Reel maker
 social/reels/
+
+# Audio analyzer: private Python environment and run state (analysis results ARE committed)
+admin/analyze/.venv/
+admin/analyze/__pycache__/
+admin/analysis/_progress.json
+admin/analysis/*.tmp

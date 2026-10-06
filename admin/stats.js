@@ -106,6 +106,9 @@ async function getStats(rangeDays) {
     topPlays: named(countBy(of('play'), e => e.track)),
     formats: countBy(downloads, e => e.v || 'mp3').map(([fmt, count]) => ({ fmt, count })),
     radio: countBy(of('radio_start'), e => e.v).map(([station, count]) => ({ station, count })),
+    // What visitors typed into "Search a sound" (track = how many results they got)
+    searches: countBy(of('search'), e => e.v).slice(0, 20).map(([q, count]) => ({ q, count })),
+    noResults: countBy(of('search').filter(e => e.track === '0'), e => e.v).slice(0, 15).map(([q, count]) => ({ q, count })),
     overlay: { starts: of('overlay_start').length, streamers: people(of('overlay_start')).total,
       stations: countBy(of('overlay_start'), e => e.v).map(([station, count]) => ({ station, count })) },
     pages: countBy(visits, e => e.page).slice(0, 10).map(([page, count]) => ({ page, count })),

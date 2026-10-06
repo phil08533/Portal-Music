@@ -143,6 +143,7 @@
     <button class="tab-btn" onclick="switchTab('catalog')">📚 Manage Catalog (<span id="tab-count">0</span>)</button>
     <button class="tab-btn" onclick="switchTab('users')">👥 Users & Pro (<span id="users-count">–</span>)</button>
     <button class="tab-btn" onclick="switchTab('reels')">🎬 Reels & Videos</button>
+    <button class="tab-btn" onclick="switchTab('tags')">🏷️ Tags</button>
     <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
     <button class="tab-btn" onclick="switchTab('ads')">💰 Ads</button>
     <button class="tab-btn" onclick="switchTab('publish')">🚀 Actions & Sync</button>
@@ -150,6 +151,53 @@
 
   <!-- TAB 1: UPLOAD -->
   <div id="tab-upload" class="tab-content active">
+    <div class="card">
+      <h2>📦 Batch upload: a whole folder at once</h2>
+      <p class="muted" style="white-space:normal;margin-bottom:10px;">Drop a folder of MP3s (subfolders too). Each MP3 is matched with a WAV and a cover of the same name, or a <code>cover.jpg</code> in its folder, or the cover inside the MP3. Titles come from the file names; you can edit them below. After uploading, the AI analyzes the whole batch once, tags every song and sorts it into its genre.</p>
+      <div class="dropzone" id="batch-dropzone" style="padding:18px;">
+        <div style="font-size:1.6rem;">📂</div>
+        <strong>Drag a folder (or many MP3s) here</strong>
+        <div class="action-btns" style="justify-content:center;margin-top:8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();document.getElementById('batch-folder').click()">Choose a folder…</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();document.getElementById('batch-files').click()">Choose files…</button>
+        </div>
+        <input type="file" id="batch-folder" webkitdirectory directory multiple style="display:none;">
+        <input type="file" id="batch-files" multiple accept=".mp3,.wav,.jpg,.jpeg,.png,.webp,audio/mpeg,audio/wav,image/*" style="display:none;">
+      </div>
+      <div id="batch-panel" style="display:none;margin-top:12px;">
+        <div class="form-row" style="align-items:flex-end;flex-wrap:wrap;">
+          <div class="form-group">
+            <label>Genre</label>
+            <select id="batch-genre" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label>Artist (optional, for all)</label>
+            <input type="text" id="batch-artist" class="form-control" list="artists-datalist" placeholder="Leave empty to read it from the MP3">
+          </div>
+        </div>
+        <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="batch-ai-genre" checked>
+          <span>🤖 Let the AI pick each song's genre (the genre above is used when it isn't sure)</span></label>
+        <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="batch-new" checked>
+          <span>Show in <strong>New Releases</strong> (45 days)</span></label>
+        <label class="checkbox-group" style="margin:0 0 10px;"><input type="checkbox" id="batch-skip-dupes" checked>
+          <span>Skip songs whose title is already in the catalog</span></label>
+        <div class="table-container" style="max-height:360px;overflow:auto;">
+          <table>
+            <thead><tr><th>#</th><th>Title</th><th>Files</th><th>Status</th><th></th></tr></thead>
+            <tbody id="batch-rows"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn btn-primary" id="batch-start" style="width:auto;" onclick="batchStart()">⬆ Upload all</button>
+          <button class="btn btn-secondary btn-sm" onclick="batchClear()">Clear list</button>
+          <span id="batch-summary" class="muted" style="font-size:0.85rem;"></span>
+        </div>
+        <div id="batch-progress" style="display:none;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:8px;">
+          <div id="batch-bar" style="height:100%;width:0;background:var(--accent);transition:width .3s;"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-layout">
       
       <div class="card">
@@ -483,6 +531,55 @@
   </div>
 
   <!-- TAB 3: ACTIONS & SYNC -->
+  <!-- TAB: AI TAGS -->
+  <div id="tab-tags" class="tab-content">
+    <div class="card">
+      <h2>🏷️ AI Tags</h2>
+      <p class="muted" style="white-space:normal;margin-bottom:12px;">Two AI models listen to every song, calibrated to each other. A tag goes on the site only when <strong>both agree</strong> (or it's measured, like tempo and length). Tags only one model hears stay hidden (they just help search a little), and vocals/energy/tempo disagreements settle themselves. <strong>You only review songs where both models are sure and contradict each other</strong>, usually very few. Your decisions always win.</p>
+      <div id="tg-setup" style="display:none;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.4);border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;">
+        <strong>One-time setup:</strong> in a terminal in the Portal-Music folder run <code>npm run analyze:setup</code>
+        (installs the free AI tools and downloads the two models, about 2 GB, takes a while). If it says venv is missing, first run <code>sudo apt install python3-venv</code>.
+        Then restart the admin studio.
+      </div>
+      <div id="tg-counts" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"></div>
+      <div class="action-btns" style="flex-wrap:wrap;margin-bottom:10px;">
+        <button class="btn btn-primary btn-sm" style="width:auto;" onclick="tgRun('missing')">▶ Analyze new songs</button>
+        <button class="btn btn-secondary btn-sm" onclick="tgRun('all')">↻ Re-analyze everything</button>
+        <button class="btn btn-secondary btn-sm" id="tg-stop" onclick="tgStop()" style="display:none;">■ Stop</button>
+        <button class="btn btn-primary btn-sm" style="width:auto;" onclick="tgPublish()">🚀 Publish tags to site</button>
+        <button class="btn btn-secondary btn-sm" onclick="tgAgreement()">🤝 Model agreement</button>
+        <button class="btn btn-secondary btn-sm" onclick="tgAccuracy()">🎯 Check accuracy</button>
+        <button class="btn btn-secondary btn-sm" onclick="tgTune()">🔧 Auto-tune</button>
+      </div>
+      <div id="tg-progress" style="display:none;margin-bottom:8px;">
+        <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden;"><div id="tg-bar" style="height:100%;width:0;background:var(--accent);transition:width .4s;"></div></div>
+        <div id="tg-progress-text" class="muted" style="font-size:0.8rem;margin-top:4px;white-space:normal;"></div>
+      </div>
+      <pre id="tg-log" class="muted" style="display:none;font-size:0.72rem;max-height:120px;overflow:auto;background:#000;padding:8px;border-radius:6px;white-space:pre-wrap;"></pre>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <h2 style="margin:0;">Review</h2>
+        <select id="tg-filter" class="form-control" style="width:auto;" onchange="tgApplyFilter()">
+          <option value="review">Needs review</option>
+          <option value="auto">Auto-tagged</option>
+          <option value="approved">Approved</option>
+          <option value="all">All analyzed</option>
+        </select>
+        <input id="tg-search" class="form-control" style="width:220px;" placeholder="Find a song…" oninput="tgApplyFilter()">
+        <span id="tg-pos" class="muted" style="font-size:0.85rem;"></span>
+        <span class="muted" style="font-size:0.75rem;margin-left:auto;">Keys: <strong>A</strong> approve · <strong>N</strong> next · <strong>P</strong> previous</span>
+      </div>
+      <div id="tg-review"><p class="muted">Open this tab to load songs.</p></div>
+    </div>
+
+    <div class="card" id="tg-acc-card" style="display:none;">
+      <h2>🎯 Accuracy</h2>
+      <div id="tg-acc"></div>
+    </div>
+  </div>
+
   <!-- TAB: STATS -->
   <div id="tab-stats" class="tab-content">
     <div class="card">
@@ -696,6 +793,303 @@
       setTimeout(() => { t.className = ''; }, 3500);
     }
 
+    // --- 🏷️ AI Tags ---
+    const TG_MOCK = new URLSearchParams(location.search).get('mock') === '1' ? '?mock=1' : '';
+    let tgDict = null, tgItems = [], tgList = [], tgIdx = 0, tgEdit = { add: new Set(), remove: new Set(), genre: null };
+    let tgPoll = null, tgLoaded = false, tgWasRunning = false;
+
+    async function tgApi(pathname, body) {
+      const res = await fetch('/api/tags/' + pathname + TG_MOCK, body ? {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      } : undefined);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || data.message || 'Request failed');
+      return data;
+    }
+
+    async function tgOpen() {
+      await tgStatus();
+      if (!tgLoaded) { tgLoaded = true; await tgLoadQueue(); }
+    }
+
+    async function tgStatus() {
+      try {
+        const st = await tgApi('status');
+        document.getElementById('tg-setup').style.display = st.installed ? 'none' : 'block';
+        const c = st.counts;
+        document.getElementById('tg-counts').innerHTML =
+          statTile('Analyzed', c.analyzed + c.mock + ' / ' + c.total, c.errors ? c.errors + ' failed' : (c.mock ? c.mock + ' are TEST data' : '')) +
+          statTile('Needs review', c.review, 'models clearly disagree') +
+          statTile('Auto-tagged', c.auto, 'both models agreed') +
+          statTile('Approved by you', c.approved, '');
+        const p = st.progress || {};
+        const box = document.getElementById('tg-progress');
+        document.getElementById('tg-stop').style.display = st.running ? '' : 'none';
+        if (st.running || p.fatal) {
+          box.style.display = 'block';
+          const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
+          document.getElementById('tg-bar').style.width = pct + '%';
+          const eta = p.etaSec ? ' · about ' + Math.max(1, Math.round(p.etaSec / 60)) + ' min left' : '';
+          document.getElementById('tg-progress-text').textContent = p.fatal
+            ? '⚠ ' + p.fatal
+            : `${p.done || 0} of ${p.total || '?'} songs (${pct}%)${eta} · now: ${p.current || '…'}${p.errors ? ' · ' + p.errors + ' failed' : ''}`;
+        } else {
+          box.style.display = 'none';
+        }
+        const log = document.getElementById('tg-log');
+        log.style.display = st.log && st.log.trim() ? 'block' : 'none';
+        log.textContent = st.log || '';
+        clearTimeout(tgPoll);
+        if (st.running) { tgWasRunning = true; tgPoll = setTimeout(tgStatus, 3000); }
+        else if (tgWasRunning) { tgWasRunning = false; await tgLoadQueue(); showToast('Analysis finished. Review the results, then Publish tags to site.'); }
+      } catch (err) {
+        document.getElementById('tg-counts').innerHTML = `<p style="color:#ff4d6a;">${escapeHtml(err.message)}</p>`;
+      }
+    }
+    async function tgRun(mode) {
+      if (mode === 'all' && !confirm('Re-analyze every song? This can take an hour or more. Your review decisions are kept.')) return;
+      try {
+        await tgApi('run', { mode, mock: !!TG_MOCK });
+        showToast(mode === 'all' ? 'Re-analyzing everything…' : 'Analyzing new songs…');
+        tgWasRunning = true;
+        await tgStatus();
+      } catch (err) { showToast(err.message, false); }
+    }
+
+    async function tgStop() {
+      try { await tgApi('stop', {}); showToast('Stopping… it will continue where it left off next time.'); setTimeout(tgStatus, 1500); }
+      catch (err) { showToast(err.message, false); }
+    }
+
+    async function tgPublish() {
+      try {
+        const { result } = await tgApi('publish', {});
+        showToast(`Tags published for ${result.tracks} songs (${result.changed} changed). SEO pages rebuilding — push to put it live.`);
+      } catch (err) { showToast('Publish failed: ' + err.message, false); }
+    }
+
+    function tgPct(v) { return v == null ? '—' : Math.round(v * 100) + '%'; }
+
+    // How much the two models agree, tag by tag (no reviewing needed to see this)
+    async function tgAgreement() {
+      try {
+        const { agreement: ag } = await tgApi('agreement');
+        document.getElementById('tg-acc-card').style.display = 'block';
+        const el = document.getElementById('tg-acc');
+        if (!ag.calibrated) {
+          el.innerHTML = `<p class="muted">Analyze at least 30 songs first (${ag.tracks} so far). The models are matched to each other using the whole catalog.</p>`;
+          return;
+        }
+        const word = k => k >= 0.6 ? '🟢 strong' : k >= 0.4 ? '🟡 fair' : k >= 0.2 ? '🟠 weak' : '🔴 poor';
+        const label = f => (tgDict && tgDict.facets[f] ? tgDict.facets[f].label : f);
+        el.innerHTML = `<p style="white-space:normal;">Across ${ag.tracks} songs, when either model hears a tag, the other agrees <strong>${tgPct(ag.overallAgreement)}</strong> of the time.
+          Typical agreement per tag: <strong>${word(ag.medianKappa)}</strong> (κ ${ag.medianKappa}).
+          Only tags both models hear are published, so weak-agreement tags simply appear on fewer songs; they don't create wrong tags.</p>` +
+          statTable('Every tag (weakest first)', ['Tag', 'Group', 'Model A', 'Model B', 'Both', 'Agreement'],
+            ag.tags.map(r => [r.label, label(r.facet), r.songsA, r.songsB, r.both, word(r.kappa) + ' (' + r.kappa + ')']));
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) { showToast(err.message, false); }
+    }
+
+    async function tgAccuracy() {
+      try {
+        const { accuracy } = await tgApi('accuracy');
+        tgShowAccuracy(accuracy, null);
+      } catch (err) { showToast(err.message, false); }
+    }
+
+    function tgShowAccuracy(acc, after) {
+      document.getElementById('tg-acc-card').style.display = 'block';
+      const el = document.getElementById('tg-acc');
+      if (!acc.tracks) { el.innerHTML = '<p class="muted">Approve some songs in Review first. Accuracy compares the AI\'s own choices with your approved answers.</p>'; return; }
+      const facets = Object.entries(acc.facets);
+      const label = f => (tgDict && tgDict.facets[f] ? tgDict.facets[f].label : f);
+      const worst = Object.entries(acc.tags).filter(([, v]) => v.f1 != null && v.tp + v.fn >= 3).sort((a, b) => a[1].f1 - b[1].f1).slice(0, 8);
+      el.innerHTML = `<p class="muted" style="white-space:normal;">Based on <strong>${acc.tracks}</strong> songs you approved. <em>Precision</em> = how often an AI tag was right. <em>Recall</em> = how many of your tags the AI found.</p>` +
+        statTable('By group', ['Group', 'Precision', 'Recall', 'Score (F1)'].concat(after ? ['After tuning'] : []),
+          facets.map(([f, v]) => [label(f), tgPct(v.precision), tgPct(v.recall), tgPct(v.f1)].concat(after ? [tgPct((after.facets[f] || {}).f1)] : []))) +
+        statTable('Weakest tags (worth a look)', ['Tag', 'Precision', 'Recall'], worst.map(([id, v]) => [tgTagLabel(id), tgPct(v.precision), tgPct(v.recall)]));
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function tgTune() {
+      try {
+        const res = await tgApi('tune', {});
+        if (!res.ok) { showToast(res.message, false); return; }
+        tgShowAccuracy(res.before, res.after);
+        showToast(`Tuned: overall score ${tgPct(res.before.macroF1)} → ${tgPct(res.after.macroF1)}. Click Publish to apply.`);
+        await tgLoadQueue();
+      } catch (err) { showToast(err.message, false); }
+    }
+
+    function tgTagLabel(id) {
+      const t = tgDict && tgDict.tags.find(x => x.id === id);
+      return t ? t.label : id;
+    }
+
+    async function tgLoadQueue() {
+      try {
+        if (!tgDict) tgDict = (await tgApi('dict')).dict;
+        const data = await tgApi('queue');
+        tgItems = data.items;
+        tgApplyFilter(true);
+      } catch (err) {
+        document.getElementById('tg-review').innerHTML = `<p style="color:#ff4d6a;">${escapeHtml(err.message)}</p>`;
+      }
+    }
+
+    function tgApplyFilter(keepPos) {
+      const f = document.getElementById('tg-filter').value;
+      const q = document.getElementById('tg-search').value.toLowerCase().trim();
+      const currentId = tgList[tgIdx] && tgList[tgIdx].id;
+      tgList = tgItems.filter(it => (f === 'all' || it.status === f) && (!q || (it.title || '').toLowerCase().includes(q)));
+      // most uncertain first
+      if (f === 'review') tgList.sort((a, b) => (b.notes.length + Object.keys(b.suggested).length) - (a.notes.length + Object.keys(a.suggested).length));
+      const keep = keepPos ? tgList.findIndex(it => it.id === currentId) : -1;
+      tgIdx = keep >= 0 ? keep : 0;
+      tgRender();
+    }
+
+    function tgLoadEdit(it) {
+      const r = it.review || {};
+      tgEdit = { add: new Set(r.add || []), remove: new Set(r.remove || []), genre: r.genre || null };
+    }
+
+    function tgCurrentTags(it) {
+      const ids = new Set(Object.keys(it.decided));
+      for (const id of tgEdit.add) ids.add(id);
+      for (const id of tgEdit.remove) ids.delete(id);
+      return ids;
+    }
+
+    function tgRender() {
+      const el = document.getElementById('tg-review');
+      document.getElementById('tg-pos').textContent = tgList.length ? `${tgIdx + 1} of ${tgList.length}` : '';
+      if (!tgList.length) {
+        el.innerHTML = '<p class="muted">Nothing here. ' + (tgItems.length ? 'Try another filter.' : 'Run "Analyze new songs" first.') + '</p>';
+        return;
+      }
+      const it = tgList[tgIdx];
+      if (!tgEdit.for || tgEdit.for !== it.id) { tgLoadEdit(it); tgEdit.for = it.id; }
+      const current = tgCurrentTags(it);
+      const m = it.measured || {};
+      const facets = Object.entries(tgDict.facets);
+      const chip = (id, kind, title) => {
+        const styles = {
+          agree: 'background:rgba(46,204,113,.18);border:1px solid rgba(46,204,113,.6);',
+          measured: 'background:rgba(52,152,219,.18);border:1px solid rgba(52,152,219,.6);',
+          owner: 'background:rgba(155,89,182,.22);border:1px solid rgba(155,89,182,.7);',
+          suggested: 'background:transparent;border:1px dashed rgba(245,166,35,.8);',
+        };
+        const action = kind === 'suggested' ? `tgToggle('${id}', true)` : `tgToggle('${id}', false)`;
+        return `<button type="button" onclick="${action}" title="${escapeHtml(title || '')}" style="${styles[kind]}color:inherit;border-radius:14px;padding:3px 10px;font-size:0.8rem;cursor:pointer;margin:2px;">${kind === 'suggested' ? '+ ' : ''}${escapeHtml(tgTagLabel(id))}${kind === 'suggested' ? '' : ' ✕'}</button>`;
+      };
+      const rows = facets.map(([facet, f]) => {
+        const inFacet = id => (tgDict.tags.find(t => t.id === id) || {}).facet === facet;
+        const have = [...current].filter(inFacet);
+        const sugg = Object.keys(it.suggested).filter(id => inFacet(id) && !current.has(id));
+        const others = tgDict.tags.filter(t => t.facet === facet && !current.has(t.id));
+        const kindOf = id => tgEdit.add.has(id) ? 'owner' : ((it.decided[id] || {}).conf || 'owner');
+        return `<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--card-border);">
+          <div class="muted" style="width:96px;flex:none;font-size:0.8rem;padding-top:5px;">${escapeHtml(f.label)}</div>
+          <div style="flex:1;">
+            ${have.map(id => chip(id, kindOf(id), (it.decided[id] || {}).why)).join('')}
+            ${sugg.map(id => chip(id, 'suggested', it.suggested[id].why)).join('')}
+            ${f.measured ? '' : `<select onchange="if(this.value)tgToggle(this.value,true)" style="font-size:0.75rem;margin:2px;background:var(--bg);color:inherit;border:1px solid var(--card-border);border-radius:6px;padding:2px;">
+              <option value="">+ add…</option>${others.map(t => `<option value="${t.id}">${escapeHtml(t.label)}</option>`).join('')}</select>`}
+          </div></div>`;
+      }).join('');
+      const genre = it.genreSuggestion && !tgEdit.genre ? `<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.4);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:0.85rem;white-space:normal;">
+          The AI thinks this fits <strong>${escapeHtml(it.genreSuggestion)}</strong> better than <strong>${escapeHtml(it.genre)}</strong>.
+          <button class="btn btn-secondary btn-sm" onclick="tgEdit.genre='${escapeHtml(it.genreSuggestion)}';tgRender()">Move it</button>
+          <button class="btn btn-secondary btn-sm" onclick="tgEdit.genre='${escapeHtml(it.genre)}';tgRender()">Keep ${escapeHtml(it.genre)}</button></div>`
+        : (tgEdit.genre && tgEdit.genre !== it.genre ? `<p style="font-size:0.85rem;">Genre will move to <strong>${escapeHtml(tgEdit.genre)}</strong> when you publish.</p>` : '');
+      el.innerHTML = `
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+          <img src="${escapeHtml(it.cover || '')}" style="width:72px;height:72px;border-radius:8px;object-fit:cover;background:#222;" onerror="this.style.visibility='hidden'">
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:1.1rem;font-weight:700;">${escapeHtml(it.title)} ${it.mock ? '<span class="badge">TEST DATA</span>' : ''}</div>
+            <div class="muted" style="font-size:0.85rem;">${escapeHtml(it.artist || '—')} · ${escapeHtml(it.genre || '')} · <span class="badge">${it.status}</span></div>
+            <div style="font-size:0.85rem;margin-top:4px;">⏱ ${m.duration || '?'} · 🥁 ${m.bpm || '?'} BPM${m.tempoReliable ? '' : ' (unsure)'} · 🎼 ${escapeHtml(m.key || '?')}</div>
+          </div>
+          <audio controls preload="none" src="${escapeHtml(it.file)}" style="height:36px;max-width:100%;"></audio>
+        </div>
+        ${it.notes.length ? `<p style="color:#f5a623;font-size:0.85rem;margin-top:8px;">Unsure: ${escapeHtml(it.notes.join(', '))}</p>` : ''}
+        ${genre}
+        <div style="margin-top:8px;">${rows}</div>
+        <p class="muted" style="font-size:0.75rem;margin-top:6px;white-space:normal;">🟢 both models agree · 🔵 measured · 🟣 your choice · dashed = only one model heard it (click to add). Click a tag to remove it.</p>
+        <div class="action-btns" style="margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" onclick="tgMove(-1)">← Previous</button>
+          <button class="btn btn-primary" style="width:auto;" onclick="tgApprove()">✓ Approve</button>
+          <button class="btn btn-secondary btn-sm" onclick="tgMove(1)">Next →</button>
+          ${it.review ? '<button class="btn btn-secondary btn-sm" onclick="tgResetReview()">Reset my changes</button>' : ''}
+        </div>`;
+    }
+
+    function tgToggle(id, add) {
+      const it = tgList[tgIdx];
+      if (add) {
+        tgEdit.remove.delete(id);
+        if (!it.decided[id]) tgEdit.add.add(id);
+        const facet = (tgDict.tags.find(t => t.id === id) || {}).facet;
+        if (tgDict.facets[facet] && !tgDict.facets[facet].multi) {   // single choice: replace the old one
+          for (const other of tgCurrentTags(it)) {
+            if (other !== id && (tgDict.tags.find(t => t.id === other) || {}).facet === facet) { tgEdit.add.delete(other); if (it.decided[other]) tgEdit.remove.add(other); }
+          }
+        }
+      } else {
+        tgEdit.add.delete(id);
+        if (it.decided[id]) tgEdit.remove.add(id);
+      }
+      tgRender();
+    }
+
+    function tgMove(step) {
+      if (!tgList.length) return;
+      tgIdx = (tgIdx + step + tgList.length) % tgList.length;
+      tgEdit.for = null;
+      tgRender();
+    }
+
+    async function tgSave(status) {
+      const it = tgList[tgIdx];
+      const body = { id: it.id, status, add: [...tgEdit.add], remove: [...tgEdit.remove] };
+      if (tgEdit.genre) body.genre = tgEdit.genre;
+      const res = await tgApi('review', body);
+      if (res.decision) Object.assign(it, { status: res.decision.status, decided: res.decision.decided, suggested: res.decision.suggested,
+        genreSuggestion: res.decision.genreSuggestion, review: res.review });
+      return it;
+    }
+
+    async function tgApprove() {
+      try {
+        await tgSave('approved');
+        showToast('Approved ✓');
+        const filter = document.getElementById('tg-filter').value;
+        if (filter === 'review' || filter === 'auto') {      // it leaves this list
+          tgList.splice(tgIdx, 1);
+          if (tgIdx >= tgList.length) tgIdx = 0;
+        } else tgIdx = (tgIdx + 1) % tgList.length;
+        tgEdit.for = null;
+        tgRender();
+      } catch (err) { showToast('Save failed: ' + err.message, false); }
+    }
+
+    async function tgResetReview() {
+      tgEdit = { add: new Set(), remove: new Set(), genre: null, for: tgList[tgIdx].id };
+      try { await tgSave('pending'); tgRender(); showToast('Back to the AI\'s choices'); }
+      catch (err) { showToast(err.message, false); }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('tab-tags').classList.contains('active')) return;
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'a') { e.preventDefault(); tgApprove(); }
+      else if (k === 'n' || e.key === 'ArrowRight') { e.preventDefault(); tgMove(1); }
+      else if (k === 'p' || e.key === 'ArrowLeft') { e.preventDefault(); tgMove(-1); }
+    });
+
     // --- Stats ---
     let statsLoaded = false;
 
@@ -739,6 +1133,8 @@
           statTable('Where visits came from', ['Source', 'Visits'], st.sources.map(r => [r.src, r.count])) +
           statTable('Most downloaded', ['Track', 'Downloads'], st.topDownloads.map(r => [r.title, r.count])) +
           statTable('Most played', ['Track', 'Plays'], st.topPlays.map(r => [r.title, r.count])) +
+          statTable('What people search for', ['Search', 'Times'], (st.searches || []).map(r => [r.q, r.count])) +
+          statTable('Searches with NO results (make this music!)', ['Search', 'Times'], (st.noResults || []).map(r => [r.q, r.count])) +
           statTable('Landing pages', ['Page', 'Visits'], st.pages.map(r => [r.page, r.count])) +
           statTable('Download formats', ['Format', 'Downloads'], st.formats.map(r => [r.fmt.toUpperCase(), r.count])) +
           statTable('Radio stations started', ['Station', 'Starts'], st.radio.map(r => [r.station, r.count])) +
@@ -806,6 +1202,7 @@
       if (btn) btn.classList.add('active');
       document.getElementById('tab-' + name).classList.add('active');
       if (name === 'stats' && !statsLoaded) loadStats();
+      if (name === 'tags') tgOpen();
     }
 
     const NEW_RELEASE_DAYS = 45; // keep in sync with js/home.js
@@ -885,6 +1282,8 @@
 
         genreSelect.innerHTML = Object.keys(genresConfig).map(g => `<option value="${g}">${genresConfig[g].icon || ''} ${g}</option>`).join('');
         editGenreSelect.innerHTML = genreSelect.innerHTML;
+        const batchGenre = document.getElementById('batch-genre');
+        if (batchGenre && !batchGenre.options.length) batchGenre.innerHTML = genreSelect.innerHTML;
         filterSelect.innerHTML = '<option value="">All Tracks / Genres</option>' +
           '<option value="__featured__">⭐ Featured Tracks Only</option>' +
           '<option value="__new_release__">🔥 New Releases Only</option>' +
@@ -1003,6 +1402,176 @@
       };
       reader.readAsDataURL(file);
     }
+
+    // --- 📦 Batch upload ---
+    let batchItems = [];
+    let batchRunning = false;
+    const BATCH_COVER_NAMES = ['cover', 'folder', 'front', 'artwork', 'album', 'albumart'];
+
+    function batchBase(name) { return name.replace(/\.[^.]+$/, '').toLowerCase().trim(); }
+    function batchDir(f) { const p = f.webkitRelativePath || f._path || ''; return p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : ''; }
+
+    // "my_song-final (1).mp3" → "My Song Final"
+    function batchCleanTitle(name) {
+      let t = name.replace(/\.[^.]+$/, '')
+        .replace(/[\[(](?:\d+|v\d+|final|master(?:ed)?|remaster(?:ed)?|copy|edit|mix|suno[^)\]]*)[\])]/gi, ' ')
+        .replace(/[_]+/g, ' ').replace(/\s+-\s+|\s*-\s*$/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      // export leftovers at the end: "-final", " v2", "master", "demo", "export 3"…
+      for (let k = 0; k < 3; k++) t = t.replace(/[\s-]+(?:final|master(?:ed)?|v\d+|version\s*\d+|demo|export(?:ed)?|bounce|mixdown|copy|edit|take\s*\d+)\s*\d*$/i, '').trim();
+      if (t === t.toLowerCase() || t === t.toUpperCase()) t = t.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+      return t || name;
+    }
+
+    function batchAddFiles(files) {
+      files = [...files].filter(f => !f.name.startsWith('.'));
+      const known = new Set(batchItems.map(it => it.mp3.name + ':' + it.mp3.size));
+      const catalogTitles = new Set(catalog.map(t => String(t.title).trim().toLowerCase()));
+      const byDir = {};
+      for (const f of files) (byDir[batchDir(f)] = byDir[batchDir(f)] || []).push(f);
+      let added = 0;
+      for (const [dir, list] of Object.entries(byDir)) {
+        const images = list.filter(f => /\.(jpe?g|png|webp)$/i.test(f.name));
+        const folderCover = images.find(f => BATCH_COVER_NAMES.includes(batchBase(f.name)));
+        for (const mp3 of list.filter(f => /\.mp3$/i.test(f.name))) {
+          if (known.has(mp3.name + ':' + mp3.size)) continue;
+          const base = batchBase(mp3.name);
+          const title = batchCleanTitle(mp3.name);
+          batchItems.push({
+            mp3, dir,
+            wav: list.find(f => /\.wav$/i.test(f.name) && batchBase(f.name) === base) || null,
+            cover: images.find(f => batchBase(f.name) === base) || folderCover || null,
+            title, edited: false,
+            status: catalogTitles.has(title.toLowerCase()) ? 'dupe' : 'ready',
+          });
+          added++;
+        }
+      }
+      if (!added) { showToast('No new MP3 files found there.', false); return; }
+      document.getElementById('batch-panel').style.display = 'block';
+      batchRender();
+      showToast(`${added} song${added === 1 ? '' : 's'} added to the batch.`);
+    }
+
+    // Drag & drop folders: walk the dropped directory tree
+    async function batchReadEntry(entry, prefix, out) {
+      if (entry.isFile) {
+        const file = await new Promise((res, rej) => entry.file(res, rej));
+        file._path = prefix + file.name;
+        out.push(file);
+      } else if (entry.isDirectory) {
+        const reader = entry.createReader();
+        let batch;
+        do {
+          batch = await new Promise((res, rej) => reader.readEntries(res, rej));
+          for (const e of batch) await batchReadEntry(e, prefix + entry.name + '/', out);
+        } while (batch.length);
+      }
+    }
+
+    function batchRender() {
+      const label = { ready: '⏳ ready', dupe: '⚠ already in catalog', uploading: '⬆ uploading…', done: '✅ added', skipped: '↷ skipped', error: '✗ ' };
+      document.getElementById('batch-rows').innerHTML = batchItems.map((it, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><input class="form-control" style="padding:4px 8px;font-size:0.85rem;" value="${escapeHtml(it.title)}" ${it.status === 'done' ? 'disabled' : ''}
+               onchange="batchItems[${i}].title=this.value.trim()||batchItems[${i}].title;batchItems[${i}].edited=true"></td>
+          <td style="font-size:0.8rem;white-space:nowrap;">🎵 ${(it.mp3.size / 1048576).toFixed(1)} MB${it.wav ? ' · WAV ✓' : ''}${it.cover ? ' · 🖼 ✓' : ''}</td>
+          <td style="font-size:0.8rem;">${label[it.status] || ''}${it.status === 'error' ? escapeHtml(it.error || '') : ''}</td>
+          <td>${it.status === 'done' || batchRunning ? '' : `<button class="btn btn-secondary btn-sm" onclick="batchItems.splice(${i},1);batchRender()">✕</button>`}</td>
+        </tr>`).join('');
+      const c = s => batchItems.filter(it => it.status === s).length;
+      document.getElementById('batch-summary').textContent =
+        `${batchItems.length} songs · ${batchItems.filter(it => it.wav).length} with WAV · ${batchItems.filter(it => it.cover).length} with a cover file` +
+        (c('dupe') ? ` · ${c('dupe')} already in catalog` : '') + (c('done') ? ` · ${c('done')} added` : '');
+    }
+
+    function batchClear() {
+      if (batchRunning) return;
+      batchItems = [];
+      document.getElementById('batch-panel').style.display = 'none';
+      document.getElementById('batch-folder').value = '';
+      document.getElementById('batch-files').value = '';
+    }
+
+    async function batchStart() {
+      if (batchRunning) return;
+      const skipDupes = document.getElementById('batch-skip-dupes').checked;
+      const todo = batchItems.filter(it => it.status === 'ready' || it.status === 'error' || (it.status === 'dupe' && !skipDupes));
+      for (const it of batchItems) if (it.status === 'dupe' && skipDupes) it.status = 'skipped';
+      if (!todo.length) { showToast('Nothing to upload.', false); batchRender(); return; }
+      batchRunning = true;
+      const btn = document.getElementById('batch-start');
+      btn.disabled = true;
+      document.getElementById('batch-progress').style.display = 'block';
+      const genre = document.getElementById('batch-genre').value;
+      const artist = document.getElementById('batch-artist').value.trim();
+      const aiGenre = document.getElementById('batch-ai-genre').checked;
+      const isNewRelease = document.getElementById('batch-new').checked;
+      const newIds = [];
+      for (let i = 0; i < todo.length; i++) {
+        const it = todo[i];
+        it.status = 'uploading'; batchRender();
+        btn.textContent = `Uploading ${i + 1} of ${todo.length}…`;
+        try {
+          const audio = await blobToDataUrl(it.mp3);
+          const cover = it.cover ? await blobToDataUrl(it.cover) : null;
+          const res = await fetch('/api/track/add', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: it.title, keepTitle: it.edited, artist, genre, subgenre: genre, tags: '',
+              isNewRelease, featured: false, audioBase64: audio, coverBase64: cover,
+              preferId3: true, autoGenre: aiGenre, batch: { skipDuplicates: skipDupes },
+            })
+          });
+          const result = await res.json();
+          if (!result.success) throw new Error(result.error);
+          if (result.skipped) { it.status = 'skipped'; }
+          else {
+            newIds.push(result.track.id);
+            it.title = result.track.title;
+            if (it.wav) { try { await uploadWav(result.track.id, it.wav); } catch (e) { it.error = 'WAV: ' + e.message; } }
+            it.status = 'done';
+          }
+        } catch (err) {
+          it.status = 'error'; it.error = err.message;
+        }
+        document.getElementById('batch-bar').style.width = Math.round(((i + 1) / todo.length) * 100) + '%';
+        batchRender();
+      }
+      batchRunning = false;
+      btn.disabled = false;
+      btn.textContent = '⬆ Upload all';
+      loadCatalog();
+      if (!newIds.length) { showToast('No new songs were added.', false); return; }
+      // One AI run for the whole batch (tags + genres), then pages are rebuilt automatically
+      let note = '';
+      try {
+        const r = await tgApi('run', { mode: 'ids', ids: newIds });
+        note = r.result === 'started' ? ' The AI is now tagging and sorting them (see 🏷️ Tags).'
+          : r.result === 'busy' ? ' The AI is busy; click "Analyze new songs" in 🏷️ Tags when it finishes.' : '';
+      } catch (e) {
+        note = ' (AI tagging isn\'t set up yet, so they keep the genre you picked.)';
+        fetch('/api/action/regenerate-seo', { method: 'POST' });
+      }
+      const failed = batchItems.filter(it => it.status === 'error').length;
+      showToast(`✅ ${newIds.length} songs added${failed ? `, ${failed} failed (see list)` : ''}.${note} Next: R2 sync, then push.`);
+    }
+
+    document.getElementById('batch-folder').addEventListener('change', e => batchAddFiles(e.target.files));
+    document.getElementById('batch-files').addEventListener('change', e => batchAddFiles(e.target.files));
+    (function () {
+      const dz = document.getElementById('batch-dropzone');
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+      dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+      dz.addEventListener('drop', async e => {
+        e.preventDefault(); dz.classList.remove('dragover');
+        const entries = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+        if (!entries.length) return batchAddFiles(e.dataTransfer.files);
+        const files = [];
+        for (const en of entries) await batchReadEntry(en, '', files);
+        batchAddFiles(files);
+      });
+    })();
 
     // --- Suno import ---
     let sunoSong = null;

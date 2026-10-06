@@ -87,7 +87,7 @@
         <div class="search-bar-wrap">
           <span class="search-icon">🔍</span>
           <input id="search-input" class="search-input" type="search"
-                 placeholder="Search by title, artist, or genre…" autocomplete="off">
+                 placeholder="Describe the sound you need… e.g. spooky piano under a minute" autocomplete="off">
         </div>
         <select id="use-case-filter" class="browse-dropdown" title="Find music for...">
           <option value="">🎵 Any vibe</option>
@@ -116,6 +116,14 @@
           <option value="longest">⌛ Longest</option>
         </select>
       </div>
+      <div class="search-understood" id="search-understood" style="display:none;"></div>
+      <div class="search-examples" id="search-examples">
+        Try: <button type="button" data-q="spooky piano under a minute">spooky piano under a minute</button>
+        <button type="button" data-q="chill lofi for studying">chill lofi for studying</button>
+        <button type="button" data-q="epic trailer music, no vocals">epic trailer, no vocals</button>
+        <button type="button" data-q="upbeat vlog music">upbeat vlog</button>
+        <button type="button" data-q="dark tense true crime podcast">true crime podcast</button>
+      </div>
 
       <!-- Dedicated Subgenre Pills (shown on genre & category views) -->
       <div class="genre-subgenre-pills" id="genre-subgenre-pills" style="display:none;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px;"></div>
@@ -138,6 +146,7 @@
       </div>
 
     </div>
+  <script src="js/search.js"></script>
   <script src="js/browse.js"></script>
 </main>
 

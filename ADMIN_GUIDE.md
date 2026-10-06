@@ -153,3 +153,36 @@ All three are catalog changes: run the SEO rebuild and push to publish.
 3. **Add to Music Catalog**, then R2 sync (uploads the MP3/WAV), SEO rebuild, push.
 
 To add or remove a WAV on any track later: Manage Catalog → Edit → WAV download.
+
+## AI tags and "Search a sound"
+
+Two free AI models (run on your computer) listen to every song. They're calibrated to each other per
+tag, and a tag goes on the site only when **both agree** (or it's measured, like tempo and length).
+What only one model hears stays hidden (it just helps search a little); vocals/energy/tempo
+disagreements settle themselves. Tags the models rarely agree on need both to be strongly sure.
+Only songs where both models are confident *and* contradict each other come to you.
+
+1. **Once:** `sudo apt install python3-venv` (if needed), then `npm run analyze:setup` in the
+   Portal-Music folder. It installs the tools and downloads the models (~2 GB). Restart the admin.
+2. **🏷️ Tags → ▶ Analyze new songs.** The first run covers all songs (about an hour or two; leave it
+   running, you can Stop and it continues later). New uploads are analyzed automatically after that.
+3. **🤝 Model agreement** shows how well the two models agree, tag by tag (no reviewing needed).
+   **Review** only holds real conflicts: click tags to remove, dashed ones to add, **A** to approve,
+   **N** for next. Optional: approve 20+ songs and click **🔧 Auto-tune** to fit the AI to your taste.
+4. **🚀 Publish tags to site**, then push. Visitors can then type what they need ("spooky piano under a
+   minute, no vocals") on Browse; track pages show tags and similar tracks; "Best for" pages appear in `use/`.
+
+To add or rename tags, edit `data/tags.json` (or ask Claude), then Publish again. Only new *clap*
+descriptions need `admin/analyze/.venv/bin/python admin/analyze/analyze.py --rescore` (takes seconds).
+
+## Batch upload (a whole folder)
+
+Upload & Add Track → **📦 Batch upload**: drag in a folder (subfolders included) or pick files.
+- Each MP3 is paired with a **WAV** and a **cover image** of the same name; otherwise a `cover.jpg`/`folder.jpg`
+  in its folder, otherwise the cover inside the MP3. Titles come from the file names (export leftovers like
+  "-final" or "v2" are removed), or from the MP3's own title; edit any title in the list before uploading.
+- Songs already in the catalog (same title) are skipped, and no upload ever overwrites another song's file.
+- Leave **🤖 Let the AI pick each song's genre** on: after the upload the AI analyzes the whole batch once,
+  tags every song and moves it into its genre/subgenre (the genre you picked is used when it isn't sure).
+- Then: R2 sync (Actions & Sync step 2, uploads the files), and push.
+
