@@ -3,6 +3,15 @@
 Things only you can do (accounts, dashboards, decisions). Claude keeps this list updated.
 Tick items off as you go.
 
+## AI tags & "Search a sound" (new)
+- [ ] **Re-publish `firestore.rules`** (it now allows a "search" event, so Stats can show what people search for):
+      Firebase Console → Firestore Database → Rules → paste the whole file → Publish.
+- [ ] `git pull`, then in the Portal-Music folder: `npm run analyze:setup` (once; if it says venv is missing,
+      run `sudo apt install python3-venv` first). Restart `npm run admin`.
+- [ ] Admin → 🏷️ Tags → **Analyze new songs** (first run ≈ 1–2 h; you can stop and continue).
+- [ ] Review ~30 songs (keys A / N), click **Auto-tune**, then **Publish tags to site**, SEO is rebuilt
+      automatically; push.
+
 ## Stats (new)
 - [ ] **Publish the updated `firestore.rules`** (Firebase Console → Firestore Database → Rules → paste the whole
       file → Publish). Until then the site can't record downloads/visits and the 📊 Stats tab stays empty.

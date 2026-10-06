@@ -35,7 +35,7 @@ function parseDurationSecs(dur) {
 
 function matchesLength(song, filter) {
   if (!filter) return true;
-  var secs = parseDurationSecs(song.duration);
+  var secs = song.durationSec || parseDurationSecs(song.duration);
   if (secs === null) return true; // unknown duration passes all
   if (filter === 'short')  return secs < 120;
   if (filter === 'medium') return secs >= 120 && secs <= 240;
@@ -43,8 +43,19 @@ function matchesLength(song, filter) {
   return true;
 }
 
+// The same dropdown, answered by the AI tags for tracks that have them
+var USE_CASE_TAGS = {
+  workout: ['workout'], study: ['study'], gaming: ['gaming', 'game-dev'], roadtrip: ['travel'],
+  content: ['vlog', 'edits', 'ads', 'tech'], relax: ['chill', 'peaceful', 'meditation'], party: ['groovy', 'energetic'],
+  latenight: ['chill', 'romantic', 'dreamy'], podcast: ['podcast', 'true-crime'], cinematic: ['film', 'trailer', 'epic'],
+};
+
 function matchesUseCase(song, useCase) {
   if (!useCase) return true;
+  if (song.labels && song.labels.length) {
+    var want = USE_CASE_TAGS[useCase] || [];
+    return want.some(function (id) { return song.labels.indexOf(id) !== -1; });
+  }
   var genres = USE_CASE_GENRES[useCase] || [];
   return genres.indexOf(song.genre) !== -1;
 }
@@ -337,6 +348,82 @@ function renderBrowseArtists() {
     }).catch(function () {});
 }
 
+// --- "Search a sound" (js/search.js) ---
+var pmSearchEngine = null, pmSearchLoading = null, pmSearchLogged = {};
+
+function pmSearchEnsure() {
+  if (pmSearchEngine || !window.PMSearch) return Promise.resolve(pmSearchEngine);
+  if (!pmSearchLoading) {
+    pmSearchLoading = fetch('data/tags.json', { cache: 'no-cache' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { pmSearchEngine = window.PMSearch.create(d); return pmSearchEngine; })
+      .catch(function () { return null; });
+  }
+  return pmSearchLoading;
+}
+
+function pmSearchShowUnderstood(chips) {
+  var box = document.getElementById('search-understood');
+  var ex = document.getElementById('search-examples');
+  if (ex) ex.style.display = 'none';
+  if (!box) return;
+  var parts = chips.filter(function (c) { return !c.word; }).map(function (c) {
+    return '<span class="su-chip' + (c.negated ? ' su-not' : '') + '" title="' + _esc(c.corrected ? 'You typed “' + c.text + '”' : (c.text || '')) + '">' + _esc(c.label) + '</span>';
+  });
+  box.innerHTML = parts.length ? 'Searching for: ' + parts.join(' ') : '';
+  box.style.display = parts.length ? '' : 'none';
+}
+
+window.pmSearchClear = function () {
+  window._pmSearchReasons = null;
+  var box = document.getElementById('search-understood');
+  if (box) box.style.display = 'none';
+  var ex = document.getElementById('search-examples');
+  if (ex) ex.style.display = '';
+  // Show the normal list again
+  var filtersEl = document.getElementById('browse-filters');
+  if (filtersEl && !genre && !artist && !filterMode) filtersEl.style.display = '';
+  if (!genre && !artist && !filterMode) renderFilteredGrid();
+  else location.reload();
+};
+
+window.pmSearchRun = function (query, pool) {
+  return pmSearchEnsure().then(function (engine) {
+    if (!engine) { window._pmSearchReasons = null; renderSimpleGrid(fuzzySearch(pool, query)); return; }
+    var res = engine.search(pool, query);
+    window._pmSearchReasons = {};
+    res.results.forEach(function (r) { window._pmSearchReasons[r.song.id] = r.reasons; });
+    pmSearchShowUnderstood(res.chips);
+    var found = res.results.map(function (r) { return r.song; });
+    var bar = document.getElementById('browse-active-bar');
+    if (bar) bar.style.display = 'none';
+    var filtersEl = document.getElementById('browse-filters');   // results go right under the search box
+    if (filtersEl) filtersEl.style.display = 'none';
+    paintGrid(applySorting(found),
+      '<div class="empty-state"><div class="empty-icon">🔎</div><p>No exact match for “' + _esc(query) +
+      '”. Try fewer words, or a mood like <em>chill</em>, <em>dark</em> or <em>epic</em>.</p></div>');
+    // What people search for tells us what music to make next (once per search per visit)
+    var key = engine.normalize(query).slice(0, 40);
+    if (key && !pmSearchLogged[key] && window.pmTrack) {
+      clearTimeout(window._pmSearchLogTimer);
+      window._pmSearchLogTimer = setTimeout(function () {
+        if (pmSearchLogged[key]) return;
+        pmSearchLogged[key] = 1;
+        pmTrack('search', { v: key, track: String(found.length) });
+      }, 1500);
+    }
+  });
+};
+
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('#search-examples button[data-q]');
+  if (!b) return;
+  var input = document.getElementById('search-input');
+  if (!input) return;
+  input.value = b.getAttribute('data-q');
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+});
+
 // --- Init ---
 Promise.all([loadGenres(), loadSongs()]).then(function (results) {
   var songs = results[1];
@@ -389,6 +476,14 @@ Promise.all([loadGenres(), loadSongs()]).then(function (results) {
   }
 
   if (trackParam) highlightTrack(trackParam);
+
+  // ?q= opens a search (links from track pages and "best for" pages)
+  var qParam = params.get('q');
+  if (qParam && !filterMode && !genre && !artist) {
+    var input = document.getElementById('search-input');
+    if (input) input.value = qParam;
+    window.pmSearchRun(qParam, songs);
+  }
 });
 
 // Featured Artists — only on main browse view

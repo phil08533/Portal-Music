@@ -22,6 +22,12 @@ Read README.md first for the architecture. Key rules:
 - **Stream overlay**: `overlay.html` is an OBS/Streamlabs Browser Source (plays a free radio station and shows a
   "Now playing · portal-music.com" card); streamers build their link in the box on `radio.html`. Its station
   filters must stay in sync with the free stations in `radio.html`. No ads ever run on it.
+- **AI tags + "Search a sound"**: `data/tags.json` is the tag dictionary (facets, search synonyms, AudioSet
+  labels for Model A, CLAP prompts for Model B). `admin/analyze/analyze.py` (owner's PC, Python venv) saves raw
+  scores to `admin/analysis/<id>.json`; `admin/tagging.js` publishes a tag only when two sources agree, owner
+  review wins, and writes `labels`/`bpm`/`key`/`durationSec` into `data/music.json` + `data/similar.json`.
+  `js/search.js` turns typed requests into tags on the browse page. Track pages and `use/<tag>.html` are built
+  from the tags by `npm run seo`. Tests: `npm test`. Never publish `--mock` analyses.
 - `admin/` runs locally only (127.0.0.1 + per-launch token) and is never deployed.
 
 ## Owner to-do list

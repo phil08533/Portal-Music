@@ -153,3 +153,21 @@ All three are catalog changes: run the SEO rebuild and push to publish.
 3. **Add to Music Catalog**, then R2 sync (uploads the MP3/WAV), SEO rebuild, push.
 
 To add or remove a WAV on any track later: Manage Catalog → Edit → WAV download.
+
+## AI tags and "Search a sound"
+
+Two free AI models (run on your computer) listen to every song. A tag goes on the site only when
+**both agree** (or it's measured, like tempo and length); anything only one model hears waits for you.
+
+1. **Once:** `sudo apt install python3-venv` (if needed), then `npm run analyze:setup` in the
+   Portal-Music folder. It installs the tools and downloads the models (~2 GB). Restart the admin.
+2. **🏷️ Tags → ▶ Analyze new songs.** The first run covers all songs (about an hour or two; leave it
+   running, you can Stop and it continues later). New uploads are analyzed automatically after that.
+3. **Review** ("Needs review" list): click tags to remove, dashed ones to add, **A** to approve,
+   **N** for next. Approve 20–50 songs, then **🔧 Auto-tune** to fit the AI to your answers.
+4. **🚀 Publish tags to site**, then push. Visitors can then type what they need ("spooky piano under a
+   minute, no vocals") on Browse; track pages show tags and similar tracks; "Best for" pages appear in `use/`.
+
+To add or rename tags, edit `data/tags.json` (or ask Claude), then Publish again. Only new *clap*
+descriptions need `admin/analyze/.venv/bin/python admin/analyze/analyze.py --rescore` (takes seconds).
+

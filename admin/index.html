@@ -1064,6 +1064,8 @@
           statTable('Where visits came from', ['Source', 'Visits'], st.sources.map(r => [r.src, r.count])) +
           statTable('Most downloaded', ['Track', 'Downloads'], st.topDownloads.map(r => [r.title, r.count])) +
           statTable('Most played', ['Track', 'Plays'], st.topPlays.map(r => [r.title, r.count])) +
+          statTable('What people search for', ['Search', 'Times'], (st.searches || []).map(r => [r.q, r.count])) +
+          statTable('Searches with NO results (make this music!)', ['Search', 'Times'], (st.noResults || []).map(r => [r.q, r.count])) +
           statTable('Landing pages', ['Page', 'Visits'], st.pages.map(r => [r.page, r.count])) +
           statTable('Download formats', ['Format', 'Downloads'], st.formats.map(r => [r.fmt.toUpperCase(), r.count])) +
           statTable('Radio stations started', ['Station', 'Starts'], st.radio.map(r => [r.station, r.count])) +

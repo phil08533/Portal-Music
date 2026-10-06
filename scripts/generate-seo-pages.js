@@ -18,6 +18,21 @@ const genresCfg  = JSON.parse(fs.readFileSync('data/genres.json', 'utf8')).genre
 
 fs.mkdirSync('genres', { recursive: true });
 fs.mkdirSync('tracks', { recursive: true });
+fs.mkdirSync('use', { recursive: true });
+
+// AI tags (admin 🏷️ Tags → Publish) and sound-alike tracks; both optional
+const tagDict  = fs.existsSync('data/tags.json') ? JSON.parse(fs.readFileSync('data/tags.json', 'utf8')) : { tags: [], facets: {} };
+const similar  = fs.existsSync('data/similar.json') ? JSON.parse(fs.readFileSync('data/similar.json', 'utf8')) : {};
+const TAG      = Object.fromEntries(tagDict.tags.map(function (t) { return [t.id, t]; }));
+const songById = Object.fromEntries(songs.map(function (s) { return [s.id, s]; }));
+const USE_PAGE_MIN = 6;   // a "Best for" page needs at least this many tracks
+const useTracks = {};
+songs.forEach(function (s) {
+  (s.labels || []).forEach(function (id) {
+    if (TAG[id] && TAG[id].facet === 'use') (useTracks[id] = useTracks[id] || []).push(s);
+  });
+});
+const usePageIds = Object.keys(useTracks).filter(function (id) { return useTracks[id].length >= USE_PAGE_MIN; });
 
 function slug(str) {
   return String(str).toLowerCase()
@@ -74,6 +89,45 @@ songs.forEach(function (s) {
   byGenre[g].push(s);
 });
 
+function trackHref(s) {
+  return '/tracks/' + slug(s.title + '-' + (s.artist || s.subgenre || s.genre || 'Other')) + '-' + s.id + '.html';
+}
+
+function tagsOf(s, facet) {
+  return (s.labels || []).map(function (id) { return TAG[id]; })
+    .filter(function (t) { return t && (!facet || t.facet === facet); });
+}
+
+function listWords(words) {
+  if (words.length <= 1) return words.join('');
+  return words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1];
+}
+
+function plainLabel(t) {
+  return t.label.toLowerCase().replace(/\s*\(.*\)/, '');
+}
+
+// A readable description from the AI tags, e.g. "A dark, tense cinematic track with piano
+// and strings (instrumental). Great for horror, true crime and trailers."
+function describeTrack(s) {
+  if (!(s.labels || []).length) return null;
+  var moods = tagsOf(s, 'mood').slice(0, 2).map(plainLabel);
+  var style = tagsOf(s, 'style').slice(0, 1).map(plainLabel)[0] || (s.genre || 'music').toLowerCase();
+  var inst = tagsOf(s, 'instrument').slice(0, 2).map(plainLabel);
+  var vocal = tagsOf(s, 'vocals')[0];
+  var uses = tagsOf(s, 'use').slice(0, 3).map(plainLabel);
+  var words = (moods.length ? moods.join(', ') + ' ' : '') + style;
+  var first = (/^[aeiou]/.test(words) ? 'An ' : 'A ') + words + ' track' +
+    (inst.length ? ' with ' + listWords(inst) : '') +
+    (vocal ? (vocal.id === 'instrumental' ? ' (instrumental)' : ' with vocals') : '') + '.';
+  return first + (uses.length ? ' Great for ' + listWords(uses) + '.' : '');
+}
+
+function tagLink(t) {
+  if (t.facet === 'use' && usePageIds.indexOf(t.id) !== -1) return '/use/' + t.id + '.html';
+  return '/browse.html?q=' + encodeURIComponent(plainLabel(t));
+}
+
 // Shared header/footer/player HTML
 function sharedHeader(active) {
   return `  <header>
@@ -92,7 +146,7 @@ function sharedFooter() {
       <p>&copy; 2025&ndash;2026 Portal Music. All tracks are free to use.</p>
       <div class="footer-links">
         <a href="/about.html">About</a>
-        <a href="/license.html">License</a>
+        ${usePageIds.length ? '<a href="/use/">Music by use</a>\n        ' : ''}<a href="/license.html">License</a>
         <a href="/dispute-guide.html">Copyright Help</a>
         <a href="/privacy.html">Privacy Policy</a>
         <a href="/terms.html">Terms of Use</a>
@@ -254,17 +308,28 @@ songs.forEach(function (s) {
   var canonUrl   = 'https://portal-music.com/tracks/' + filename;
   var gslug      = slug(genre);
   var icon       = (genresCfg[genre] && genresCfg[genre].icon) || '🎵';
-  var desc       = 'Download "' + s.title + '" by ' + artist + ' free. Royalty-free ' +
-                   genre.toLowerCase() + ' music for YouTube, videos, and creative projects. No copyright strikes ever.';
+  var about      = describeTrack(s);
+  var desc       = about
+    ? ('Free download: "' + s.title + '". ' + about + ' Royalty-free, no copyright strikes.')
+    : ('Download "' + s.title + '"' + (s.artist ? ' by ' + s.artist : '') + ' free. Royalty-free ' +
+       genre.toLowerCase() + ' music for YouTube, videos, and creative projects. No copyright strikes ever.');
 
-  // Related tracks: same genre, exclude self, up to 4
-  var related = songs.filter(function (x) { return x.genre === genre && x.id !== s.id; }).slice(0, 4);
+  // Similar tracks: sound-alikes from the AI analysis, otherwise the same genre
+  var sim = (similar[s.id] || []).map(function (id) { return songById[id]; }).filter(Boolean).slice(0, 6);
+  var related = sim.length ? sim : songs.filter(function (x) { return x.genre === genre && x.id !== s.id; }).slice(0, 4);
+
+  // Tag chips, grouped (each opens a search or a "Best for" page)
+  var tagGroups = ['use', 'mood', 'style', 'instrument', 'energy', 'vocals', 'tempo'].map(function (facet) {
+    var ts = tagsOf(s, facet);
+    if (!ts.length) return '';
+    return '<div class="track-tag-group"><span class="track-tag-facet">' + esc((tagDict.facets[facet] || {}).label || facet) + '</span> ' +
+      ts.map(function (t) { return '<a class="track-tag" href="' + tagLink(t) + '">' + esc(t.label) + '</a>'; }).join(' ') + '</div>';
+  }).filter(Boolean).join('\n          ');
 
   var relatedRows = related.map(function (r) {
-    var rslug = slug(r.title + '-' + (r.artist || r.subgenre || r.genre || ''));
     var rArtist = esc(r.artist || r.subgenre || genre);
     return '<div class="track-row">' +
-      '<a href="/tracks/' + rslug + '-' + r.id + '.html" class="track-link">' +
+      '<a href="' + trackHref(r) + '" class="track-link">' +
         '<img src="' + esc(r.cover) + '" alt="' + esc(r.title) + '" class="track-thumb" width="60" height="60" loading="lazy">' +
         '<div class="track-info">' +
           '<span class="track-title">' + esc(r.title) + '</span>' +
@@ -278,8 +343,9 @@ songs.forEach(function (s) {
     '@context': 'https://schema.org',
     '@type': 'MusicRecording',
     'name': s.title,
-    'byArtist': { '@type': 'MusicGroup', 'name': artist },
+    'byArtist': { '@type': 'MusicGroup', 'name': s.artist || 'Portal Music' },
     'genre': genre,
+    ...((s.labels || []).length ? { 'keywords': tagsOf(s).map(function (t) { return t.label; }).join(', ') } : {}),
     'url': canonUrl,
     'image': s.cover,
     'description': desc,
@@ -299,7 +365,9 @@ songs.forEach(function (s) {
   });
 
   var subgenreRow = s.subgenre ? '<li><strong>Style:</strong> ' + esc(s.subgenre) + '</li>\n          ' : '';
-  var durationRow = s.duration ? '<li><strong>Duration:</strong> ' + esc(s.duration) + '</li>\n          ' : '';
+  var durationRow = s.duration ? '<li><strong>Length:</strong> ' + esc(s.duration) + '</li>\n          ' : '';
+  var tempoRow = s.bpm ? '<li><strong>Tempo:</strong> ' + esc(s.bpm) + ' BPM' + (s.key ? ' &middot; key of ' + esc(s.key) : '') + '</li>\n          ' : '';
+  var artistRow = s.artist ? '<li><strong>Artist:</strong> <a href="/browse.html?artist=' + encodeURIComponent(s.artist) + '">' + esc(s.artist) + '</a></li>\n          ' : '';
 
   var html = `<!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -341,7 +409,7 @@ ${sharedHeader()}
         <img src="${esc(s.cover)}" alt="${esc(s.title)} cover art" class="track-page-cover" width="220" height="220">
         <div class="track-page-meta">
           <h1>${esc(s.title)}</h1>
-          <p class="track-page-artist">by <a href="/browse.html?artist=${encodeURIComponent(artist)}">${esc(artist)}</a></p>
+          ${s.artist ? `<p class="track-page-artist">by <a href="/browse.html?artist=${encodeURIComponent(s.artist)}">${esc(s.artist)}</a></p>` : ''}
           <p class="track-page-genre"><a href="/genres/${gslug}.html">${icon} ${esc(genre)}</a></p>
           <div class="track-page-actions">
             <button class="hero-cta" id="track-play-btn">&#9654; Play</button>
@@ -353,17 +421,19 @@ ${sharedHeader()}
 
       <div class="track-page-info">
         <h2>About this track</h2>
-        <p>${esc(desc)}</p>
-        <ul class="track-details-list">
+        <p>${esc(about || desc)}</p>
+${tagGroups ? `        <div class="track-tags">
+          ${tagGroups}
+        </div>
+` : ''}        <ul class="track-details-list">
           <li><strong>Genre:</strong> <a href="/genres/${gslug}.html">${esc(genre)}</a></li>
-          ${subgenreRow}<li><strong>Artist:</strong> <a href="/browse.html?artist=${encodeURIComponent(artist)}">${esc(artist)}</a></li>
-          ${durationRow}<li><strong>License:</strong> <a href="/license.html">Free &mdash; No Copyright Strikes, Commercial Use OK</a></li>
+          ${subgenreRow}${artistRow}${durationRow}${tempoRow}<li><strong>License:</strong> <a href="/license.html">Free &mdash; No Copyright Strikes, Commercial Use OK</a></li>
           <li><strong>Platforms:</strong> YouTube, TikTok, Twitch, Instagram, Podcasts</li>
         </ul>
       </div>
 
 ${related.length ? `      <div class="related-tracks">
-        <h2>More Free ${esc(genre)} Music</h2>
+        <h2>${sim.length ? 'Similar Tracks' : 'More Free ' + esc(genre) + ' Music'}</h2>
         <div class="track-list">
       ${relatedRows}
         </div>
@@ -380,7 +450,7 @@ ${sharedPlayer()}
   <script>
     // Auto-load this track in the player when page loads
     (function () {
-      var song = ${JSON.stringify({ id: s.id, title: s.title, artist: artist, file: s.file, cover: s.cover, genre: genre })};
+      var song = ${JSON.stringify({ id: s.id, title: s.title, artist: s.artist || '', file: s.file, cover: s.cover, genre: genre })};
       document.getElementById('track-play-btn').addEventListener('click', function () {
         if (window.playSong) { window.playSong(song); }
       });
@@ -453,6 +523,183 @@ Object.keys(idMap).forEach(function (k) {
 fs.writeFileSync('data/id-map.json', JSON.stringify(idMap), 'utf8');
 console.log('Wrote data/id-map.json (' + Object.keys(idMap).length + ' old IDs)');
 
+// ─── "Best for" pages: /use/<tag>.html ──────────────────────────────────────
+// One page per "Best for" tag with enough tracks (e.g. "Free Horror Background
+// Music"), built from the AI tags. Pages whose tag drops below the minimum become
+// redirects to the matching search, so links and search results keep working.
+
+var useEntries = [];
+var keepUse = {};
+
+function useScore(s, t) {   // tracks whose supporting moods/styles are also there come first
+  return (t.imply || []).filter(function (id) { return (s.labels || []).indexOf(id) !== -1; }).length + (s.featured ? 0.5 : 0);
+}
+
+usePageIds.forEach(function (id) {
+  var t = TAG[id];
+  var list = useTracks[id].slice().sort(function (a, b) { return useScore(b, t) - useScore(a, t) || a.title.localeCompare(b.title); });
+  var title = t.title || ('Free ' + t.label + ' Music');
+  var url = 'https://portal-music.com/use/' + id + '.html';
+  var desc = title + ': ' + list.length + ' royalty-free tracks. ' + (t.desc || '') + ' Free for YouTube, TikTok, Twitch and commercial use. No copyright strikes.';
+  var rows = list.map(function (s) {
+    var why = tagsOf(s, 'mood').slice(0, 2).concat(tagsOf(s, 'style').slice(0, 1)).map(plainLabel).join(', ');
+    return '<div class="track-row">' +
+      '<a href="' + trackHref(s) + '" class="track-link">' +
+        '<img src="' + esc(s.cover) + '" alt="' + esc(s.title) + '" class="track-thumb" width="60" height="60" loading="lazy">' +
+        '<div class="track-info">' +
+          '<span class="track-title">' + esc(s.title) + '</span>' +
+          '<span class="track-artist">' + esc([why, s.duration].filter(Boolean).join(' · ') || s.genre) + '</span>' +
+        '</div>' +
+      '</a>' +
+      '<a class="dl-btn-small" href="/download.html?file=' + encodeURIComponent(s.file) + '&title=' + encodeURIComponent(s.title) + '">⬇ Download</a>' +
+    '</div>';
+  }).join('\n    ');
+  var faq = [
+    ['Can I use these tracks in monetized videos?', 'Yes. Every track is free for monetized YouTube videos, TikTok, Twitch, podcasts and commercial projects.'],
+    ['Do I have to credit Portal Music?', 'No, credit is optional. If you want to, the download page gives you a ready-to-paste credit line.'],
+    ['Will I get a copyright claim?', 'No. Portal Music never files Content ID claims or copyright strikes on any platform.'],
+  ];
+  var faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': faq.map(function (q) {
+    return { '@type': 'Question', 'name': q[0], 'acceptedAnswer': { '@type': 'Answer', 'text': q[1] } };
+  }) });
+  var pageLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'CollectionPage', 'name': title, 'description': desc, 'url': url, 'numberOfItems': list.length });
+  var others = usePageIds.filter(function (o) { return o !== id; }).map(function (o) {
+    return '          <a href="/use/' + o + '.html" class="genre-pill">' + esc(TAG[o].label) + '</a>';
+  }).join('\n');
+
+  var html = `<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(title)} — Portal Music</title>
+  <meta name="description" content="${esc(desc)}">
+  <link rel="canonical" href="${url}">
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/images/favicon-16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#080812">
+  <meta property="og:title" content="${esc(title)} — Portal Music">
+  <meta property="og:description" content="${esc(desc)}">
+  <meta property="og:image" content="https://portal-music.com/images/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:url" content="${url}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Portal Music">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js"></script>
+  <script type="application/ld+json">${pageLd}</script>
+  <script type="application/ld+json">${faqLd}</script>
+</head>
+<body>
+
+${sharedHeader('browse')}
+
+  <main>
+    <div class="container">
+
+      <nav class="seo-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> &rsaquo; <a href="/use/">Music by use</a> &rsaquo; <span>${esc(t.label)}</span>
+      </nav>
+
+      <div class="browse-header">
+        <h1>${esc(title)}</h1>
+        <p class="browse-subtitle">${list.length} free tracks &mdash; no copyright strikes, commercial use OK.</p>
+      </div>
+
+      <p class="seo-intro">${esc(t.desc || '')} Every track below is free to download and use in monetized videos, streams and client work.</p>
+
+      <div style="margin:1rem 0 1.5rem;">
+        <a href="/browse.html?q=${encodeURIComponent(plainLabel(t))}" class="hero-cta">&#9654; Listen in the player</a>
+      </div>
+
+      <div class="track-list" id="track-list">
+    ${rows}
+      </div>
+
+      <div class="seo-faq">
+        <h2>Questions</h2>
+${faq.map(function (q) { return '        <h3>' + esc(q[0]) + '</h3>\n        <p>' + esc(q[1]) + '</p>'; }).join('\n')}
+      </div>
+
+${others ? `      <div class="seo-link-section">
+        <h2>Free Music For…</h2>
+        <div class="genre-link-row">
+${others}
+        </div>
+      </div>` : ''}
+
+    </div>
+  </main>
+
+${sharedFooter()}
+
+${sharedPlayer()}
+
+</body>
+</html>`;
+
+  fs.writeFileSync('use/' + id + '.html', html, 'utf8');
+  keepUse[id + '.html'] = true;
+  useEntries.push('  <url>\n    <loc>' + url + '</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>');
+});
+
+// Hub page listing every "Best for" page
+if (usePageIds.length) {
+  var hubLinks = usePageIds.map(function (id) {
+    return '        <a href="/use/' + id + '.html" class="genre-pill">' + esc(TAG[id].label) + ' <small>(' + useTracks[id].length + ')</small></a>';
+  }).join('\n');
+  fs.writeFileSync('use/index.html', `<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Music by Use — Horror, Vlogs, Gaming, Podcasts &amp; More — Portal Music</title>
+  <meta name="description" content="Find free, royalty-free music by what you're making: horror, vlogs, gaming, podcasts, studying, trailers and more. No copyright strikes.">
+  <link rel="canonical" href="https://portal-music.com/use/">
+  <link rel="icon" href="/images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js"></script>
+</head>
+<body>
+
+${sharedHeader('browse')}
+
+  <main>
+    <div class="container">
+      <div class="browse-header">
+        <h1>Free Music for What You're Making</h1>
+        <p class="browse-subtitle">Pick your project. Every track is free, royalty-free and safe from copyright claims.</p>
+      </div>
+      <div class="genre-link-row">
+${hubLinks}
+      </div>
+      <p class="seo-intro" style="margin-top:1.5rem;">Can't find it? <a href="/browse.html">Describe the sound you need</a> and we'll match it.</p>
+    </div>
+  </main>
+
+${sharedFooter()}
+
+${sharedPlayer()}
+
+</body>
+</html>`, 'utf8');
+  keepUse['index.html'] = true;
+  useEntries.unshift('  <url>\n    <loc>https://portal-music.com/use/</loc>\n    <priority>0.7</priority>\n    <changefreq>weekly</changefreq>\n  </url>');
+}
+
+// Pages for tags that no longer have enough tracks → redirect to the matching search
+fs.readdirSync('use').forEach(function (file) {
+  if (!file.endsWith('.html') || keepUse[file]) return;
+  var id = file.replace(/\.html$/, '');
+  var target = TAG[id] ? '/browse.html?q=' + encodeURIComponent(plainLabel(TAG[id])) : '/browse.html';
+  fs.writeFileSync('use/' + file, '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n' +
+    '  <meta name="robots" content="noindex">\n  <meta http-equiv="refresh" content="0; url=' + target + '">\n' +
+    '  <title>Portal Music</title>\n</head>\n<body><p><a href="' + target + '">Continue to Portal Music</a></p></body>\n</html>\n', 'utf8');
+});
+console.log('Generated ' + usePageIds.length + ' "Best for" pages in use/');
+
 // ─── Generate sitemap-tracks.xml ────────────────────────────────────────────
 
 var genreEntries = Object.keys(byGenre).map(function (genre) {
@@ -461,7 +708,7 @@ var genreEntries = Object.keys(byGenre).map(function (genre) {
 
 var tracksSitemap = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n' +
-  genreEntries.concat(sitemapEntries).join('\n\n') +
+  genreEntries.concat(useEntries, sitemapEntries).join('\n\n') +
   '\n\n</urlset>\n';
 
 fs.writeFileSync('sitemap-tracks.xml', tracksSitemap, 'utf8');

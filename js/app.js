@@ -125,7 +125,7 @@ const CF_ANALYTICS_TOKEN = '2d6415c7cdc24a2db1d02d222422b116';
 const PM_EVENTS = { project: 'portal-music-3b1a1', key: 'AIzaSyATZysPXZM50CfB-AXdqhmTdei_4Y26DG8' };
 const PM_EVENT_NAMES = ['visit', 'play', 'download', 'credit_copy', 'share', 'favorite', 'radio_start',
   'signup', 'playlist_create', 'pro_view', 'checkout_start', 'pro_active', 'custom_click', 'affiliate_click',
-  'overlay_start'];
+  'overlay_start', 'search'];
 
 function pmRandomId(len) {
   const a = new Uint8Array(len);
@@ -617,6 +617,9 @@ function createTrackCard(song, queueVar) {
     subEl +
     '</div>' +
     (tagsStr ? '<div class="tags">' + _esc(tagsStr) + '</div>' : '') +
+    // "Search a sound": why this track matched (set by js/browse.js while searching)
+    (window._pmSearchReasons && (window._pmSearchReasons[song.id] || []).length
+      ? '<div class="match-why">✓ ' + _esc(window._pmSearchReasons[song.id].slice(0, 4).join(' · ')) + '</div>' : '') +
     '</div>' +
     '<div class="card-actions">' +
     '<button class="btn-play" data-song-id="' + song.id + '" onclick="handlePlayBtn(\'' + song.id + '\', window.' + queue + ')">' +
@@ -926,10 +929,13 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput._searchTimer = setTimeout(() => {
           const query = e.target.value;
           const pool = window.allSongsRaw || window.allSongsPage || [];
-          if (query) {
+          if (query && typeof window.pmSearchRun === 'function') {
+            window.pmSearchRun(query, pool);               // "Search a sound" on the browse page
+          } else if (query) {
             const results = fuzzySearch(pool, query);
             if (typeof renderSimpleGrid === 'function') renderSimpleGrid(results);
           } else {
+            if (typeof window.pmSearchClear === 'function') window.pmSearchClear();
             // Empty query -> show all that match current filters (or everything)
             if (typeof renderBrowseFilters === 'function') renderBrowseFilters(pool);
           }
