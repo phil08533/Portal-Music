@@ -86,6 +86,12 @@
   </url>
 
   <url>
+    <loc>https://portal-music.com/use/horror.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/use/sci-fi.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -116,6 +122,12 @@
   </url>
 
   <url>
+    <loc>https://portal-music.com/use/fantasy.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/use/sad-scene.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -123,6 +135,12 @@
 
   <url>
     <loc>https://portal-music.com/use/tech.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/western-scene.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
