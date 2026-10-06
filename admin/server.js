@@ -7,6 +7,8 @@ const users = require('./users');
 const reels = require('./reels');
 const suno  = require('./suno');
 const stats = require('./stats');
+const tagging = require('./tagging');
+const tagRunner = require('./tag-runner');
 
 let NodeID3;
 try {
@@ -397,7 +399,8 @@ const server = http.createServer(async (req, res) => {
         if (err) console.error('SEO generation notice:', stderr);
       });
 
-      return sendJson(200, { success: true, track: newEntry, warning });
+      const autoTag = tagRunner.analyzeNewTrack(id);   // 'started' | 'busy' | 'not-installed'
+      return sendJson(200, { success: true, track: newEntry, warning, autoTag });
     } catch (err) {
       return sendJson(500, { success: false, error: err.message, code: err.code || '' });
     }
@@ -503,6 +506,71 @@ const server = http.createServer(async (req, res) => {
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+  }
+
+  // --- API: 🏷️ Tags (AI tagging: run, review, publish, accuracy) ---
+  if (pathname.startsWith('/api/tags/')) {
+    try {
+      const allowMock = url.searchParams.get('mock') === '1';
+      if (req.method === 'GET' && pathname === '/api/tags/status') {
+        const ctx = tagging.loadContext({ allowMock });
+        const decisions = tagging.decideAll(ctx);
+        const counts = { total: ctx.music.length, analyzed: 0, errors: 0, mock: 0, auto: 0, review: 0, approved: 0 };
+        for (const t of ctx.music) {
+          const a = ctx.analyses[t.id];
+          if (!a) continue;
+          if (a.error) counts.errors++;
+          else if (a.mock) counts.mock++;
+          else counts.analyzed++;
+          if (decisions[t.id]) counts[decisions[t.id].status]++;
+        }
+        return sendJson(200, { success: true, ...tagRunner.status(), counts, log: tagRunner.logTail(8) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/dict') {
+        return sendJson(200, { success: true, dict: JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'data', 'tags.json'), 'utf8')) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/queue') {
+        const ctx = tagging.loadContext({ allowMock });
+        const decisions = tagging.decideAll(ctx);
+        const items = ctx.music.filter(t => decisions[t.id]).map(t => {
+          const d = decisions[t.id];
+          return {
+            id: t.id, title: t.title, artist: t.artist, genre: t.genre, file: t.file, cover: t.cover,
+            status: d.status, notes: d.notes, measured: d.measured, genreSuggestion: d.genreSuggestion, mock: d.mock,
+            decided: d.decided, suggested: d.suggested,
+            review: (ctx.analyses[t.id] || {}).review || null,
+          };
+        });
+        const notAnalyzed = ctx.music.filter(t => !decisions[t.id]).map(t => ({ id: t.id, title: t.title, error: (ctx.analyses[t.id] || {}).error || null }));
+        return sendJson(200, { success: true, items, notAnalyzed });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/accuracy') {
+        return sendJson(200, { success: true, accuracy: tagging.accuracy(tagging.loadContext({ allowMock })) });
+      }
+      if (req.method === 'POST') {
+        const data = await parseBody(req);
+        if (pathname === '/api/tags/run') {
+          return sendJson(200, { success: true, ...tagRunner.start({ mode: data.mode, limit: data.limit, mock: !!data.mock }) });
+        }
+        if (pathname === '/api/tags/stop') return sendJson(200, { success: true, ...tagRunner.stop() });
+        if (pathname === '/api/tags/review') {
+          if (!data.id) throw new Error('Track ID required');
+          const review = tagging.setReview(String(data.id), data);
+          const ctx = tagging.loadContext({ allowMock });
+          const track = ctx.music.find(t => t.id === data.id);
+          return sendJson(200, { success: true, review, decision: track ? tagging.decideTrack(ctx, track) : null });
+        }
+        if (pathname === '/api/tags/publish') {
+          const result = tagging.publish({ allowMock });
+          exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, () => {});
+          return sendJson(200, { success: true, result });
+        }
+        if (pathname === '/api/tags/tune') return sendJson(200, { success: true, ...tagging.tune({ allowMock }) });
+      }
+      return sendJson(404, { success: false, error: 'Unknown tags action' });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 

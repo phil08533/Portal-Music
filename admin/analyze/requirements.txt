@@ -1,0 +1,5 @@
+# Installed by `npm run analyze:setup` into admin/analyze/.venv (torch comes from the CPU-only index first)
+numpy>=1.24
+librosa>=0.10
+soundfile>=0.12
+transformers>=4.40,<5

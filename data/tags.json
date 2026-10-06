@@ -1,0 +1,2923 @@
+{
+ "version": 1,
+ "_about": "Portal Music tag dictionary. Every tag: facet, label, syn = words visitors may type (search), ast = AudioSet labels for Model A, clap = text descriptions for Model B, rule = measured limits (tempo/length), imply = tags that support a 'Best for' tag, genre = the site genre a style belongs to, desc/title = use-case page text. Edit freely, then re-run the decision step in the admin (no need to re-analyze audio unless you add clap prompts).",
+ "facets": {
+  "use": {
+   "label": "Best for",
+   "multi": true,
+   "max": 5
+  },
+  "mood": {
+   "label": "Mood",
+   "multi": true,
+   "max": 4
+  },
+  "style": {
+   "label": "Style",
+   "multi": true,
+   "max": 3
+  },
+  "instrument": {
+   "label": "Instruments",
+   "multi": true,
+   "max": 4
+  },
+  "energy": {
+   "label": "Energy",
+   "multi": false
+  },
+  "vocals": {
+   "label": "Vocals",
+   "multi": false
+  },
+  "tempo": {
+   "label": "Tempo",
+   "multi": false,
+   "measured": true
+  },
+  "length": {
+   "label": "Length",
+   "multi": false,
+   "measured": true
+  }
+ },
+ "tags": [
+  {
+   "id": "happy",
+   "facet": "mood",
+   "label": "Happy",
+   "syn": [
+    "happy",
+    "cheerful",
+    "joyful",
+    "joy",
+    "fun",
+    "sunny",
+    "bright",
+    "feel good",
+    "feel-good",
+    "positive",
+    "glad",
+    "smile",
+    "bubbly"
+   ],
+   "ast": [
+    "Happy music"
+   ],
+   "clap": [
+    "happy cheerful upbeat music",
+    "joyful bright feel-good song"
+   ]
+  },
+  {
+   "id": "sad",
+   "facet": "mood",
+   "label": "Sad",
+   "syn": [
+    "sad",
+    "sorrow",
+    "sorrowful",
+    "heartbreak",
+    "heartbroken",
+    "crying",
+    "tears",
+    "grief",
+    "depressing",
+    "lonely",
+    "mournful",
+    "tragic",
+    "emotional"
+   ],
+   "ast": [
+    "Sad music"
+   ],
+   "clap": [
+    "sad sorrowful music",
+    "heartbreaking emotional melody"
+   ]
+  },
+  {
+   "id": "melancholy",
+   "facet": "mood",
+   "label": "Melancholic",
+   "syn": [
+    "melancholy",
+    "melancholic",
+    "bittersweet",
+    "wistful",
+    "pensive",
+    "reflective",
+    "longing",
+    "blue"
+   ],
+   "ast": [
+    "Sad music",
+    "Tender music"
+   ],
+   "clap": [
+    "melancholic bittersweet reflective music"
+   ]
+  },
+  {
+   "id": "dark",
+   "facet": "mood",
+   "label": "Dark",
+   "syn": [
+    "dark",
+    "sinister",
+    "ominous",
+    "grim",
+    "menacing",
+    "evil",
+    "shadowy",
+    "gloomy",
+    "brooding",
+    "villain"
+   ],
+   "ast": [
+    "Scary music"
+   ],
+   "clap": [
+    "dark ominous sinister music",
+    "brooding menacing soundtrack"
+   ]
+  },
+  {
+   "id": "tense",
+   "facet": "mood",
+   "label": "Tense",
+   "syn": [
+    "tense",
+    "tension",
+    "suspense",
+    "suspenseful",
+    "nervous",
+    "anxious",
+    "thriller",
+    "edge of seat",
+    "stressful",
+    "urgent"
+   ],
+   "ast": [
+    "Scary music",
+    "Exciting music"
+   ],
+   "clap": [
+    "tense suspenseful thriller music",
+    "nervous building tension soundtrack"
+   ]
+  },
+  {
+   "id": "scary",
+   "facet": "mood",
+   "label": "Scary",
+   "syn": [
+    "scary",
+    "spooky",
+    "creepy",
+    "eerie",
+    "haunted",
+    "haunting",
+    "frightening",
+    "terrifying",
+    "ghost",
+    "ghostly",
+    "nightmare",
+    "halloween",
+    "unsettling",
+    "disturbing"
+   ],
+   "ast": [
+    "Scary music"
+   ],
+   "clap": [
+    "scary creepy horror music",
+    "eerie haunted spooky sounds"
+   ]
+  },
+  {
+   "id": "epic",
+   "facet": "mood",
+   "label": "Epic",
+   "syn": [
+    "epic",
+    "heroic",
+    "grand",
+    "powerful",
+    "massive",
+    "huge",
+    "legendary",
+    "majestic",
+    "big"
+   ],
+   "ast": [
+    "Soundtrack music",
+    "Exciting music"
+   ],
+   "clap": [
+    "epic heroic orchestral music",
+    "grand powerful cinematic score"
+   ]
+  },
+  {
+   "id": "triumphant",
+   "facet": "mood",
+   "label": "Triumphant",
+   "syn": [
+    "triumphant",
+    "victory",
+    "victorious",
+    "winning",
+    "celebration",
+    "celebratory",
+    "glorious",
+    "success"
+   ],
+   "ast": [
+    "Exciting music",
+    "Happy music"
+   ],
+   "clap": [
+    "triumphant victorious celebration music"
+   ]
+  },
+  {
+   "id": "inspiring",
+   "facet": "mood",
+   "label": "Inspiring",
+   "syn": [
+    "inspiring",
+    "inspirational",
+    "uplifting",
+    "motivational",
+    "motivating",
+    "hopeful",
+    "hope",
+    "encouraging",
+    "empowering",
+    "optimistic"
+   ],
+   "ast": [
+    "Happy music",
+    "Exciting music"
+   ],
+   "clap": [
+    "inspiring uplifting motivational music",
+    "hopeful optimistic background music"
+   ]
+  },
+  {
+   "id": "chill",
+   "facet": "mood",
+   "label": "Chill",
+   "syn": [
+    "chill",
+    "chilled",
+    "relaxed",
+    "relaxing",
+    "laid back",
+    "laid-back",
+    "mellow",
+    "easygoing",
+    "cozy",
+    "cosy",
+    "vibe",
+    "vibes",
+    "smooth"
+   ],
+   "ast": [
+    "Tender music",
+    "Ambient music"
+   ],
+   "clap": [
+    "chill relaxed mellow music",
+    "laid-back cozy background vibes"
+   ]
+  },
+  {
+   "id": "peaceful",
+   "facet": "mood",
+   "label": "Peaceful",
+   "syn": [
+    "peaceful",
+    "calm",
+    "calming",
+    "serene",
+    "tranquil",
+    "soothing",
+    "gentle",
+    "quiet",
+    "soft",
+    "still",
+    "restful"
+   ],
+   "ast": [
+    "Tender music",
+    "Ambient music",
+    "New-age music"
+   ],
+   "clap": [
+    "peaceful calm soothing music",
+    "serene gentle tranquil music"
+   ]
+  },
+  {
+   "id": "dreamy",
+   "facet": "mood",
+   "label": "Dreamy",
+   "syn": [
+    "dreamy",
+    "dreamlike",
+    "ethereal",
+    "floaty",
+    "floating",
+    "hazy",
+    "atmospheric",
+    "airy",
+    "spacey",
+    "otherworldly"
+   ],
+   "ast": [
+    "Ambient music",
+    "New-age music"
+   ],
+   "clap": [
+    "dreamy ethereal atmospheric music"
+   ]
+  },
+  {
+   "id": "romantic",
+   "facet": "mood",
+   "label": "Romantic",
+   "syn": [
+    "romantic",
+    "romance",
+    "love",
+    "loving",
+    "tender",
+    "intimate",
+    "sensual",
+    "date night",
+    "valentine",
+    "valentines"
+   ],
+   "ast": [
+    "Tender music"
+   ],
+   "clap": [
+    "romantic tender love song",
+    "intimate soft romantic music"
+   ]
+  },
+  {
+   "id": "playful",
+   "facet": "mood",
+   "label": "Playful",
+   "syn": [
+    "playful",
+    "quirky",
+    "silly",
+    "whimsical",
+    "goofy",
+    "cartoon",
+    "cartoonish",
+    "bouncy",
+    "cheeky",
+    "mischievous",
+    "lighthearted",
+    "light-hearted"
+   ],
+   "ast": [
+    "Funny music",
+    "Music for children"
+   ],
+   "clap": [
+    "playful quirky whimsical music",
+    "silly cartoon comedy music"
+   ]
+  },
+  {
+   "id": "funny",
+   "facet": "mood",
+   "label": "Funny",
+   "syn": [
+    "funny",
+    "comedy",
+    "comedic",
+    "humorous",
+    "humor",
+    "humour",
+    "hilarious",
+    "meme",
+    "goofy"
+   ],
+   "ast": [
+    "Funny music"
+   ],
+   "clap": [
+    "funny comedic music for comedy video"
+   ]
+  },
+  {
+   "id": "aggressive",
+   "facet": "mood",
+   "label": "Aggressive",
+   "syn": [
+    "aggressive",
+    "angry",
+    "rage",
+    "furious",
+    "intense",
+    "hard hitting",
+    "hard-hitting",
+    "fierce",
+    "violent",
+    "raw"
+   ],
+   "ast": [
+    "Angry music",
+    "Heavy metal"
+   ],
+   "clap": [
+    "aggressive angry intense music",
+    "hard hitting heavy music"
+   ]
+  },
+  {
+   "id": "energetic",
+   "facet": "mood",
+   "label": "Energetic",
+   "syn": [
+    "energetic",
+    "hype",
+    "hyped",
+    "pumped",
+    "pumping",
+    "exciting",
+    "excited",
+    "driving",
+    "adrenaline",
+    "lively",
+    "upbeat"
+   ],
+   "ast": [
+    "Exciting music",
+    "Dance music"
+   ],
+   "clap": [
+    "energetic exciting upbeat music",
+    "high energy driving music"
+   ]
+  },
+  {
+   "id": "mysterious",
+   "facet": "mood",
+   "label": "Mysterious",
+   "syn": [
+    "mysterious",
+    "mystery",
+    "enigmatic",
+    "curious",
+    "secret",
+    "investigation",
+    "detective",
+    "unknown",
+    "puzzle"
+   ],
+   "ast": [
+    "Scary music",
+    "Ambient music"
+   ],
+   "clap": [
+    "mysterious enigmatic music",
+    "curious detective mystery soundtrack"
+   ]
+  },
+  {
+   "id": "nostalgic",
+   "facet": "mood",
+   "label": "Nostalgic",
+   "syn": [
+    "nostalgic",
+    "nostalgia",
+    "retro feeling",
+    "memories",
+    "memory",
+    "throwback",
+    "old times",
+    "vintage feel",
+    "sentimental"
+   ],
+   "ast": [
+    "Tender music"
+   ],
+   "clap": [
+    "nostalgic sentimental music"
+   ]
+  },
+  {
+   "id": "confident",
+   "facet": "mood",
+   "label": "Confident",
+   "syn": [
+    "confident",
+    "swagger",
+    "cool",
+    "bossy",
+    "boss",
+    "badass",
+    "attitude",
+    "strut",
+    "stylish"
+   ],
+   "ast": [
+    "Hip hop music",
+    "Funk"
+   ],
+   "clap": [
+    "confident cool swagger music"
+   ]
+  },
+  {
+   "id": "adventurous",
+   "facet": "mood",
+   "label": "Adventurous",
+   "syn": [
+    "adventurous",
+    "adventure",
+    "journey",
+    "quest",
+    "exploration",
+    "explore",
+    "exploring",
+    "wanderlust",
+    "travel vibe"
+   ],
+   "ast": [
+    "Soundtrack music"
+   ],
+   "clap": [
+    "adventurous journey exploration music"
+   ]
+  },
+  {
+   "id": "groovy",
+   "facet": "mood",
+   "label": "Groovy",
+   "syn": [
+    "groovy",
+    "groove",
+    "funky",
+    "danceable",
+    "catchy",
+    "bop",
+    "head nodding",
+    "head-nodding"
+   ],
+   "ast": [
+    "Funk",
+    "Dance music",
+    "Disco"
+   ],
+   "clap": [
+    "groovy funky danceable music"
+   ]
+  },
+  {
+   "id": "vlog",
+   "facet": "use",
+   "label": "Vlogs",
+   "syn": [
+    "vlog",
+    "vlogs",
+    "vlogging",
+    "daily vlog",
+    "day in my life",
+    "lifestyle",
+    "lifestyle video",
+    "youtube video",
+    "youtuber"
+   ],
+   "ast": [
+    "Background music",
+    "Pop music",
+    "Independent music"
+   ],
+   "clap": [
+    "upbeat background music for a vlog",
+    "light positive lifestyle video music"
+   ],
+   "desc": "Light, positive background tracks that sit under talking without fighting it.",
+   "imply": [
+    "happy",
+    "chill",
+    "groovy"
+   ],
+   "title": "Free Vlog Background Music"
+  },
+  {
+   "id": "gaming",
+   "facet": "use",
+   "label": "Gaming",
+   "syn": [
+    "gaming",
+    "gamer",
+    "game",
+    "games",
+    "gameplay",
+    "let's play",
+    "montage",
+    "gaming montage",
+    "fortnite",
+    "minecraft",
+    "valorant",
+    "call of duty",
+    "twitch"
+   ],
+   "ast": [
+    "Video game music",
+    "Electronic music",
+    "Dubstep"
+   ],
+   "clap": [
+    "video game music",
+    "energetic gaming montage music"
+   ],
+   "desc": "High-energy tracks for gameplay, montages and highlight reels.",
+   "imply": [
+    "energetic",
+    "aggressive",
+    "epic"
+   ],
+   "title": "Free Gaming & Montage Music"
+  },
+  {
+   "id": "game-dev",
+   "facet": "use",
+   "label": "Indie games",
+   "syn": [
+    "game dev",
+    "gamedev",
+    "indie game",
+    "video game soundtrack",
+    "game soundtrack",
+    "rpg",
+    "boss fight",
+    "boss battle",
+    "level music",
+    "8-bit",
+    "8 bit",
+    "pixel game",
+    "unity",
+    "godot"
+   ],
+   "ast": [
+    "Video game music"
+   ],
+   "clap": [
+    "retro video game soundtrack music",
+    "epic boss battle game music"
+   ],
+   "desc": "Loopable moods for your own game: menus, levels, boss fights and quiet towns.",
+   "imply": [
+    "epic",
+    "adventurous",
+    "mysterious"
+   ],
+   "title": "Free Music for Indie Games"
+  },
+  {
+   "id": "horror",
+   "facet": "use",
+   "label": "Horror",
+   "syn": [
+    "horror",
+    "horror movie",
+    "scary video",
+    "haunted house",
+    "creepypasta",
+    "jumpscare",
+    "jump scare",
+    "paranormal",
+    "halloween",
+    "ghost story",
+    "slasher"
+   ],
+   "ast": [
+    "Scary music"
+   ],
+   "clap": [
+    "horror movie soundtrack",
+    "creepy horror background music"
+   ],
+   "desc": "Dark, unsettling atmospheres for horror videos, ghost stories and Halloween content.",
+   "imply": [
+    "scary",
+    "dark",
+    "tense"
+   ],
+   "title": "Free Horror Background Music"
+  },
+  {
+   "id": "true-crime",
+   "facet": "use",
+   "label": "True crime",
+   "syn": [
+    "true crime",
+    "crime",
+    "crime documentary",
+    "murder mystery",
+    "investigation",
+    "cold case",
+    "detective"
+   ],
+   "ast": [
+    "Scary music",
+    "Soundtrack music"
+   ],
+   "clap": [
+    "true crime documentary background music",
+    "mysterious investigation underscore"
+   ],
+   "desc": "Subtle, tense underscores that keep a story moving without stealing focus.",
+   "imply": [
+    "mysterious",
+    "tense",
+    "dark"
+   ],
+   "title": "Free True Crime Background Music"
+  },
+  {
+   "id": "podcast",
+   "facet": "use",
+   "label": "Podcasts",
+   "syn": [
+    "podcast",
+    "podcasts",
+    "podcast intro",
+    "podcast outro",
+    "intro music",
+    "outro music",
+    "talk show",
+    "interview",
+    "radio show"
+   ],
+   "ast": [
+    "Theme music",
+    "Jingle (music)",
+    "Background music"
+   ],
+   "clap": [
+    "podcast intro theme music",
+    "background music for a podcast"
+   ],
+   "desc": "Intros, outros and quiet beds for spoken content.",
+   "imply": [
+    "confident",
+    "chill",
+    "groovy"
+   ],
+   "title": "Free Podcast Intro & Background Music"
+  },
+  {
+   "id": "study",
+   "facet": "use",
+   "label": "Study & focus",
+   "syn": [
+    "study",
+    "studying",
+    "focus",
+    "concentration",
+    "concentrate",
+    "homework",
+    "work music",
+    "productivity",
+    "reading",
+    "coding",
+    "deep work",
+    "background for work",
+    "lofi study"
+   ],
+   "ast": [
+    "Ambient music",
+    "Classical music",
+    "New-age music"
+   ],
+   "clap": [
+    "calm focus music for studying",
+    "lo-fi study background music"
+   ],
+   "desc": "Steady, unobtrusive tracks for studying, coding and deep work.",
+   "imply": [
+    "chill",
+    "peaceful",
+    "dreamy"
+   ],
+   "title": "Free Study & Focus Music"
+  },
+  {
+   "id": "meditation",
+   "facet": "use",
+   "label": "Meditation & sleep",
+   "syn": [
+    "meditation",
+    "meditate",
+    "sleep",
+    "sleeping",
+    "yoga",
+    "mindfulness",
+    "spa",
+    "massage",
+    "relaxation",
+    "asmr",
+    "breathing",
+    "healing",
+    "calm down",
+    "bedtime"
+   ],
+   "ast": [
+    "New-age music",
+    "Ambient music",
+    "Lullaby"
+   ],
+   "clap": [
+    "slow meditation relaxation music",
+    "soft ambient sleep music"
+   ],
+   "desc": "Slow, soft, airy music for meditation, yoga and sleep content.",
+   "imply": [
+    "peaceful",
+    "dreamy"
+   ],
+   "title": "Free Meditation & Sleep Music"
+  },
+  {
+   "id": "workout",
+   "facet": "use",
+   "label": "Workout",
+   "syn": [
+    "workout",
+    "gym",
+    "fitness",
+    "exercise",
+    "training",
+    "running",
+    "run",
+    "cardio",
+    "sports",
+    "sport",
+    "hiit",
+    "lifting",
+    "crossfit"
+   ],
+   "ast": [
+    "Exciting music",
+    "Electronic dance music",
+    "Rock music",
+    "Hip hop music"
+   ],
+   "clap": [
+    "energetic workout gym music",
+    "pumping high energy training music"
+   ],
+   "desc": "Driving tracks that keep the pace up for fitness and sports edits.",
+   "imply": [
+    "energetic",
+    "aggressive",
+    "triumphant"
+   ],
+   "title": "Free Workout & Gym Music"
+  },
+  {
+   "id": "trailer",
+   "facet": "use",
+   "label": "Trailers",
+   "syn": [
+    "trailer",
+    "teaser",
+    "movie trailer",
+    "film trailer",
+    "promo",
+    "epic intro",
+    "announcement",
+    "reveal",
+    "launch video"
+   ],
+   "ast": [
+    "Soundtrack music",
+    "Exciting music",
+    "Orchestra"
+   ],
+   "clap": [
+    "epic cinematic movie trailer music",
+    "dramatic build up trailer score"
+   ],
+   "desc": "Big builds and dramatic hits for trailers, reveals and promos.",
+   "imply": [
+    "epic",
+    "tense",
+    "triumphant"
+   ],
+   "title": "Free Epic Trailer Music"
+  },
+  {
+   "id": "film",
+   "facet": "use",
+   "label": "Film & storytelling",
+   "syn": [
+    "film",
+    "short film",
+    "movie",
+    "cinematic video",
+    "documentary",
+    "storytelling",
+    "story",
+    "narrative",
+    "scene",
+    "score",
+    "underscore"
+   ],
+   "ast": [
+    "Soundtrack music",
+    "Classical music"
+   ],
+   "clap": [
+    "cinematic film score",
+    "emotional documentary underscore"
+   ],
+   "desc": "Scoring for short films, documentaries and story-driven videos.",
+   "imply": [
+    "epic",
+    "sad",
+    "mysterious",
+    "inspiring"
+   ],
+   "title": "Free Music for Films & Documentaries"
+  },
+  {
+   "id": "travel",
+   "facet": "use",
+   "label": "Travel",
+   "syn": [
+    "travel",
+    "travel vlog",
+    "trip",
+    "vacation",
+    "holiday trip",
+    "road trip",
+    "roadtrip",
+    "adventure vlog",
+    "drone",
+    "drone footage",
+    "nature",
+    "outdoors",
+    "hiking",
+    "beach",
+    "summer"
+   ],
+   "ast": [
+    "Background music",
+    "Pop music",
+    "Independent music"
+   ],
+   "clap": [
+    "uplifting travel vlog music",
+    "adventurous road trip music"
+   ],
+   "desc": "Uplifting, open-feeling tracks for trips, drone shots and nature footage.",
+   "imply": [
+    "adventurous",
+    "inspiring",
+    "happy"
+   ],
+   "title": "Free Travel Vlog Music"
+  },
+  {
+   "id": "wedding",
+   "facet": "use",
+   "label": "Weddings & slideshows",
+   "syn": [
+    "wedding",
+    "weddings",
+    "slideshow",
+    "slide show",
+    "photo slideshow",
+    "memorial",
+    "anniversary",
+    "engagement",
+    "family video",
+    "birthday video",
+    "graduation",
+    "tribute"
+   ],
+   "ast": [
+    "Wedding music",
+    "Tender music"
+   ],
+   "clap": [
+    "romantic wedding music",
+    "emotional slideshow piano music"
+   ],
+   "desc": "Warm, emotional music for weddings, slideshows, tributes and family videos.",
+   "imply": [
+    "romantic",
+    "nostalgic",
+    "inspiring"
+   ],
+   "title": "Free Wedding & Slideshow Music"
+  },
+  {
+   "id": "comedy",
+   "facet": "use",
+   "label": "Comedy & memes",
+   "syn": [
+    "comedy",
+    "sketch",
+    "skit",
+    "meme",
+    "memes",
+    "funny video",
+    "prank",
+    "blooper",
+    "bloopers",
+    "fail",
+    "fails",
+    "cartoon",
+    "animation"
+   ],
+   "ast": [
+    "Funny music",
+    "Music for children"
+   ],
+   "clap": [
+    "funny comedy sketch music",
+    "quirky cartoon background music"
+   ],
+   "desc": "Quirky, bouncy tracks that make funny moments land.",
+   "imply": [
+    "funny",
+    "playful"
+   ],
+   "title": "Free Comedy & Meme Music"
+  },
+  {
+   "id": "kids",
+   "facet": "use",
+   "label": "Kids",
+   "syn": [
+    "kids",
+    "children",
+    "child",
+    "kid",
+    "family friendly",
+    "family-friendly",
+    "toddler",
+    "nursery",
+    "educational",
+    "classroom",
+    "cartoon for kids"
+   ],
+   "ast": [
+    "Music for children",
+    "Lullaby"
+   ],
+   "clap": [
+    "cheerful music for children",
+    "gentle educational kids music"
+   ],
+   "desc": "Friendly, gentle tracks for kids' videos and educational content.",
+   "imply": [
+    "playful",
+    "happy",
+    "peaceful"
+   ],
+   "title": "Free Music for Kids' Videos"
+  },
+  {
+   "id": "ads",
+   "facet": "use",
+   "label": "Ads & business",
+   "syn": [
+    "ad",
+    "ads",
+    "advert",
+    "advertisement",
+    "commercial",
+    "marketing",
+    "promo video",
+    "product video",
+    "business",
+    "corporate",
+    "brand",
+    "startup",
+    "presentation",
+    "explainer",
+    "real estate"
+   ],
+   "ast": [
+    "Background music",
+    "Jingle (music)",
+    "Pop music"
+   ],
+   "clap": [
+    "upbeat corporate background music",
+    "modern advertising commercial music"
+   ],
+   "desc": "Clean, modern tracks for ads, product videos and company presentations.",
+   "imply": [
+    "inspiring",
+    "happy",
+    "confident"
+   ],
+   "title": "Free Music for Ads & Business Videos"
+  },
+  {
+   "id": "tech",
+   "facet": "use",
+   "label": "Tech & explainers",
+   "syn": [
+    "tech",
+    "technology",
+    "tech review",
+    "unboxing",
+    "explainer video",
+    "tutorial",
+    "how to",
+    "how-to",
+    "science",
+    "futuristic",
+    "ai video",
+    "software"
+   ],
+   "ast": [
+    "Electronic music",
+    "Electronica"
+   ],
+   "clap": [
+    "modern electronic tech background music",
+    "futuristic technology music"
+   ],
+   "desc": "Modern electronic beds for tutorials, reviews and explainers.",
+   "imply": [
+    "confident",
+    "chill",
+    "dreamy"
+   ],
+   "title": "Free Tech & Tutorial Music"
+  },
+  {
+   "id": "cooking",
+   "facet": "use",
+   "label": "Cooking & food",
+   "syn": [
+    "cooking",
+    "cook",
+    "recipe",
+    "food",
+    "kitchen",
+    "baking",
+    "food vlog",
+    "mukbang",
+    "restaurant"
+   ],
+   "ast": [
+    "Background music",
+    "Jazz",
+    "Pop music"
+   ],
+   "clap": [
+    "light cheerful cooking video music"
+   ],
+   "desc": "Light, cheerful tracks for recipes and food videos.",
+   "imply": [
+    "happy",
+    "playful",
+    "groovy"
+   ],
+   "title": "Free Cooking Video Music"
+  },
+  {
+   "id": "fashion",
+   "facet": "use",
+   "label": "Fashion & beauty",
+   "syn": [
+    "fashion",
+    "beauty",
+    "makeup",
+    "make up",
+    "style",
+    "outfit",
+    "haul",
+    "runway",
+    "glow up",
+    "grwm",
+    "get ready with me"
+   ],
+   "ast": [
+    "Pop music",
+    "Electronic music",
+    "Hip hop music"
+   ],
+   "clap": [
+    "stylish modern fashion music",
+    "trendy beauty vlog music"
+   ],
+   "desc": "Stylish, trendy tracks for fashion, beauty and get-ready videos.",
+   "imply": [
+    "confident",
+    "groovy",
+    "dreamy"
+   ],
+   "title": "Free Fashion & Beauty Music"
+  },
+  {
+   "id": "edits",
+   "facet": "use",
+   "label": "TikTok & Reels edits",
+   "syn": [
+    "edit",
+    "edits",
+    "tiktok",
+    "tik tok",
+    "reels",
+    "reel",
+    "shorts",
+    "youtube shorts",
+    "transition",
+    "transitions",
+    "velocity edit",
+    "phonk edit",
+    "fan edit",
+    "car edit",
+    "anime edit",
+    "sports edit"
+   ],
+   "ast": [
+    "Electronic music",
+    "Hip hop music",
+    "Dubstep",
+    "Dance music"
+   ],
+   "clap": [
+    "hard hitting short video edit music",
+    "trendy tiktok edit beat"
+   ],
+   "desc": "Punchy tracks with strong drops for edits, transitions and short-form video.",
+   "imply": [
+    "energetic",
+    "confident",
+    "aggressive"
+   ],
+   "title": "Free Music for TikTok & Reels Edits"
+  },
+  {
+   "id": "streaming",
+   "facet": "use",
+   "label": "Livestreams",
+   "syn": [
+    "stream",
+    "streaming",
+    "livestream",
+    "live stream",
+    "twitch stream",
+    "stream music",
+    "dmca free",
+    "dmca-free",
+    "background for stream",
+    "just chatting",
+    "obs"
+   ],
+   "ast": [
+    "Background music",
+    "Electronic music",
+    "Video game music"
+   ],
+   "clap": [
+    "chill background music for a livestream"
+   ],
+   "desc": "Background music that's safe for Twitch, YouTube and Kick streams and VODs.",
+   "imply": [
+    "chill",
+    "groovy",
+    "energetic"
+   ],
+   "title": "Free Music for Livestreams (DMCA-safe)"
+  },
+  {
+   "id": "western-scene",
+   "facet": "use",
+   "label": "Westerns & cowboys",
+   "syn": [
+    "western",
+    "cowboy",
+    "cowboys",
+    "wild west",
+    "desert",
+    "saloon",
+    "showdown",
+    "duel",
+    "ranch",
+    "rodeo",
+    "outlaw"
+   ],
+   "ast": [
+    "Country",
+    "Bluegrass",
+    "Soundtrack music"
+   ],
+   "clap": [
+    "wild west cowboy western music",
+    "spaghetti western showdown music"
+   ],
+   "desc": "Dusty guitars and showdown tension for westerns, cowboy edits and rodeo videos.",
+   "imply": [
+    "adventurous",
+    "tense",
+    "confident"
+   ],
+   "title": "Free Western & Cowboy Music"
+  },
+  {
+   "id": "fantasy",
+   "facet": "use",
+   "label": "Fantasy & medieval",
+   "syn": [
+    "fantasy",
+    "medieval",
+    "tavern",
+    "dragon",
+    "dragons",
+    "castle",
+    "kingdom",
+    "knight",
+    "knights",
+    "elf",
+    "elves",
+    "magic",
+    "magical",
+    "dnd",
+    "d&d",
+    "dungeons and dragons",
+    "rpg tavern",
+    "celtic",
+    "renaissance"
+   ],
+   "ast": [
+    "Traditional music",
+    "Folk music",
+    "Soundtrack music"
+   ],
+   "clap": [
+    "medieval fantasy tavern music",
+    "magical fantasy adventure score"
+   ],
+   "desc": "Taverns, castles and magic: music for fantasy worlds and tabletop sessions.",
+   "imply": [
+    "adventurous",
+    "mysterious",
+    "epic"
+   ],
+   "title": "Free Fantasy & Medieval Music"
+  },
+  {
+   "id": "sci-fi",
+   "facet": "use",
+   "label": "Sci-fi & space",
+   "syn": [
+    "sci fi",
+    "sci-fi",
+    "scifi",
+    "space",
+    "outer space",
+    "galaxy",
+    "planet",
+    "astronaut",
+    "alien",
+    "aliens",
+    "cyberpunk",
+    "futuristic city",
+    "robot",
+    "robots",
+    "spaceship"
+   ],
+   "ast": [
+    "Electronic music",
+    "Ambient music"
+   ],
+   "clap": [
+    "futuristic sci-fi space music",
+    "cosmic ambient space soundscape"
+   ],
+   "desc": "Cosmic, futuristic sounds for space, sci-fi and cyberpunk content.",
+   "imply": [
+    "dreamy",
+    "mysterious",
+    "epic"
+   ],
+   "title": "Free Sci-Fi & Space Music"
+  },
+  {
+   "id": "holiday",
+   "facet": "use",
+   "label": "Christmas & holidays",
+   "syn": [
+    "christmas",
+    "xmas",
+    "holiday",
+    "holidays",
+    "festive",
+    "winter",
+    "snow",
+    "santa",
+    "new year",
+    "new years",
+    "thanksgiving"
+   ],
+   "ast": [
+    "Christmas music"
+   ],
+   "clap": [
+    "festive christmas holiday music"
+   ],
+   "desc": "Festive, warm tracks for Christmas and holiday videos.",
+   "imply": [
+    "happy",
+    "nostalgic",
+    "peaceful"
+   ],
+   "title": "Free Christmas & Holiday Music"
+  },
+  {
+   "id": "action",
+   "facet": "use",
+   "label": "Action & chase",
+   "syn": [
+    "action",
+    "chase",
+    "fight",
+    "fight scene",
+    "battle",
+    "war",
+    "combat",
+    "car chase",
+    "racing",
+    "race",
+    "heist",
+    "explosion"
+   ],
+   "ast": [
+    "Exciting music",
+    "Soundtrack music",
+    "Heavy metal"
+   ],
+   "clap": [
+    "intense action chase music",
+    "battle combat soundtrack"
+   ],
+   "desc": "Fast, intense cues for fights, chases and action sequences.",
+   "imply": [
+    "tense",
+    "aggressive",
+    "epic",
+    "energetic"
+   ],
+   "title": "Free Action & Battle Music"
+  },
+  {
+   "id": "sad-scene",
+   "facet": "use",
+   "label": "Emotional moments",
+   "syn": [
+    "emotional scene",
+    "sad scene",
+    "goodbye",
+    "farewell",
+    "loss",
+    "memorial video",
+    "breakup",
+    "break up",
+    "rain scene",
+    "reflection"
+   ],
+   "ast": [
+    "Sad music",
+    "Tender music"
+   ],
+   "clap": [
+    "emotional sad piano music for a touching scene"
+   ],
+   "desc": "Gentle, emotional music for touching or reflective moments.",
+   "imply": [
+    "sad",
+    "melancholy",
+    "romantic"
+   ],
+   "title": "Free Emotional & Sad Background Music"
+  },
+  {
+   "id": "lofi",
+   "facet": "style",
+   "label": "Lo-fi",
+   "syn": [
+    "lofi",
+    "lo-fi",
+    "lo fi",
+    "lofi hip hop",
+    "chillhop",
+    "beats to study",
+    "study beats",
+    "vinyl crackle"
+   ],
+   "ast": [
+    "Hip hop music",
+    "Electronic music"
+   ],
+   "clap": [
+    "lo-fi hip hop beat with vinyl crackle"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "synthwave",
+   "facet": "style",
+   "label": "Synthwave",
+   "syn": [
+    "synthwave",
+    "retrowave",
+    "outrun",
+    "80s synth",
+    "vaporwave",
+    "darksynth",
+    "synth pop",
+    "synthpop",
+    "new retro"
+   ],
+   "ast": [
+    "Electronic music",
+    "Synthesizer"
+   ],
+   "clap": [
+    "80s synthwave retro synthesizer music"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "edm",
+   "facet": "style",
+   "label": "EDM",
+   "syn": [
+    "edm",
+    "electronic dance",
+    "dance music",
+    "club",
+    "festival",
+    "drop",
+    "big drop",
+    "rave"
+   ],
+   "ast": [
+    "Electronic dance music",
+    "House music",
+    "Trance music"
+   ],
+   "clap": [
+    "edm electronic dance music with a big drop"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "house",
+   "facet": "style",
+   "label": "House",
+   "syn": [
+    "house",
+    "deep house",
+    "tech house",
+    "progressive house"
+   ],
+   "ast": [
+    "House music"
+   ],
+   "clap": [
+    "four on the floor house music"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "techno",
+   "facet": "style",
+   "label": "Techno",
+   "syn": [
+    "techno",
+    "minimal techno",
+    "industrial techno",
+    "warehouse"
+   ],
+   "ast": [
+    "Techno"
+   ],
+   "clap": [
+    "driving techno beat"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "dubstep",
+   "facet": "style",
+   "label": "Dubstep & bass",
+   "syn": [
+    "dubstep",
+    "bass music",
+    "riddim",
+    "brostep",
+    "drum and bass",
+    "dnb",
+    "d&b",
+    "jungle"
+   ],
+   "ast": [
+    "Dubstep",
+    "Drum and bass"
+   ],
+   "clap": [
+    "heavy dubstep bass wobble"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "electronic",
+   "facet": "style",
+   "label": "Electronic",
+   "syn": [
+    "electronic",
+    "electronica",
+    "synth",
+    "synths",
+    "digital",
+    "electro",
+    "idm"
+   ],
+   "ast": [
+    "Electronic music",
+    "Electronica"
+   ],
+   "clap": [
+    "electronic synthesizer music"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "ambient",
+   "facet": "style",
+   "label": "Ambient",
+   "syn": [
+    "ambient",
+    "drone",
+    "soundscape",
+    "pads",
+    "atmosphere",
+    "textures"
+   ],
+   "ast": [
+    "Ambient music"
+   ],
+   "clap": [
+    "ambient atmospheric soundscape with pads"
+   ],
+   "genre": "Ambient & Chill"
+  },
+  {
+   "id": "chiptune",
+   "facet": "style",
+   "label": "Chiptune / 8-bit",
+   "syn": [
+    "chiptune",
+    "8-bit",
+    "8 bit",
+    "8bit",
+    "16-bit",
+    "16 bit",
+    "retro game",
+    "nes",
+    "arcade",
+    "bitpop"
+   ],
+   "ast": [
+    "Video game music"
+   ],
+   "clap": [
+    "8-bit chiptune video game music"
+   ],
+   "genre": "Electronic"
+  },
+  {
+   "id": "phonk",
+   "facet": "style",
+   "label": "Phonk",
+   "syn": [
+    "phonk",
+    "drift phonk",
+    "memphis",
+    "cowbell"
+   ],
+   "ast": [
+    "Hip hop music"
+   ],
+   "clap": [
+    "phonk drift music with cowbell"
+   ],
+   "genre": "Hip-Hop"
+  },
+  {
+   "id": "hiphop",
+   "facet": "style",
+   "label": "Hip-hop",
+   "syn": [
+    "hip hop",
+    "hip-hop",
+    "hiphop",
+    "rap",
+    "boom bap",
+    "boombap",
+    "beat",
+    "beats",
+    "instrumental beat",
+    "type beat"
+   ],
+   "ast": [
+    "Hip hop music",
+    "Rapping"
+   ],
+   "clap": [
+    "hip hop beat"
+   ],
+   "genre": "Hip-Hop"
+  },
+  {
+   "id": "trap",
+   "facet": "style",
+   "label": "Trap",
+   "syn": [
+    "trap",
+    "808",
+    "808s",
+    "drill",
+    "hi hats",
+    "trap beat"
+   ],
+   "ast": [
+    "Hip hop music"
+   ],
+   "clap": [
+    "trap beat with heavy 808 bass"
+   ],
+   "genre": "Hip-Hop"
+  },
+  {
+   "id": "rnb",
+   "facet": "style",
+   "label": "R&B / Soul",
+   "syn": [
+    "r&b",
+    "rnb",
+    "r and b",
+    "soul",
+    "neo soul",
+    "neo-soul",
+    "motown",
+    "slow jam"
+   ],
+   "ast": [
+    "Rhythm and blues",
+    "Soul music"
+   ],
+   "clap": [
+    "smooth r&b soul music"
+   ],
+   "genre": "R&B / Soul"
+  },
+  {
+   "id": "funk",
+   "facet": "style",
+   "label": "Funk / Disco",
+   "syn": [
+    "funk",
+    "disco",
+    "boogie",
+    "slap bass",
+    "70s"
+   ],
+   "ast": [
+    "Funk",
+    "Disco"
+   ],
+   "clap": [
+    "funky disco groove with slap bass"
+   ],
+   "genre": "Playful & Mood"
+  },
+  {
+   "id": "pop",
+   "facet": "style",
+   "label": "Pop",
+   "syn": [
+    "pop",
+    "pop song",
+    "mainstream",
+    "radio",
+    "catchy pop",
+    "dance pop"
+   ],
+   "ast": [
+    "Pop music"
+   ],
+   "clap": [
+    "catchy modern pop song"
+   ],
+   "genre": "Pop"
+  },
+  {
+   "id": "indie",
+   "facet": "style",
+   "label": "Indie",
+   "syn": [
+    "indie",
+    "indie pop",
+    "indie rock",
+    "alternative",
+    "alt",
+    "bedroom pop",
+    "dream pop",
+    "shoegaze"
+   ],
+   "ast": [
+    "Independent music"
+   ],
+   "clap": [
+    "indie alternative music"
+   ],
+   "genre": "Pop"
+  },
+  {
+   "id": "rock",
+   "facet": "style",
+   "label": "Rock",
+   "syn": [
+    "rock",
+    "rock and roll",
+    "classic rock",
+    "guitar rock",
+    "alt rock",
+    "hard rock",
+    "stadium rock"
+   ],
+   "ast": [
+    "Rock music",
+    "Rock and roll"
+   ],
+   "clap": [
+    "rock music with electric guitars and drums"
+   ],
+   "genre": "Rock"
+  },
+  {
+   "id": "metal",
+   "facet": "style",
+   "label": "Metal",
+   "syn": [
+    "metal",
+    "heavy metal",
+    "metalcore",
+    "thrash",
+    "hair metal",
+    "djent",
+    "headbang"
+   ],
+   "ast": [
+    "Heavy metal"
+   ],
+   "clap": [
+    "heavy metal with distorted guitars"
+   ],
+   "genre": "Rock"
+  },
+  {
+   "id": "punk",
+   "facet": "style",
+   "label": "Punk",
+   "syn": [
+    "punk",
+    "punk rock",
+    "pop punk",
+    "skate punk",
+    "garage",
+    "grunge"
+   ],
+   "ast": [
+    "Punk rock",
+    "Grunge"
+   ],
+   "clap": [
+    "fast punk rock"
+   ],
+   "genre": "Rock"
+  },
+  {
+   "id": "orchestral",
+   "facet": "style",
+   "label": "Orchestral",
+   "syn": [
+    "orchestral",
+    "orchestra",
+    "symphonic",
+    "symphony",
+    "strings and brass",
+    "score",
+    "film score"
+   ],
+   "ast": [
+    "Orchestra",
+    "Classical music",
+    "Soundtrack music"
+   ],
+   "clap": [
+    "full orchestral symphonic music"
+   ],
+   "genre": "Cinematic"
+  },
+  {
+   "id": "cinematic",
+   "facet": "style",
+   "label": "Cinematic",
+   "syn": [
+    "cinematic",
+    "movie score",
+    "soundtrack",
+    "hybrid orchestral",
+    "trailer music"
+   ],
+   "ast": [
+    "Soundtrack music"
+   ],
+   "clap": [
+    "cinematic movie soundtrack"
+   ],
+   "genre": "Cinematic"
+  },
+  {
+   "id": "classical",
+   "facet": "style",
+   "label": "Classical",
+   "syn": [
+    "classical",
+    "baroque",
+    "sonata",
+    "concerto",
+    "chamber music",
+    "string quartet",
+    "romantic era",
+    "mozart",
+    "bach",
+    "beethoven",
+    "chopin"
+   ],
+   "ast": [
+    "Classical music"
+   ],
+   "clap": [
+    "classical piano and strings"
+   ],
+   "genre": "Classical"
+  },
+  {
+   "id": "piano-solo",
+   "facet": "style",
+   "label": "Solo piano",
+   "syn": [
+    "piano solo",
+    "solo piano",
+    "piano only",
+    "just piano",
+    "piano ballad"
+   ],
+   "ast": [
+    "Piano"
+   ],
+   "clap": [
+    "solo piano music"
+   ],
+   "genre": "Classical"
+  },
+  {
+   "id": "acoustic",
+   "facet": "style",
+   "label": "Acoustic",
+   "syn": [
+    "acoustic",
+    "unplugged",
+    "acoustic guitar",
+    "singer songwriter",
+    "singer-songwriter",
+    "coffeehouse",
+    "campfire"
+   ],
+   "ast": [
+    "Acoustic guitar",
+    "Folk music"
+   ],
+   "clap": [
+    "acoustic guitar song"
+   ],
+   "genre": "Acoustic"
+  },
+  {
+   "id": "folk",
+   "facet": "style",
+   "label": "Folk",
+   "syn": [
+    "folk",
+    "americana",
+    "folksy",
+    "indie folk",
+    "roots"
+   ],
+   "ast": [
+    "Folk music",
+    "Traditional music"
+   ],
+   "clap": [
+    "folk music with acoustic instruments"
+   ],
+   "genre": "Country & Folk"
+  },
+  {
+   "id": "country",
+   "facet": "style",
+   "label": "Country",
+   "syn": [
+    "country",
+    "country music",
+    "honky tonk",
+    "honky-tonk",
+    "nashville",
+    "twang",
+    "southern"
+   ],
+   "ast": [
+    "Country"
+   ],
+   "clap": [
+    "country music with twangy guitar"
+   ],
+   "genre": "Country & Folk"
+  },
+  {
+   "id": "bluegrass",
+   "facet": "style",
+   "label": "Bluegrass",
+   "syn": [
+    "bluegrass",
+    "banjo",
+    "hillbilly",
+    "appalachian",
+    "fiddle tune",
+    "hoedown"
+   ],
+   "ast": [
+    "Bluegrass",
+    "Banjo"
+   ],
+   "clap": [
+    "bluegrass with banjo and fiddle"
+   ],
+   "genre": "Country & Folk"
+  },
+  {
+   "id": "jazz",
+   "facet": "style",
+   "label": "Jazz",
+   "syn": [
+    "jazz",
+    "jazzy",
+    "smooth jazz",
+    "swing",
+    "bebop",
+    "big band",
+    "lounge",
+    "jazz cafe"
+   ],
+   "ast": [
+    "Jazz",
+    "Swing music"
+   ],
+   "clap": [
+    "jazz with saxophone and piano"
+   ],
+   "genre": "Jazz"
+  },
+  {
+   "id": "blues",
+   "facet": "style",
+   "label": "Blues",
+   "syn": [
+    "blues",
+    "bluesy",
+    "delta blues",
+    "blues rock"
+   ],
+   "ast": [
+    "Blues"
+   ],
+   "clap": [
+    "blues guitar music"
+   ],
+   "genre": "Jazz"
+  },
+  {
+   "id": "latin",
+   "facet": "style",
+   "label": "Latin",
+   "syn": [
+    "latin",
+    "reggaeton",
+    "salsa",
+    "bossa nova",
+    "bossa",
+    "samba",
+    "tango",
+    "flamenco",
+    "cumbia"
+   ],
+   "ast": [
+    "Music of Latin America",
+    "Salsa music",
+    "Flamenco"
+   ],
+   "clap": [
+    "latin rhythm music"
+   ],
+   "genre": "Pop"
+  },
+  {
+   "id": "reggae",
+   "facet": "style",
+   "label": "Reggae",
+   "syn": [
+    "reggae",
+    "dub",
+    "ska",
+    "island",
+    "caribbean",
+    "dancehall"
+   ],
+   "ast": [
+    "Reggae",
+    "Ska"
+   ],
+   "clap": [
+    "reggae music"
+   ],
+   "genre": "Playful & Mood"
+  },
+  {
+   "id": "world",
+   "facet": "style",
+   "label": "World",
+   "syn": [
+    "world",
+    "world music",
+    "ethnic",
+    "tribal",
+    "african",
+    "afrobeat",
+    "asian",
+    "japanese",
+    "chinese",
+    "indian",
+    "middle eastern",
+    "arabic",
+    "bollywood"
+   ],
+   "ast": [
+    "Music of Africa",
+    "Afrobeat",
+    "Music of Asia",
+    "Middle Eastern music",
+    "Music of Bollywood",
+    "Traditional music"
+   ],
+   "clap": [
+    "world music with traditional instruments"
+   ],
+   "genre": "Cinematic"
+  },
+  {
+   "id": "gospel",
+   "facet": "style",
+   "label": "Gospel / worship",
+   "syn": [
+    "gospel",
+    "worship",
+    "christian",
+    "church",
+    "choir music",
+    "hymn",
+    "praise"
+   ],
+   "ast": [
+    "Gospel music",
+    "Christian music",
+    "Choir"
+   ],
+   "clap": [
+    "gospel choir music"
+   ],
+   "genre": "R&B / Soul"
+  },
+  {
+   "id": "medieval",
+   "facet": "style",
+   "label": "Medieval / Celtic",
+   "syn": [
+    "medieval",
+    "celtic",
+    "irish",
+    "scottish",
+    "renaissance",
+    "bard",
+    "tavern",
+    "lute"
+   ],
+   "ast": [
+    "Traditional music",
+    "Folk music",
+    "Bagpipes"
+   ],
+   "clap": [
+    "medieval celtic tavern music"
+   ],
+   "genre": "Classical"
+  },
+  {
+   "id": "new-age",
+   "facet": "style",
+   "label": "New age",
+   "syn": [
+    "new age",
+    "new-age",
+    "healing music",
+    "spa music",
+    "zen"
+   ],
+   "ast": [
+    "New-age music"
+   ],
+   "clap": [
+    "new age relaxation music"
+   ],
+   "genre": "Ambient & Chill"
+  },
+  {
+   "id": "piano",
+   "facet": "instrument",
+   "label": "Piano",
+   "syn": [
+    "piano",
+    "keys",
+    "grand piano",
+    "keyboard"
+   ],
+   "ast": [
+    "Piano",
+    "Electric piano",
+    "Keyboard (musical)"
+   ],
+   "clap": [
+    "piano"
+   ]
+  },
+  {
+   "id": "acoustic-guitar",
+   "facet": "instrument",
+   "label": "Acoustic guitar",
+   "syn": [
+    "acoustic guitar",
+    "guitar strumming",
+    "fingerpicking",
+    "fingerstyle",
+    "nylon guitar"
+   ],
+   "ast": [
+    "Acoustic guitar",
+    "Plucked string instrument"
+   ],
+   "clap": [
+    "acoustic guitar"
+   ]
+  },
+  {
+   "id": "electric-guitar",
+   "facet": "instrument",
+   "label": "Electric guitar",
+   "syn": [
+    "electric guitar",
+    "guitar solo",
+    "distorted guitar",
+    "riff",
+    "riffs",
+    "shred"
+   ],
+   "ast": [
+    "Electric guitar"
+   ],
+   "clap": [
+    "electric guitar"
+   ]
+  },
+  {
+   "id": "bass",
+   "facet": "instrument",
+   "label": "Bass",
+   "syn": [
+    "bass",
+    "bass guitar",
+    "bassline",
+    "bass line",
+    "sub bass",
+    "heavy bass"
+   ],
+   "ast": [
+    "Bass guitar",
+    "Double bass"
+   ],
+   "clap": [
+    "deep bass"
+   ]
+  },
+  {
+   "id": "drums",
+   "facet": "instrument",
+   "label": "Drums",
+   "syn": [
+    "drums",
+    "drum",
+    "drumming",
+    "percussion",
+    "beat heavy",
+    "breakbeat",
+    "drum kit"
+   ],
+   "ast": [
+    "Drum kit",
+    "Drum",
+    "Snare drum",
+    "Bass drum",
+    "Percussion"
+   ],
+   "clap": [
+    "drums and percussion"
+   ]
+  },
+  {
+   "id": "drum-machine",
+   "facet": "instrument",
+   "label": "Drum machine / 808",
+   "syn": [
+    "drum machine",
+    "808",
+    "909",
+    "electronic drums"
+   ],
+   "ast": [
+    "Drum machine"
+   ],
+   "clap": [
+    "electronic drum machine beat"
+   ]
+  },
+  {
+   "id": "synth",
+   "facet": "instrument",
+   "label": "Synthesizer",
+   "syn": [
+    "synth",
+    "synths",
+    "synthesizer",
+    "analog synth",
+    "arpeggio",
+    "arp"
+   ],
+   "ast": [
+    "Synthesizer",
+    "Sampler"
+   ],
+   "clap": [
+    "synthesizer"
+   ]
+  },
+  {
+   "id": "strings",
+   "facet": "instrument",
+   "label": "Strings",
+   "syn": [
+    "strings",
+    "string section",
+    "violin",
+    "violins",
+    "cello",
+    "viola",
+    "string quartet",
+    "pizzicato"
+   ],
+   "ast": [
+    "String section",
+    "Bowed string instrument",
+    "Violin, fiddle",
+    "Cello",
+    "Pizzicato"
+   ],
+   "clap": [
+    "string section with violins and cellos"
+   ]
+  },
+  {
+   "id": "fiddle",
+   "facet": "instrument",
+   "label": "Fiddle",
+   "syn": [
+    "fiddle",
+    "country fiddle",
+    "bluegrass fiddle"
+   ],
+   "ast": [
+    "Violin, fiddle"
+   ],
+   "clap": [
+    "fiddle"
+   ]
+  },
+  {
+   "id": "brass",
+   "facet": "instrument",
+   "label": "Brass",
+   "syn": [
+    "brass",
+    "horns",
+    "trumpet",
+    "trombone",
+    "french horn",
+    "tuba",
+    "horn section"
+   ],
+   "ast": [
+    "Brass instrument",
+    "Trumpet",
+    "Trombone",
+    "French horn"
+   ],
+   "clap": [
+    "brass section with trumpets and horns"
+   ]
+  },
+  {
+   "id": "woodwinds",
+   "facet": "instrument",
+   "label": "Woodwinds",
+   "syn": [
+    "woodwinds",
+    "flute",
+    "clarinet",
+    "oboe",
+    "bassoon",
+    "recorder",
+    "pan flute"
+   ],
+   "ast": [
+    "Wind instrument, woodwind instrument",
+    "Flute",
+    "Clarinet"
+   ],
+   "clap": [
+    "flute and woodwinds"
+   ]
+  },
+  {
+   "id": "saxophone",
+   "facet": "instrument",
+   "label": "Saxophone",
+   "syn": [
+    "saxophone",
+    "sax",
+    "smooth sax"
+   ],
+   "ast": [
+    "Saxophone"
+   ],
+   "clap": [
+    "saxophone"
+   ]
+  },
+  {
+   "id": "organ",
+   "facet": "instrument",
+   "label": "Organ",
+   "syn": [
+    "organ",
+    "church organ",
+    "hammond",
+    "pipe organ"
+   ],
+   "ast": [
+    "Organ",
+    "Hammond organ",
+    "Electronic organ"
+   ],
+   "clap": [
+    "organ"
+   ]
+  },
+  {
+   "id": "banjo",
+   "facet": "instrument",
+   "label": "Banjo",
+   "syn": [
+    "banjo",
+    "clawhammer"
+   ],
+   "ast": [
+    "Banjo"
+   ],
+   "clap": [
+    "banjo"
+   ]
+  },
+  {
+   "id": "harp",
+   "facet": "instrument",
+   "label": "Harp",
+   "syn": [
+    "harp",
+    "harps",
+    "harpsichord"
+   ],
+   "ast": [
+    "Harp",
+    "Harpsichord"
+   ],
+   "clap": [
+    "harp"
+   ]
+  },
+  {
+   "id": "bells",
+   "facet": "instrument",
+   "label": "Bells & chimes",
+   "syn": [
+    "bells",
+    "bell",
+    "chimes",
+    "glockenspiel",
+    "music box",
+    "celesta",
+    "xylophone",
+    "marimba",
+    "vibraphone"
+   ],
+   "ast": [
+    "Bell",
+    "Glockenspiel",
+    "Marimba, xylophone",
+    "Vibraphone",
+    "Chime",
+    "Tubular bells"
+   ],
+   "clap": [
+    "bells and music box chimes"
+   ]
+  },
+  {
+   "id": "choir",
+   "facet": "instrument",
+   "label": "Choir",
+   "syn": [
+    "choir",
+    "chorus",
+    "choral",
+    "chant",
+    "chanting",
+    "voices",
+    "gregorian"
+   ],
+   "ast": [
+    "Choir",
+    "Chant"
+   ],
+   "clap": [
+    "choir singing"
+   ]
+  },
+  {
+   "id": "whistle",
+   "facet": "instrument",
+   "label": "Whistling",
+   "syn": [
+    "whistle",
+    "whistling"
+   ],
+   "ast": [
+    "Whistling"
+   ],
+   "clap": [
+    "whistling melody"
+   ]
+  },
+  {
+   "id": "harmonica",
+   "facet": "instrument",
+   "label": "Harmonica",
+   "syn": [
+    "harmonica",
+    "blues harp"
+   ],
+   "ast": [
+    "Harmonica"
+   ],
+   "clap": [
+    "harmonica"
+   ]
+  },
+  {
+   "id": "accordion",
+   "facet": "instrument",
+   "label": "Accordion",
+   "syn": [
+    "accordion",
+    "squeezebox"
+   ],
+   "ast": [
+    "Accordion"
+   ],
+   "clap": [
+    "accordion"
+   ]
+  },
+  {
+   "id": "taiko",
+   "facet": "instrument",
+   "label": "Taiko & big drums",
+   "syn": [
+    "taiko",
+    "war drums",
+    "big drums",
+    "epic drums",
+    "timpani",
+    "toms"
+   ],
+   "ast": [
+    "Timpani",
+    "Drum"
+   ],
+   "clap": [
+    "huge cinematic taiko war drums"
+   ]
+  },
+  {
+   "id": "ukulele",
+   "facet": "instrument",
+   "label": "Ukulele",
+   "syn": [
+    "ukulele",
+    "uke"
+   ],
+   "ast": [
+    "Ukulele"
+   ],
+   "clap": [
+    "ukulele"
+   ]
+  },
+  {
+   "id": "low-energy",
+   "facet": "energy",
+   "label": "Low energy",
+   "syn": [
+    "low energy",
+    "calm",
+    "slow and calm",
+    "minimal",
+    "subtle",
+    "soft",
+    "quiet",
+    "gentle",
+    "sleepy"
+   ],
+   "ast": [
+    "Tender music",
+    "Ambient music",
+    "Lullaby"
+   ],
+   "clap": [
+    "very calm quiet soft music"
+   ]
+  },
+  {
+   "id": "medium-energy",
+   "facet": "energy",
+   "label": "Medium energy",
+   "syn": [
+    "medium energy",
+    "moderate",
+    "steady",
+    "mid tempo",
+    "mid-tempo",
+    "balanced"
+   ],
+   "clap": [
+    "moderate steady music"
+   ]
+  },
+  {
+   "id": "high-energy",
+   "facet": "energy",
+   "label": "High energy",
+   "syn": [
+    "high energy",
+    "hype",
+    "intense",
+    "loud",
+    "powerful",
+    "pumping",
+    "banger",
+    "bangers",
+    "hard",
+    "heavy",
+    "fast and loud"
+   ],
+   "ast": [
+    "Exciting music",
+    "Heavy metal",
+    "Dubstep",
+    "Electronic dance music"
+   ],
+   "clap": [
+    "very loud intense high energy music"
+   ]
+  },
+  {
+   "id": "instrumental",
+   "facet": "vocals",
+   "label": "Instrumental",
+   "syn": [
+    "instrumental",
+    "no vocals",
+    "no vocal",
+    "without vocals",
+    "no lyrics",
+    "without lyrics",
+    "no singing",
+    "no words",
+    "music only",
+    "no voice",
+    "backing track"
+   ],
+   "clap": [
+    "instrumental music with no vocals"
+   ]
+  },
+  {
+   "id": "vocals",
+   "facet": "vocals",
+   "label": "With vocals",
+   "syn": [
+    "vocals",
+    "vocal",
+    "with vocals",
+    "singing",
+    "singer",
+    "lyrics",
+    "with lyrics",
+    "song with words",
+    "voice",
+    "female vocals",
+    "male vocals",
+    "female singer",
+    "male singer",
+    "rap vocals"
+   ],
+   "ast": [
+    "Singing",
+    "Male singing",
+    "Female singing",
+    "Vocal music",
+    "Rapping",
+    "Song"
+   ],
+   "clap": [
+    "song with a person singing lyrics"
+   ]
+  },
+  {
+   "id": "slow",
+   "facet": "tempo",
+   "label": "Slow",
+   "syn": [
+    "slow",
+    "slow tempo",
+    "slowed",
+    "downtempo",
+    "ballad"
+   ],
+   "rule": {
+    "bpmMax": 90
+   }
+  },
+  {
+   "id": "medium-tempo",
+   "facet": "tempo",
+   "label": "Medium tempo",
+   "syn": [
+    "medium tempo",
+    "mid tempo",
+    "moderate tempo",
+    "walking pace"
+   ],
+   "rule": {
+    "bpmMin": 90,
+    "bpmMax": 125
+   }
+  },
+  {
+   "id": "fast",
+   "facet": "tempo",
+   "label": "Fast",
+   "syn": [
+    "fast",
+    "fast paced",
+    "fast-paced",
+    "quick",
+    "rapid",
+    "uptempo",
+    "up-tempo",
+    "speedy"
+   ],
+   "rule": {
+    "bpmMin": 125
+   }
+  },
+  {
+   "id": "short",
+   "facet": "length",
+   "label": "Short (under 1:15)",
+   "syn": [
+    "short",
+    "quick clip",
+    "short clip",
+    "jingle",
+    "sting",
+    "stinger",
+    "intro",
+    "outro",
+    "under a minute",
+    "15 seconds",
+    "30 seconds",
+    "60 seconds"
+   ],
+   "rule": {
+    "secMax": 75
+   }
+  },
+  {
+   "id": "medium-length",
+   "facet": "length",
+   "label": "1–3 minutes",
+   "syn": [
+    "medium length",
+    "couple minutes",
+    "2 minutes",
+    "two minutes"
+   ],
+   "rule": {
+    "secMin": 75,
+    "secMax": 180
+   }
+  },
+  {
+   "id": "long",
+   "facet": "length",
+   "label": "Long (3 min+)",
+   "syn": [
+    "long",
+    "long track",
+    "extended",
+    "full length",
+    "loop for hours",
+    "background for long video",
+    "5 minutes",
+    "10 minutes"
+   ],
+   "rule": {
+    "secMin": 180
+   }
+  }
+ ]
+}
