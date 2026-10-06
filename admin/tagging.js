@@ -37,6 +37,7 @@ const MUSIC_JSON = path.join(ROOT, 'data', 'music.json');
 const TAGS_JSON = path.join(ROOT, 'data', 'tags.json');
 const SIMILAR_JSON = path.join(ROOT, 'data', 'similar.json');
 const GENRES_JSON = path.join(ROOT, 'data', 'genres.json');
+const FOLDER_TAGS_JSON = path.join(ROOT, 'data', 'folder-tags.json');
 const ANALYSIS_DIR = path.join(__dirname, 'analysis');
 const CONFIG_JSON = path.join(ANALYSIS_DIR, 'config.json');
 
@@ -106,7 +107,8 @@ function loadContext(opts = {}) {
   const tagById = Object.fromEntries(dict.tags.map(t => [t.id, t]));
   const stats = catalogStats(dict, analyses, opts.allowMock, config);
   const genres = opts.genres || readJson(GENRES_JSON, { genres: {} }).genres;
-  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres };
+  const folderTags = opts.folderTags || readJson(FOLDER_TAGS_JSON, {});
+  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres, folderTags };
   ctx.calib = calibrate(ctx);
   ctx.folder = folderCheck(ctx);
   return ctx;
@@ -140,6 +142,16 @@ function folderCheck(ctx) {
   for (const l of levels) l.precision = l.checked ? l.right / l.checked : null;
   const sure = levels.find(l => l.checked >= config.sureMinChecked && l.precision >= config.sureMinPrecision);
   return { levels, perTag, sureThreshold: sure ? sure.thr : null, sure: sure || null };
+}
+
+// Tags a song gets from the genre/subgenre folder you put it in (data/folder-tags.json): your own
+// choice, so no AI involved. Not for songs whose genre the AI picked (batch "let the AI pick").
+function folderTagsFor(ctx, track, a) {
+  if (!track.genre || (a && a.review && a.review.autoGenre)) return [];
+  const g = (ctx.folderTags || {})[track.genre];
+  if (!g) return [];
+  const ids = g[track.subgenre] || g['*'] || [];
+  return ids.filter(id => ctx.tagById[id]);
 }
 
 // Model A on its own is trusted only at a confidence level checked against your folders
@@ -196,7 +208,10 @@ function calibrate(ctx) {
 
 // Per-tag agreement between the two models, for the 🏷️ Tags tab
 function agreementReport(ctx) {
-  const rows = Object.entries(ctx.calib).map(([id, c]) => ({
+  // Tags Model A hasn't heard in any song yet have nothing to agree on: left out, not counted as disagreement
+  const entries = Object.entries(ctx.calib);
+  const unheard = entries.filter(([, c]) => !c.nA).length;
+  const rows = entries.filter(([, c]) => c.nA > 0).map(([id, c]) => ({
     id, label: (ctx.tagById[id] || {}).label || id, facet: (ctx.tagById[id] || {}).facet,
     songsA: c.nA, songsB: c.nB, both: c.both, kappa: Math.round(c.kappa * 100) / 100,
   }));
@@ -204,7 +219,9 @@ function agreementReport(ctx) {
   const agreed = rows.reduce((s, r) => s + r.both, 0);
   const kappas = rows.map(r => r.kappa);
   return {
-    calibrated: rows.length > 0,
+    calibrated: entries.length > 0,
+    unheard,
+    folderSongs: ctx.music.filter(t => folderTagsFor(ctx, t, ctx.analyses[t.id]).length).length,
     modelB: { working: !ctx.stats.clapOff, spread: ctx.stats.clapSpread },
     folder: ctx.folder ? { sureThreshold: ctx.folder.sureThreshold, levels: ctx.folder.levels } : null,
     tracks: Object.values(ctx.analyses).filter(a => usable(a, ctx.allowMock)).length,
@@ -318,12 +335,17 @@ function decideTrack(ctx, track, opts = {}) {
     decided.slow = { conf: 'measured', score: 0.6, why: 'no steady beat' };
   }
 
+  // Your folder: certain, so decided first
+  const folderWhy = 'your folder: ' + track.genre + (track.subgenre ? ' › ' + track.subgenre : '');
+  for (const id of folderTagsFor(ctx, track, a)) decided[id] = { conf: 'folder', score: 1, why: folderWhy };
+
   // Multi-label facets: A + B (+ rules for "Best for")
   const order = ['mood', 'style', 'instrument', 'use'];   // "use" last: its rule reads mood/style results
   for (const facet of order) {
     const fc = config.facets[facet] || DEFAULTS.facets.mood;
     const scored = [];
     for (const t of byFacet[facet] || []) {
+      if (decided[t.id]) continue;   // already from your folder
       const A = astScore(a, t), B = clapZ(a, t, stats);
       const votes = [];
       const cal = ctx.calib[t.id];
@@ -350,7 +372,7 @@ function decideTrack(ctx, track, opts = {}) {
     }
     const ok = s => s.votes.length >= 2 || s.sure;
     scored.sort((x, y) => ok(y) - ok(x) || y.votes.length - x.votes.length || y.strength - x.strength);
-    let kept = 0;
+    let kept = Object.keys(decided).filter(id => (tagById[id] || {}).facet === facet).length;
     for (const s of scored) {
       if (ok(s) && kept < (dict.facets[facet] || {}).max) {
         decided[s.t.id] = { conf: s.votes.length >= 2 ? 'agree' : 'sure', score: Math.min(1, s.strength), why: s.why };
