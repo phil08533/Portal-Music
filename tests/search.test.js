@@ -102,3 +102,19 @@ test('chips describe what was understood', () => {
   const c = S.search([], 'creepy piano under 45 seconds not sad').chips.map(x => x.label);
   for (const want of ['Scary', 'Piano', 'not Sad', 'under 45 s']) assert.ok(c.includes(want), want + ' in ' + c);
 });
+
+test('half-typed words finish themselves as you type', () => {
+  assert.deepStrictEqual(ids('true crim'), ['true-crime']);
+  assert.deepStrictEqual(ids('tru'), ['true-crime'], 'a tag name beats a synonym (trumpet)');
+  assert.deepStrictEqual(ids('hip h'), ['hiphop']);
+  assert.ok(ids('spooky pian').includes('piano'));
+  assert.deepStrictEqual(ids('tr '), [], 'after a space the word is finished, not completed');
+});
+
+test('the dropdown suggests tags for what is being typed, skipping tags with no songs', () => {
+  const sug = S.suggest('true cr', 5);
+  assert.strictEqual(sug[0].id, 'true-crime');
+  assert.strictEqual(sug[0].replace, 2, 'replaces both typed words');
+  assert.deepStrictEqual(S.suggest('pia', 5, { piano: 3 }).map(x => x.id), ['piano']);
+  assert.deepStrictEqual(S.suggest('rock ', 5), [], 'nothing after a finished word');
+});
