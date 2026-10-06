@@ -196,7 +196,10 @@ function calibrate(ctx) {
 
 // Per-tag agreement between the two models, for the 🏷️ Tags tab
 function agreementReport(ctx) {
-  const rows = Object.entries(ctx.calib).map(([id, c]) => ({
+  // Tags Model A hasn't heard in any song yet have nothing to agree on: left out, not counted as disagreement
+  const entries = Object.entries(ctx.calib);
+  const unheard = entries.filter(([, c]) => !c.nA).length;
+  const rows = entries.filter(([, c]) => c.nA > 0).map(([id, c]) => ({
     id, label: (ctx.tagById[id] || {}).label || id, facet: (ctx.tagById[id] || {}).facet,
     songsA: c.nA, songsB: c.nB, both: c.both, kappa: Math.round(c.kappa * 100) / 100,
   }));
@@ -204,7 +207,8 @@ function agreementReport(ctx) {
   const agreed = rows.reduce((s, r) => s + r.both, 0);
   const kappas = rows.map(r => r.kappa);
   return {
-    calibrated: rows.length > 0,
+    calibrated: entries.length > 0,
+    unheard,
     modelB: { working: !ctx.stats.clapOff, spread: ctx.stats.clapSpread },
     folder: ctx.folder ? { sureThreshold: ctx.folder.sureThreshold, levels: ctx.folder.levels } : null,
     tracks: Object.values(ctx.analyses).filter(a => usable(a, ctx.allowMock)).length,

@@ -235,3 +235,10 @@ test('a weak Model A style hit is published when your genre folder agrees', () =
   assert.ok(d.labels.includes('country'), d.labels);
   assert.ok(/your folder/.test(d.decided.country.why));
 });
+
+test('the agreement report leaves out tags Model A never heard', () => {
+  const { music, analyses } = catalog([['h', horrorTrack]]);
+  const rep = tagging.agreementReport(tagging.loadContext({ music, analyses, tags: dict }));
+  assert.ok(rep.unheard > 0);
+  assert.ok(rep.tags.every(r => r.songsA > 0));
+});

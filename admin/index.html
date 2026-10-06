@@ -889,7 +889,7 @@
         const folderHtml = f ? statTable('Model A checked against your genre folders', ['When Model A is at least', 'Songs', 'In the right folder'],
           f.levels.filter(l => l.checked).map(l => [Math.round(l.thr * 100) + '% sure', l.checked, tgPct(l.precision) + (l.thr === f.sureThreshold ? ' ✅ trusted alone from here' : '')])) : '';
         const aLine = f && f.sureThreshold != null
-          ? `<p style="white-space:normal;">✅ <strong>Model A</strong> tags on its own only when it is at least ${Math.round(f.sureThreshold * 100)}% sure. At that level it put songs in the right genre folder ${tgPct(f.sure ? f.sure.precision : null)} of the time.</p>`
+          ? `<p style="white-space:normal;">✅ <strong>Model A</strong> tags on its own only when it is at least ${Math.round(f.sureThreshold * 100)}% sure. At that level it put songs in the right genre folder ${tgPct((f.levels.find(l => l.thr === f.sureThreshold) || {}).precision)} of the time.</p>`
           : `<p style="white-space:normal;">Model A isn't right often enough against your folders to tag on its own yet, so it needs a second witness (Model B or your folder).</p>`;
         if (!ag.modelB.working) {
           el.innerHTML = `<p style="white-space:normal;color:#ff4d6a;"><strong>⚠ Model B isn't listening</strong> (it gives every tag almost the same score). It is switched off, so it can't add wrong tags. Fix: update, then click ▶ Analyze new songs: it re-checks Model B, uses a backup model if needed, and redoes only the Model B part.</p>` + aLine + folderHtml;
@@ -904,7 +904,8 @@
         const label = f => (tgDict && tgDict.facets[f] ? tgDict.facets[f].label : f);
         el.innerHTML = `<p style="white-space:normal;">Across ${ag.tracks} songs, when either model hears a tag, the other agrees <strong>${tgPct(ag.overallAgreement)}</strong> of the time.
           Typical agreement per tag: <strong>${word(ag.medianKappa)}</strong> (κ ${ag.medianKappa}).
-          Only tags both models hear are published, so weak-agreement tags simply appear on fewer songs; they don't create wrong tags.</p>` + aLine + folderHtml +
+          Only tags both models hear are published, so weak-agreement tags simply appear on fewer songs; they don't create wrong tags.
+          ${ag.unheard ? `(${ag.unheard} tags Model A hasn't heard in any song yet are left out.)` : ''}</p>` + aLine + folderHtml +
           statTable('Every tag (weakest first)', ['Tag', 'Group', 'Model A', 'Model B', 'Both', 'Agreement'],
             ag.tags.map(r => [r.label, label(r.facet), r.songsA, r.songsB, r.both, word(r.kappa) + ' (' + r.kappa + ')']));
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
