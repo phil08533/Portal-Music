@@ -61,6 +61,10 @@ const DEFAULTS = {
   tempoMinPercussive: 0.02,  // below this the BPM guess is unreliable (no drums)
   tempoMinRegularity: 0.5,
   similarCount: 8,
+  clapMinSpread: 0.02,       // Model B is "not listening" if a typical song scores all tags within this range
+  sureMinPrecision: 0.9,     // Model A may tag on its own only where it matches your genre folders this often…
+  sureMinChecked: 10,        // …measured on at least this many songs
+  sureTagMinPrecision: 0.75, // a style tag whose own folder match is worse than this never goes alone
 };
 
 // ── loading ────────────────────────────────────────────────────────────────
@@ -100,11 +104,56 @@ function loadContext(opts = {}) {
   const analyses = opts.analyses || loadAnalyses(music);
   const config = opts.config || loadConfig();
   const tagById = Object.fromEntries(dict.tags.map(t => [t.id, t]));
-  const stats = catalogStats(dict, analyses, opts.allowMock);
+  const stats = catalogStats(dict, analyses, opts.allowMock, config);
   const genres = opts.genres || readJson(GENRES_JSON, { genres: {} }).genres;
   const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres };
   ctx.calib = calibrate(ctx);
+  ctx.folder = folderCheck(ctx);
   return ctx;
+}
+
+// ── Model A checked against the owner's genre folders ─────────────────────
+// Style tags know their site genre (tags.json "genre"). How often is a song Model A
+// tags "metal" really in the Rock folder? Per confidence level; the lowest level that
+// is right ≥ sureMinPrecision of the time is where Model A may tag on its own.
+const SURE_GRID = [0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6];
+
+function folderCheck(ctx) {
+  const { dict, analyses, config, music } = ctx;
+  const styles = dict.tags.filter(t => t.facet === 'style' && t.genre && t.ast);
+  const levels = SURE_GRID.map(thr => ({ thr, checked: 0, right: 0 }));
+  const perTag = {};
+  for (const tr of music) {
+    const a = analyses[tr.id];
+    if (!usable(a, ctx.allowMock) || !tr.genre || (a.review && a.review.autoGenre)) continue;
+    for (const t of styles) {
+      const A = astScore(a, t) || 0;
+      const ok = tr.genre === t.genre;
+      levels.forEach((l, i) => {
+        if (A < l.thr) return;
+        l.checked++; if (ok) l.right++;
+        const p = ((perTag[t.id] = perTag[t.id] || SURE_GRID.map(() => ({ checked: 0, right: 0 })))[i]);
+        p.checked++; if (ok) p.right++;
+      });
+    }
+  }
+  for (const l of levels) l.precision = l.checked ? l.right / l.checked : null;
+  const sure = levels.find(l => l.checked >= config.sureMinChecked && l.precision >= config.sureMinPrecision);
+  return { levels, perTag, sureThreshold: sure ? sure.thr : null, sure: sure || null };
+}
+
+// Model A on its own is trusted only at a confidence level checked against your folders
+function aloneThreshold(ctx, t, fc) {
+  const f = ctx.folder;
+  if (!f || f.sureThreshold == null) return Infinity;
+  if (t.facet === 'style') {
+    const i = SURE_GRID.indexOf(f.sureThreshold);
+    const own = (f.perTag[t.id] || [])[i];
+    if (own && own.checked >= 5 && own.right / own.checked < ctx.config.sureTagMinPrecision) return Infinity;
+    return Math.max(f.sureThreshold, fc.astMin);
+  }
+  // moods/instruments/uses can't be checked against folders: stay stricter
+  return Math.max(f.sureThreshold, fc.astStrong);
 }
 
 // ── calibration: make Model B flag as many songs per tag as Model A does ──
@@ -119,7 +168,7 @@ function calibrate(ctx) {
   const list = Object.values(analyses).filter(a => usable(a, ctx.allowMock));
   const N = list.length;
   const out = {};
-  if (N < config.calibrateMinTracks) return out;
+  if (N < config.calibrateMinTracks || ctx.stats.clapOff) return out;
   for (const t of dict.tags) {
     const fc = config.facets[t.facet];
     if (!fc || !t.ast || !t.clap) continue;
@@ -156,6 +205,8 @@ function agreementReport(ctx) {
   const kappas = rows.map(r => r.kappa);
   return {
     calibrated: rows.length > 0,
+    modelB: { working: !ctx.stats.clapOff, spread: ctx.stats.clapSpread },
+    folder: ctx.folder ? { sureThreshold: ctx.folder.sureThreshold, levels: ctx.folder.levels } : null,
     tracks: Object.values(ctx.analyses).filter(a => usable(a, ctx.allowMock)).length,
     overallAgreement: flagged ? agreed / flagged : null,
     medianKappa: kappas.length ? kappas.sort((x, y) => x - y)[Math.floor(kappas.length / 2)] : null,
@@ -176,8 +227,17 @@ function meanStd(values) {
   return { mean, std: Math.sqrt(v) || 1e-6 };
 }
 
-function catalogStats(dict, analyses, allowMock) {
+function catalogStats(dict, analyses, allowMock, config = DEFAULTS) {
   const list = Object.values(analyses).filter(a => usable(a, allowMock));
+  // Is Model B actually listening? A working CLAP scores a song very differently per tag;
+  // a broken one (e.g. weights that didn't load) gives every tag the same number.
+  const tagIds = dict.tags.filter(t => t.clap).map(t => t.id);
+  const spreads = list.filter(a => a.clap).map(a => {
+    const v = tagIds.map(id => a.clap[id]).filter(x => typeof x === 'number');
+    return v.length > 1 ? Math.max(...v) - Math.min(...v) : 0;
+  }).sort((x, y) => x - y);
+  const clapSpread = spreads.length ? spreads[Math.floor(spreads.length / 2)] : 0;
+  const clapOff = !spreads.length || clapSpread < config.clapMinSpread;
   const clap = {};
   for (const t of dict.tags) {
     if (!t.clap) continue;
@@ -193,7 +253,7 @@ function catalogStats(dict, analyses, allowMock) {
   const gaps = list.filter(a => a.clap && a.clap.vocals != null && a.clap.instrumental != null)
     .map(a => a.clap.vocals - a.clap.instrumental).sort((x, y) => x - y);
   const vocalGapMedian = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0;
-  return { clap, sorted, count: list.length, vocalGapMedian };
+  return { clap, sorted, count: list.length, vocalGapMedian, clapOff, clapSpread };
 }
 
 function percentile(sortedValues, v) {
@@ -213,7 +273,7 @@ function astScore(a, tag) {
 function clapZ(a, tag, stats) {
   if (!tag.clap || !a.clap || a.clap[tag.id] == null) return null;
   const s = stats.clap[tag.id];
-  if (!s) return null;
+  if (!s || stats.clapOff) return null;
   return ((a.clap[tag.id] - (a.clap._baseline || 0)) - s.mean) / s.std;
 }
 
@@ -273,20 +333,27 @@ function decideTrack(ctx, track, opts = {}) {
       const bYes = B != null && (shaky ? B >= fc.clapStrongZ
         : cal ? clapRel(a, t) >= cal.bThr && B >= fc.clapMinZ : B >= fc.clapZ);
       if (bYes) votes.push('B');
+      // Style + your own genre folder: a second, independent witness
+      if (facet === 'style' && A != null && A >= fc.astMin && t.genre && track.genre === t.genre && !(a.review && a.review.autoGenre)) {
+        if (!votes.includes('A')) votes.push('A');
+        votes.push('F');
+      }
       if (facet === 'use' && t.imply && t.imply.length) {
         const hits = t.imply.filter(id => decided[id]).length;
         if (hits >= Math.min(fc.implyMin || 2, t.imply.length)) votes.push('R');
       }
       const strength = Math.max(A != null ? A / Math.max(fc.astStrong, 1e-6) : 0, B != null ? B / fc.clapStrongZ : 0);
-      const why = [A != null ? `A ${A.toFixed(2)}` : null, B != null ? `B z${B.toFixed(1)}` : null, votes.includes('R') ? 'rule' : null]
-        .filter(Boolean).join(', ');
-      scored.push({ t, votes, strength, why });
+      const sure = A != null && A >= aloneThreshold(ctx, t, fc);
+      const why = [A != null ? `A ${A.toFixed(2)}${sure ? ' (sure)' : ''}` : null, B != null ? `B z${B.toFixed(1)}` : null,
+        votes.includes('F') ? 'your folder' : null, votes.includes('R') ? 'rule' : null].filter(Boolean).join(', ');
+      scored.push({ t, votes, sure, strength, why });
     }
-    scored.sort((x, y) => y.votes.length - x.votes.length || y.strength - x.strength);
+    const ok = s => s.votes.length >= 2 || s.sure;
+    scored.sort((x, y) => ok(y) - ok(x) || y.votes.length - x.votes.length || y.strength - x.strength);
     let kept = 0;
     for (const s of scored) {
-      if (s.votes.length >= 2 && kept < (dict.facets[facet] || {}).max) {
-        decided[s.t.id] = { conf: 'agree', score: Math.min(1, s.strength), why: s.why };
+      if (ok(s) && kept < (dict.facets[facet] || {}).max) {
+        decided[s.t.id] = { conf: s.votes.length >= 2 ? 'agree' : 'sure', score: Math.min(1, s.strength), why: s.why };
         kept++;
       } else if (s.votes.length === 1 && s.strength >= config.hintMinStrength) {
         // one confident model only: a hidden hint (helps search a little, never shown, never reviewed)
@@ -299,7 +366,7 @@ function decideTrack(ctx, track, opts = {}) {
   const vocalLabels = ['Singing', 'Male singing', 'Female singing', 'Rapping', 'Vocal music', 'Choir', 'Child singing', 'Synthetic singing'];
   const aVocal = Math.max(0, ...vocalLabels.map(l => (a.ast || {})[l] || 0));
   const vA = a.ast ? (aVocal >= config.vocalsAst ? 'vocals' : 'instrumental') : null;
-  const gap = a.clap && a.clap.vocals != null && a.clap.instrumental != null
+  const gap = !stats.clapOff && a.clap && a.clap.vocals != null && a.clap.instrumental != null
     ? (a.clap.vocals - a.clap.instrumental) - stats.vocalGapMedian : null;
   const vB = gap != null ? (gap > 0 ? 'vocals' : 'instrumental') : null;
   const vocalWhy = `A singing ${aVocal.toFixed(2)}${vB ? `, B prefers ${vB}` : ''}`;

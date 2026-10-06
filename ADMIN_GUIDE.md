@@ -162,6 +162,13 @@ What only one model hears stays hidden (it just helps search a little); vocals/e
 disagreements settle themselves. Tags the models rarely agree on need both to be strongly sure.
 Only songs where both models are confident *and* contradict each other come to you.
 
+Two safety checks so it never guesses:
+- **Your genre folders are the referee.** Model A is checked against them; it may tag on its own only
+  at the confidence level where it put songs in the right folder at least 9 times out of 10. A style
+  tag that matches the song's folder (e.g. "country" on a song in Country & Folk) also counts as agreement.
+- **Model B tests itself** before every run. If it isn't really listening, the analyzer tries a backup
+  model; if none works, Model B is switched off and can't add wrong tags. The 🤝 report shows its status.
+
 1. **Once:** `sudo apt install python3-venv` (if needed), then `npm run analyze:setup` in the
    Portal-Music folder. It installs the tools and downloads the models (~2 GB). Restart the admin.
 2. **🏷️ Tags → ▶ Analyze new songs.** The first run covers all songs (about an hour or two; leave it
