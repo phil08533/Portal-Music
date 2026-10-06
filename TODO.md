@@ -24,10 +24,8 @@ Tick items off as you go.
       (run `git pull && npm install` first so the video engine is downloaded).
 
 ## Monetag (dashboard)
-- [ ] Ads run on the **download page only** now (Admin Studio → 💰 Ads to change). Set the Monetag
-      frequency cap below so the popunder can't repeat more than once per 12–24 h.
-- [ ] Glad tag (popunder, 10786944) → set **frequency cap** to 1 per 12–24 hours (the site now also
-      limits it to once per 12 h and never on a visitor's first page).
+- [ ] Ads run on the **download page only, on every download** (Admin Studio → 💰 Ads to change).
+      In Monetag, make sure the Glad tag's frequency cap isn't lower than that (or it will skip some downloads).
 - [ ] Delete unused zones on portal-music.com: Epic (10786950), the four Sharp-witted zones
       (10803343–10803346), Cheerful (10803159) and the two untitled ones (11392081, 11392281).
 - [ ] If the site ever shows "Unverified": copy the `ads.txt` line Monetag gives you into `ads.txt`.

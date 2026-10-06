@@ -521,8 +521,8 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>At most one ad per visitor every … hours</label>
-          <input type="number" id="ads-gap" class="form-control" min="1" max="168">
+          <label>At most one ad per visitor every … hours (0 = every time)</label>
+          <input type="number" id="ads-gap" class="form-control" min="0" max="168" title="0 = every time">
         </div>
         <div class="form-group">
           <label>Never before … seconds on the site</label>
@@ -770,7 +770,7 @@
 
     function showAdsStatus(a) {
       document.getElementById('ads-status').innerHTML = a.enabled
-        ? `🟢 On: ${a.where === 'download' ? 'download page only' : 'all pages'}, at most once every ${a.gapHours} h per visitor.`
+        ? `🟢 On: ${a.where === 'download' ? 'download page only' : 'all pages'}, ${Number(a.gapHours) === 0 ? (a.where === 'download' ? 'on every download' : 'on every page view') : 'at most once every ' + a.gapHours + ' h per visitor'}.`
         : '⚪ Off: no ads anywhere on the site.';
     }
 

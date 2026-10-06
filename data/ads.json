@@ -2,6 +2,6 @@
   "enabled": true,
   "zone": "10786944",
   "where": "download",
-  "gapHours": 12,
-  "delaySeconds": 30
+  "gapHours": 0,
+  "delaySeconds": 0
 }
