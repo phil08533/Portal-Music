@@ -14,7 +14,7 @@ const dict = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data',
 // A neutral analysis: every CLAP tag at the same similarity, AudioSet near zero
 function neutral(i, over = {}) {
   const clap = { _baseline: 0.2 };
-  for (const t of dict.tags) if (t.clap) clap[t.id] = 0.25 + ((i * 37 + t.id.length * 11) % 10) / 1000;
+  for (const t of dict.tags) if (t.clap) clap[t.id] = 0.2 + ((i * 37 + t.id.length * 11) % 10) / 250;
   return {
     version: 1,
     dsp: { durationSec: 150, bpm: 100, beatRegularity: 0.9, loudnessDb: -20 + (i % 7), percussiveRatio: 0.2 + (i % 5) / 50,
@@ -200,4 +200,38 @@ test('batch upload: the AI picks the genre and a matching subgenre', () => {
   const t = JSON.parse(fs.readFileSync(path.join(dir, 'm.json'), 'utf8')).find(x => x.id === 'lofi');
   assert.strictEqual(t.genre, 'Electronic');
   assert.strictEqual(t.subgenre, 'Lo-Fi');
+});
+
+test('a broken Model B (same score for every tag) is ignored; Model A tags alone only where your folders prove it right', () => {
+  const music = [], analyses = {};
+  const flat = i => { const a = neutral(i); for (const k of Object.keys(a.clap)) a.clap[k] = -0.003; a.clap.metal = -0.0029; return a; };
+  for (let i = 0; i < 40; i++) {
+    const rock = i < 15;
+    music.push({ id: 'r' + i, title: 't' + i, genre: rock ? 'Rock' : 'Jazz' });
+    const a = flat(i);
+    a.ast[rock ? 'Heavy metal' : 'Jazz'] = 0.55;
+    analyses['r' + i] = a;
+  }
+  // A hears metal in a jazz-folder song, but only weakly: not sure enough to tag alone
+  [0.21, 0.22, 0.23, 0.24, 0.26].forEach((v, k) => {
+    music.push({ id: 'weak' + k, title: 'weak', genre: 'Jazz' });
+    analyses['weak' + k] = flat(90 + k); analyses['weak' + k].ast['Heavy metal'] = v;
+  });
+  const ctx = tagging.loadContext({ music, analyses, tags: dict });
+  const rep = tagging.agreementReport(ctx);
+  assert.strictEqual(rep.modelB.working, false);
+  assert.strictEqual(rep.folder.sureThreshold, 0.25, 'lowest level that is right 90% of the time');
+  const rock = tagging.decideTrack(ctx, music[0]);
+  assert.ok(rock.labels.includes('metal'), 'sure + folder-verified: ' + rock.labels);
+  assert.ok(!tagging.decideTrack(ctx, music.find(t => t.id === 'weak0')).labels.includes('metal'), 'a weak, unverified hit is not tagged');
+  assert.ok(tagging.decideTrack(ctx, music[20]).labels.includes('jazz'));
+});
+
+test('a weak Model A style hit is published when your genre folder agrees', () => {
+  const special = [['folk1', boosted(103, {}, { 'Country': 0.2 }), 'Country & Folk']];
+  const { music, analyses } = catalog(special);
+  const ctx = tagging.loadContext({ music, analyses, tags: dict });
+  const d = tagging.decideTrack(ctx, music.find(t => t.id === 'folk1'));
+  assert.ok(d.labels.includes('country'), d.labels);
+  assert.ok(/your folder/.test(d.decided.country.why));
 });

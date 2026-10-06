@@ -46,7 +46,9 @@ ASSET_PREFIX = 'https://assets.portal-music.com/'
 
 VERSION = 1                       # bump when the analysis itself changes
 AST_MODEL = 'MIT/ast-finetuned-audioset-10-10-0.4593'
-CLAP_MODEL = 'laion/larger_clap_music'
+# Model B candidates, tried in order until one passes the self-test (see ClapScorer.self_test)
+CLAP_MODELS = ['laion/larger_clap_music', 'laion/larger_clap_music_and_speech', 'laion/clap-htsat-unfused']
+CLAP_MIN_SPREAD = 0.03            # a working CLAP scores different texts clearly differently
 WINDOWS = 6                       # 10-second slices spread across the song
 WINDOW_SEC = 10.0
 
@@ -233,15 +235,55 @@ def clap_prompts(tags):
     return prompts
 
 
+class ClapBroken(Exception):
+    pass
+
+
 class ClapScorer:
-    def __init__(self):
+    def __init__(self, name):
         import torch
         from transformers import ClapModel, ClapProcessor
         self.torch = torch
-        self.model = ClapModel.from_pretrained(CLAP_MODEL).eval()
-        self.proc = ClapProcessor.from_pretrained(CLAP_MODEL)
+        self.name = name
+        self.model, info = ClapModel.from_pretrained(name, output_loading_info=True)
+        self.model.eval()
+        missing = [k for k in info.get('missing_keys', []) if not k.endswith('position_ids')]
+        if missing:
+            raise ClapBroken(f'{len(missing)} weights did not load (e.g. {missing[0]})')
+        self.proc = ClapProcessor.from_pretrained(name)
         self.sr = self.proc.feature_extractor.sampling_rate  # 48 kHz
         self._text_cache = {}
+
+    def self_test(self):
+        """Does the model really listen? Made-up sounds must score clearly differently against
+        different descriptions, and different descriptions must not all mean the same thing."""
+        import numpy as np
+        rng = np.random.default_rng(0)
+        n = int(self.sr * WINDOW_SEC)
+        tt = np.arange(n) / self.sr
+        clicks = np.zeros(n, dtype=np.float32)
+        for k in range(0, n, self.sr // 2):
+            clicks[k:k + 400] = rng.uniform(-0.8, 0.8, min(400, n - k))
+        clips = {
+            'tone': (0.3 * np.sin(2 * np.pi * 440 * tt)).astype(np.float32),
+            'noise': rng.uniform(-0.3, 0.3, n).astype(np.float32),
+            'clicks': clicks,
+        }
+        texts = ['a pure sine wave tone', 'white noise static hiss', 'a metronome clicking',
+                 'heavy metal with distorted guitars', 'soft solo piano', 'hip hop beat with rap vocals']
+        temb = np.asarray(self.text_embeddings({'t': texts})['t'])
+        sims = temb @ temb.T
+        text_same = float((sims.sum() - len(texts)) / (len(texts) * (len(texts) - 1)))
+        spreads, hits = [], 0
+        for i, (k, y) in enumerate(clips.items()):
+            sc = temb @ self.audio_embedding(y)
+            spreads.append(float(sc.max() - sc.min()))
+            hits += int(np.argmax(sc[:3]) == i)
+        spread = float(np.median(spreads))
+        report = f'spread {spread:.3f}, text similarity {text_same:.2f}, made-up sounds recognised {hits}/3'
+        if spread < CLAP_MIN_SPREAD or text_same > 0.97:
+            raise ClapBroken('not listening: ' + report)
+        return report
 
     def audio_embedding(self, y48):
         import numpy as np
@@ -308,16 +350,43 @@ def mock_analysis(track, tags):
 
 # ── main ───────────────────────────────────────────────────────────────────
 
-def analyze_track(track, tags, ast_model, clap_model, prompts):
+def load_clap():
+    """The first Model B candidate that passes its self-test, or None (Model B stays off;
+    Model A and the measurements still work)."""
+    for name in CLAP_MODELS:
+        try:
+            m = ClapScorer(name)
+            print(f'Model B {name}: OK ({m.self_test()})', flush=True)
+            return m
+        except Exception as e:
+            print(f'Model B {name}: FAILED, {e}', flush=True)
+    print('Model B: no working model. Tagging continues with Model A and your genre folders only.', flush=True)
+    return None
+
+
+def needs_clap(a, clap_model):
+    return bool(clap_model) and a.get('clapModel') != clap_model.name
+
+
+def analyze_track(track, tags, ast_model, clap_model, prompts, old=None):
     import numpy as np
     path, temp = fetch_audio(track)
     try:
-        y22 = load_audio(path, 22050)
-        result = {'dsp': dsp_features(y22, 22050)}
-        result['ast'] = ast_model.scores(load_audio(path, ast_model.sr))
-        emb = clap_model.audio_embedding(load_audio(path, clap_model.sr))
-        result['clap'] = clap_scores(emb, clap_model.text_embeddings(prompts))
-        result['emb'] = [r4(v) for v in np.asarray(emb)]
+        # Model A + measurements already good? Then only (re)do Model B
+        if old and old.get('dsp') and old.get('ast') and old.get('version') == VERSION and not old.get('mock') and not old.get('error'):
+            result = {'dsp': old['dsp'], 'ast': old['ast']}
+        else:
+            y22 = load_audio(path, 22050)
+            result = {'dsp': dsp_features(y22, 22050)}
+            result['ast'] = ast_model.scores(load_audio(path, ast_model.sr))
+        if clap_model:
+            emb = clap_model.audio_embedding(load_audio(path, clap_model.sr))
+            result['clap'] = clap_scores(emb, clap_model.text_embeddings(prompts))
+            result['emb'] = [r4(v) for v in np.asarray(emb)]
+            result['clapModel'] = clap_model.name
+        else:
+            result['clap'] = {}
+            result['clapModel'] = None
         return result
     finally:
         if temp:
@@ -343,27 +412,45 @@ def main():
     prompts = clap_prompts(tags)
 
     if args.check or args.rescore:
-        clap_model = ClapScorer()
+        clap_model = load_clap()
         if args.check:
             ast_model = AstModel()
             known = set(ast_model.labels.values())
             unknown = sorted({l for t in tags for l in t.get('ast', []) if l not in known})
             print('AudioSet labels in tags.json not known to Model A:', unknown or 'none ✓')
-            clap_model.text_embeddings(prompts)
-            print('Models downloaded and working ✓')
+            if clap_model:
+                clap_model.text_embeddings(prompts)
+                print('Models downloaded and working ✓')
+            else:
+                print('Model A works; Model B is off (see above). Tagging still works.')
             return 1 if unknown else 0
+        if not clap_model:
+            return 2
         import numpy as np
         texts = clap_model.text_embeddings(prompts)
         n = 0
         for t in music:
             path = os.path.join(OUT_DIR, t['id'] + '.json')
             a = load_json(path)
-            if a and a.get('emb') and not a.get('mock'):
+            if a and a.get('emb') and not a.get('mock') and a.get('clapModel') == clap_model.name:
                 a['clap'] = clap_scores(np.asarray(a['emb']), texts)
                 save_json(path, a)
                 n += 1
         print(f'Re-scored {n} tracks against the current tags ✓')
         return 0
+
+    progress(running=True, done=0, total=0, errors=0, current='Loading AI models…',
+             startedAt=time.time(), mock=bool(args.mock), pid=os.getpid(), fatal=None, modelB=None)
+    ast_model = clap_model = None
+    if not args.mock:
+        try:
+            ast_model = AstModel()
+        except Exception as e:
+            progress(running=False, current='', fatal=f'Could not load the AI models: {e}')
+            print('Could not load the AI models. Did you run `npm run analyze:setup`?\n', e, file=sys.stderr)
+            return 2
+        clap_model = load_clap()
+        progress(modelB=clap_model.name if clap_model else 'off')
 
     if args.ids:
         wanted = set(args.ids.split(','))
@@ -373,21 +460,11 @@ def main():
         for t in music:
             a = load_json(os.path.join(OUT_DIR, t['id'] + '.json'))
             fresh = a and a.get('version') == VERSION and not a.get('mock') and not a.get('error')
-            if args.all or args.force or not fresh or (args.mock and not a):
+            if args.all or args.force or not fresh or (args.mock and not a) or (fresh and needs_clap(a, clap_model)):
                 todo.append(t)
     if args.limit:
         todo = todo[:args.limit]
-
-    progress(running=True, done=0, total=len(todo), errors=0, current='Loading AI models…',
-             startedAt=time.time(), mock=bool(args.mock), pid=os.getpid())
-    ast_model = clap_model = None
-    if not args.mock:
-        try:
-            ast_model, clap_model = AstModel(), ClapScorer()
-        except Exception as e:
-            progress(running=False, current='', fatal=f'Could not load the AI models: {e}')
-            print('Could not load the AI models. Did you run `npm run analyze:setup`?\n', e, file=sys.stderr)
-            return 2
+    progress(total=len(todo))
 
     errors = 0
     began = time.time()
@@ -396,7 +473,8 @@ def main():
         out = os.path.join(OUT_DIR, t['id'] + '.json')
         old = load_json(out, {}) or {}
         try:
-            res = mock_analysis(t, tags) if args.mock else analyze_track(t, tags, ast_model, clap_model, prompts)
+            keep = None if (args.force or args.all or args.mock) else old
+            res = mock_analysis(t, tags) if args.mock else analyze_track(t, tags, ast_model, clap_model, prompts, keep)
             res.update(version=VERSION, analyzedAt=int(time.time()), file=t.get('file'))
             if 'review' in old and (args.mock or not old.get('mock')):   # never lose the owner's review decisions
                 res['review'] = old['review']
