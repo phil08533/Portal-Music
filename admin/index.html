@@ -541,6 +541,7 @@
         (installs the free AI tools and downloads the two models, about 2 GB, takes a while). If it says venv is missing, first run <code>sudo apt install python3-venv</code>.
         Then restart the admin studio.
       </div>
+      <div id="tg-mock-banner" style="display:none;background:rgba(255,77,106,0.12);border:1px solid #ff4d6a;border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"></div>
       <div id="tg-counts" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"></div>
       <div class="action-btns" style="flex-wrap:wrap;margin-bottom:10px;">
         <button class="btn btn-primary btn-sm" style="width:auto;" onclick="tgRun('missing')">▶ Analyze new songs</button>
@@ -817,6 +818,14 @@
         const st = await tgApi('status');
         document.getElementById('tg-setup').style.display = st.installed ? 'none' : 'block';
         const c = st.counts;
+        const mb = document.getElementById('tg-mock-banner');
+        if (TG_MOCK) {
+          mb.style.display = 'block';
+          mb.innerHTML = '<strong>🧪 TEST MODE</strong> (the address ends in <code>?mock=1</code>). Songs get <strong>random fake scores</strong>, so the models will look like they never agree. Nothing here is published. For real results open the admin <strong>without</strong> <code>?mock=1</code> and click ▶ Analyze new songs.';
+        } else if (c.mock) {
+          mb.style.display = 'block';
+          mb.innerHTML = '<strong>' + c.mock + ' songs only have TEST data</strong> (random fake scores from a test run). Click <strong>▶ Analyze new songs</strong> to replace them with real results. Approvals you made on test data are thrown away.';
+        } else mb.style.display = 'none';
         document.getElementById('tg-counts').innerHTML =
           statTile('Analyzed', c.analyzed + c.mock + ' / ' + c.total, c.errors ? c.errors + ' failed' : (c.mock ? c.mock + ' are TEST data' : '')) +
           statTile('Needs review', c.review, 'models clearly disagree') +

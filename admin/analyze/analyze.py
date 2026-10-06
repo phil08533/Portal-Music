@@ -398,8 +398,10 @@ def main():
         try:
             res = mock_analysis(t, tags) if args.mock else analyze_track(t, tags, ast_model, clap_model, prompts)
             res.update(version=VERSION, analyzedAt=int(time.time()), file=t.get('file'))
-            if 'review' in old:          # never lose the owner's review decisions
+            if 'review' in old and (args.mock or not old.get('mock')):   # never lose the owner's review decisions
                 res['review'] = old['review']
+            elif old.get('review', {}).get('autoGenre'):   # reviews made on TEST data don't count
+                res['review'] = {'status': 'pending', 'add': [], 'remove': [], 'autoGenre': True}
             save_json(out, res)
         except KeyboardInterrupt:
             progress(running=False, current='Stopped')

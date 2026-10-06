@@ -434,7 +434,7 @@ function publish(opts = {}) {
   let changed = 0;
   for (const t of ctx.music) {
     const d = decisions[t.id];
-    if (!d) continue;
+    if (!d || d.mock) continue;     // test data never reaches the site
     const before = JSON.stringify([t.labels, t.bpm, t.key, t.duration, t.durationSec, t.genre]);
     t.labels = d.labels;
     if (d.hints.length) t.hints = d.hints; else delete t.hints;
