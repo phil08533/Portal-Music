@@ -81,8 +81,10 @@
       if (map[key].indexOf(id) === -1) map[key].push(id);
     }
 
+    var labelPhrase = {};   // phrases that are a tag's own name
     tags.forEach(function (t) {
       byId[t.id] = t;
+      labelPhrase[normalize(t.label.replace(/\(.*?\)/g, ''))] = 1;
       var all = [t.label, t.id.replace(/-/g, ' ')].concat(t.syn || []);
       all.forEach(function (raw) {
         var p = normalize(raw.replace(/\(.*?\)/g, ''));
@@ -125,6 +127,11 @@
         });
 
       var tokens = q.split(' ').filter(Boolean);
+      // Still typing ("true crim"): finish the last word(s) as the matching tag ("true crime")
+      if (!/\s$/.test(String(query || ''))) {
+        var done = complete(tokens);
+        if (done) tokens = tokens.slice(0, tokens.length - done.n).concat(done.phrase.split(' '));
+      }
       var found = [];        // { id, negated, text }
       var leftovers = [];
       var i = 0;
@@ -194,6 +201,55 @@
       if (limits.maxSec || limits.minSec) tagsOut = tagsOut.filter(function (f) { return (byId[f.id] || {}).facet !== 'length'; });
 
       return { tags: tagsOut, limits: limits, words: leftovers, query: query };
+    }
+
+    // The shortest tag phrase that starts with the last 1–3 typed words (at least 3 letters typed)
+    function complete(tokens) {
+      for (var n = Math.min(3, tokens.length); n >= 1; n--) {
+        var frag = tokens.slice(tokens.length - n).join(' ');
+        if (frag.replace(/ /g, '').length < 3 || phrases[frag]) { if (phrases[frag]) return null; continue; }
+        var best = null;
+        for (var p in phrases) {
+          if (p.indexOf(frag) !== 0 || p.split(' ').length < n) continue;
+          // a tag's own name beats a synonym ("tru" → "true crime", not "trumpet"); then the shortest
+          if (!best || (labelPhrase[p] || 0) > (labelPhrase[best] || 0) ||
+              ((labelPhrase[p] || 0) === (labelPhrase[best] || 0) && p.length < best.length)) best = p;
+        }
+        if (best) return { n: n, phrase: best };
+      }
+      return null;
+    }
+
+    // Tags for the search box dropdown: what the visitor is typing right now ("tru" → True crime).
+    // counts (optional): tag id → number of songs; tags with 0 songs are left out.
+    function suggest(text, limit, counts) {
+      var raw = String(text || '');
+      var tokens = normalize(raw).split(' ').filter(Boolean);
+      if (!tokens.length || /\s$/.test(raw)) return [];
+      var out = [], seen = {};
+      for (var n = Math.min(3, tokens.length); n >= 1; n--) {
+        var frag = tokens.slice(tokens.length - n).join(' ');
+        if (frag.replace(/ /g, '').length < 2) continue;
+        var scored = [];
+        tags.forEach(function (t) {
+          if (seen[t.id] || (counts && !counts[t.id])) return;
+          var label = normalize(t.label.replace(/\(.*?\)/g, ''));
+          var syns = [normalize(t.id.replace(/-/g, ' '))].concat((t.syn || []).map(normalize));
+          var score = 0;
+          if (label.indexOf(frag) === 0) score = 3;
+          else if ((' ' + label).indexOf(' ' + frag) !== -1) score = 2;
+          else if (syns.some(function (x) { return x.indexOf(frag) === 0 || (' ' + x).indexOf(' ' + frag) !== -1; })) score = 1;
+          if (score) scored.push({ t: t, score: score, n: counts ? counts[t.id] || 0 : 0 });
+        });
+        scored.sort(function (a, b) { return b.score - a.score || b.n - a.n || a.t.label.length - b.t.label.length; });
+        scored.forEach(function (x) {
+          if (out.length >= (limit || 8) || seen[x.t.id]) return;
+          seen[x.t.id] = 1;
+          out.push({ id: x.t.id, label: x.t.label, facet: x.t.facet, count: x.n, replace: n });
+        });
+        if (out.length) break;
+      }
+      return out;
     }
 
     function toSeconds(num, unit) {
@@ -333,7 +389,8 @@
       return { parsed: parsed, chips: chips(parsed), results: rank(songs, parsed) };
     }
 
-    return { parse: parse, rank: rank, search: search, chips: chips, tag: function (id) { return byId[id]; }, normalize: normalize };
+    return { parse: parse, rank: rank, search: search, chips: chips, suggest: suggest, tags: tags,
+      tag: function (id) { return byId[id]; }, normalize: normalize };
   }
 
   return { create: create, editDistance: editDistance, normalize: normalize, stem: stem };

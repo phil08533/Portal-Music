@@ -415,6 +415,109 @@ window.pmSearchRun = function (query, pool) {
   });
 };
 
+// --- Search box dropdown: suggests tags while typing; 🏷️ Tags lists them all ---
+(function () {
+  var input = document.getElementById('search-input');
+  var box = document.getElementById('tag-suggest');
+  var toggle = document.getElementById('tags-toggle');
+  if (!input || !box) return;
+  var mode = null, items = [], active = -1;
+
+  function counts() {
+    var c = {};
+    (allSongsPage || []).forEach(function (s) { (s.labels || []).forEach(function (l) { c[l] = (c[l] || 0) + 1; }); });
+    return c;
+  }
+  function songsWord(n) { return n + (n === 1 ? ' song' : ' songs'); }
+  function close() {
+    box.hidden = true; mode = null; items = []; active = -1;
+    input.setAttribute('aria-expanded', 'false');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  }
+  function open() { box.hidden = false; input.setAttribute('aria-expanded', 'true'); }
+
+  // Put the tag into the box (replacing what was being typed) and search
+  function pick(tag, replace) {
+    var words = input.value.replace(/\s+$/, '').split(/\s+/).filter(Boolean);
+    if (replace) words = words.slice(0, Math.max(0, words.length - replace));
+    var label = tag.label.replace(/\s*\(.*?\)/g, '');
+    if (words.join(' ').toLowerCase().indexOf(label.toLowerCase()) === -1) words.push(label);
+    input.value = words.join(' ') + ' ';
+    close();
+    input.focus();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function showSuggestions() {
+    var text = input.value;
+    pmSearchEnsure().then(function (engine) {
+      if (!engine || input.value !== text) return;
+      items = engine.suggest(text, 8, counts());
+      active = -1;
+      if (!items.length) { close(); return; }
+      mode = 'suggest';
+      box.innerHTML = items.map(function (t, i) {
+        return '<button type="button" class="ts-item" role="option" data-i="' + i + '">' +
+          '<span>' + _esc(t.label) + '</span><small>' + songsWord(t.count) + '</small></button>';
+      }).join('');
+      open();
+    });
+  }
+
+  function showAll() {
+    pmSearchEnsure().then(function (engine) {
+      if (!engine) return;
+      var c = counts(), groups = {}, order = ['use', 'mood', 'style', 'instrument', 'vocals', 'energy', 'tempo', 'length'];
+      var names = { use: 'Best for', mood: 'Mood', style: 'Style', instrument: 'Instruments', vocals: 'Vocals', energy: 'Energy', tempo: 'Tempo', length: 'Length' };
+      items = [];
+      engine.tags.forEach(function (t) { if (c[t.id]) (groups[t.facet] = groups[t.facet] || []).push(t); });
+      var html = order.filter(function (f) { return groups[f]; }).map(function (f) {
+        var chips = groups[f].sort(function (a, b) { return c[b.id] - c[a.id]; }).map(function (t) {
+          items.push({ id: t.id, label: t.label, count: c[t.id], replace: 0 });
+          return '<button type="button" class="ts-chip" data-i="' + (items.length - 1) + '">' +
+            _esc(t.label.replace(/\s*\(.*?\)/g, '')) + '<small>' + c[t.id] + '</small></button>';
+        }).join('');
+        return '<div class="ts-group"><div class="ts-group-title">' + names[f] + '</div><div class="ts-chips">' + chips + '</div></div>';
+      }).join('');
+      if (!html) return;
+      mode = 'all'; active = -1;
+      box.innerHTML = html;
+      open();
+      if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    });
+  }
+
+  input.addEventListener('input', function (e) {
+    if (!e.isTrusted) return;                 // our own re-search after picking a tag
+    if (input.value.trim()) showSuggestions(); else showAll();
+  });
+  input.addEventListener('focus', function () { if (!input.value.trim()) showAll(); });
+  input.addEventListener('keydown', function (e) {
+    if (box.hidden) { if (e.key === 'ArrowDown') { input.value.trim() ? showSuggestions() : showAll(); e.preventDefault(); } return; }
+    var els = box.querySelectorAll('[data-i]');
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + els.length) % els.length;
+      els.forEach(function (el, i) { el.classList.toggle('active', i === active); });
+      if (els[active]) els[active].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      if (active >= 0 && items[active]) { e.preventDefault(); pick(items[active], items[active].replace); }
+      else close();
+    } else if (e.key === 'Escape') close();
+  });
+  box.addEventListener('mousedown', function (e) { e.preventDefault(); });   // keep focus in the box
+  box.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-i]');
+    if (b && items[+b.getAttribute('data-i')]) { var t = items[+b.getAttribute('data-i')]; pick(t, t.replace); }
+  });
+  if (toggle) toggle.addEventListener('click', function () {
+    if (mode === 'all') close(); else { input.focus(); showAll(); }
+  });
+  document.addEventListener('click', function (e) {
+    if (!box.hidden && !e.target.closest('.search-bar-wrap')) close();
+  });
+})();
+
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('#search-examples button[data-q]');
   if (!b) return;

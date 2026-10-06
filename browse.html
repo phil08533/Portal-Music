@@ -87,7 +87,10 @@
         <div class="search-bar-wrap">
           <span class="search-icon">🔍</span>
           <input id="search-input" class="search-input" type="search"
-                 placeholder="Describe the sound you need… e.g. spooky piano under a minute" autocomplete="off">
+                 placeholder="Type a sound, mood or use… e.g. spooky piano" autocomplete="off"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="tag-suggest">
+          <button type="button" class="tags-toggle" id="tags-toggle" aria-label="Show all tags" title="Show all tags">🏷️ Tags</button>
+          <div class="tag-suggest" id="tag-suggest" role="listbox" hidden></div>
         </div>
         <select id="use-case-filter" class="browse-dropdown" title="Find music for...">
           <option value="">🎵 Any vibe</option>
