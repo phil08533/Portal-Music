@@ -154,12 +154,12 @@
       </div>
 
       <!-- Spotlight: custom collection set in the admin studio (hidden when off) -->
-      <div id="spotlight-section" style="display:none;">
+      <div id="spotlight-section" class="home-panel home-panel--spotlight" style="display:none;">
         <div class="section-header">
           <h2 id="spotlight-title">Spotlight</h2>
         </div>
         <p id="spotlight-subtitle" class="spotlight-subtitle"></p>
-        <div class="grid" id="spotlight-grid"></div>
+        <div class="grid grid--dense" id="spotlight-grid"></div>
       </div>
 
       <!-- Featured Artists -->
@@ -171,33 +171,36 @@
       </div>
 
       <!-- New Releases -->
-      <div id="new-releases-section" style="display:none;">
+      <div id="new-releases-section" class="home-panel home-panel--new" style="display:none;">
         <div class="section-header">
           <h2>New Releases</h2>
           <a href="browse.html">Browse all →</a>
         </div>
-        <div id="new-releases-grid" class="grid"></div>
+        <!-- one scrolling row of medium cards -->
+        <div id="new-releases-grid" class="grid grid--row"></div>
       </div>
 
-      <!-- Featured Tracks -->
-      <div class="section-header">
-        <h2>Featured Tracks</h2>
-        <a href="browse.html">See all →</a>
-      </div>
-      <div class="grid" id="featured-grid">
-        <div class="empty-state">
-          <div class="empty-icon">🎵</div>
-          <p>Loading tracks…</p>
+      <!-- Featured Tracks: the main grid -->
+      <div class="home-panel home-panel--featured">
+        <div class="section-header">
+          <h2>Featured Tracks</h2>
+          <a href="browse.html">See all →</a>
+        </div>
+        <div class="grid grid--dense" id="featured-grid">
+          <div class="empty-state">
+            <div class="empty-icon">🎵</div>
+            <p>Loading tracks…</p>
+          </div>
         </div>
       </div>
 
-      <!-- Recently Played (hidden until there is history) -->
-      <div id="recent-section" style="display:none;">
+      <!-- Recently Played (hidden until there is history): compact list -->
+      <div id="recent-section" class="home-panel home-panel--recent" style="display:none;">
         <div class="section-header">
           <h2>Recently Played</h2>
           <button id="clear-recent-btn">Clear history</button>
         </div>
-        <div class="grid" id="recent-grid"></div>
+        <div class="grid grid--list" id="recent-grid"></div>
       </div>
 
       <!-- Bottom Ad Slot -->

@@ -84,7 +84,7 @@ function renderSpotlight(songs) {
 }
 
 // --- Featured: hand-picked tracks first, topped up with picks that change every day ---
-var FEATURED_COUNT = 8;
+var FEATURED_COUNT = 10;   // two full rows of 5 on a laptop screen
 function pickFeatured(songs) {
   var pinned = songs.filter(function (s) { return s.featured; });
   var rest = songs.filter(function (s) { return !s.featured; });
