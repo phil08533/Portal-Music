@@ -180,7 +180,7 @@
         <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="batch-new" checked>
           <span>Show in <strong>New Releases</strong> (45 days)</span></label>
         <label class="checkbox-group" style="margin:0 0 10px;"><input type="checkbox" id="batch-skip-dupes" checked>
-          <span>Skip songs whose title is already in the catalog</span></label>
+          <span>Skip songs whose title is already in the catalog <span class="muted">(untick to add them with a word in front instead, e.g. “Midnight …”; rename any of them in the list first)</span></span></label>
         <div class="table-container" style="max-height:360px;overflow:auto;">
           <table>
             <thead><tr><th>#</th><th>Title</th><th>Files</th><th>Status</th><th></th></tr></thead>
@@ -575,6 +575,15 @@
       <div id="tg-review"><p class="muted">Open this tab to load songs.</p></div>
     </div>
 
+    <div class="card" id="tg-spot-card">
+      <h2>🎧 Spot-check tags</h2>
+      <p class="muted" style="white-space:normal;">Some tags (moods, instruments, "best for") are on only a few songs because your folders can't confirm them.
+        Pick a tag: you'll hear <strong>6 random songs</strong> the AI would give it. If at least 5 are right, the tag is switched on for all of them.
+        Every answer also sticks to that song. Then click 🚀 Publish.</p>
+      <button class="btn btn-secondary btn-sm" onclick="tgSpotList()">Show tags to check</button>
+      <div id="tg-spot" style="margin-top:12px;"></div>
+    </div>
+
     <div class="card" id="tg-acc-card" style="display:none;">
       <h2>🎯 Accuracy</h2>
       <div id="tg-acc"></div>
@@ -715,6 +724,12 @@
         <span>Show in New Releases <span class="muted" id="edit-new-note"></span></span>
       </label>
       <div class="form-group" style="margin-top:12px;">
+        <label>Audio (MP3)</label>
+        <div id="edit-mp3-status" class="muted" style="font-size:0.85rem;margin-bottom:6px;white-space:normal;">Wrong song or a new version? Replace the MP3 (it gets re-tagged automatically).</div>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('edit-mp3-input').click()">🔁 Replace audio (MP3)</button>
+        <input type="file" id="edit-mp3-input" accept=".mp3,audio/mpeg" style="display:none;" onchange="replaceAudio(this.files[0])">
+      </div>
+      <div class="form-group" style="margin-top:12px;">
         <label>WAV download</label>
         <div id="edit-wav-status" style="font-size:0.85rem;margin-bottom:6px;"></div>
         <div class="action-btns">
@@ -800,7 +815,7 @@
     let tgPoll = null, tgLoaded = false, tgWasRunning = false;
 
     async function tgApi(pathname, body) {
-      const res = await fetch('/api/tags/' + pathname + TG_MOCK, body ? {
+      const res = await fetch('/api/tags/' + pathname + (TG_MOCK && pathname.includes('?') ? '&mock=1' : TG_MOCK), body ? {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       } : undefined);
       const data = await res.json();
@@ -913,6 +928,62 @@
           statTable('Every tag (weakest first)', ['Tag', 'Group', 'Model A', 'Model B', 'Both', 'Agreement'],
             ag.tags.map(r => [r.label, label(r.facet), r.songsA, r.songsB, r.both, word(r.kappa) + ' (' + r.kappa + ')']));
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) { showToast(err.message, false); }
+    }
+
+    // --- 🎧 Spot-check ---
+    let tgSpotTag = null, tgSpotAns = {};
+    async function tgSpotList() {
+      const el = document.getElementById('tg-spot');
+      el.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const { tags } = await tgApi('spot');
+        if (!tags.length) { el.innerHTML = '<p class="muted">Nothing to check right now.</p>'; return; }
+        const status = t => t.on ? '✅ on' : t.tested ? `❌ off (${t.yes} of ${t.yes + t.no} right)` : '—';
+        el.innerHTML = statTable('Tags (fewest songs first)', ['Tag', 'Group', 'Songs now', 'Would add', 'Status', ''],
+          tags.map(t => [t.label, (tgDict && tgDict.facets[t.facet] || {}).label || t.facet, t.songs, '+' + t.candidates, status(t),
+            { html: `<button class="btn btn-secondary btn-sm" onclick="tgSpotStart('${escapeHtml(t.id)}')">${t.tested ? 'Check more' : 'Check'}</button>` }]));
+      } catch (err) { el.innerHTML = `<p style="color:#ff4d6a;">${escapeHtml(err.message)}</p>`; }
+    }
+    async function tgSpotStart(id) {
+      const el = document.getElementById('tg-spot');
+      el.innerHTML = '<p class="muted">Picking songs…</p>';
+      try {
+        const r = await tgApi('spot/sample?id=' + encodeURIComponent(id));
+        tgSpotTag = r; tgSpotAns = {};
+        if (!r.songs.length) { el.innerHTML = '<p class="muted">You\'ve already checked every song for this tag.</p>'; return; }
+        el.innerHTML = `<h3 style="margin:0 0 4px;">Is it “${escapeHtml(r.label)}”?</h3>
+          <p class="muted" style="white-space:normal;margin-bottom:10px;">${r.songs.length} random songs out of ${r.wouldAdd} the AI would tag. Listen a few seconds, then click Yes or No.</p>` +
+          r.songs.map(s => `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--border);">
+              <div style="flex:1 1 200px;"><strong>${escapeHtml(s.title)}</strong> <span class="muted" style="font-size:0.8rem;">${escapeHtml(s.genre || '')}${s.subgenre ? ' › ' + escapeHtml(s.subgenre) : ''}</span></div>
+              <audio controls preload="none" src="${escapeHtml(s.file)}" style="height:32px;max-width:260px;"></audio>
+              <button class="btn btn-sm btn-secondary" data-spot="${s.id}" data-v="1" onclick="tgSpotMark('${s.id}', true)">👍 Yes</button>
+              <button class="btn btn-sm btn-secondary" data-spot="${s.id}" data-v="0" onclick="tgSpotMark('${s.id}', false)">👎 No</button>
+            </div>`).join('') +
+          `<div class="action-btns" style="margin-top:12px;"><button class="btn btn-primary btn-sm" style="width:auto;" onclick="tgSpotSave()">Save answers</button>
+            <button class="btn btn-secondary btn-sm" onclick="tgSpotList()">Back</button></div>`;
+      } catch (err) { el.innerHTML = `<p style="color:#ff4d6a;">${escapeHtml(err.message)}</p>`; }
+    }
+    function tgSpotMark(id, ok) {
+      tgSpotAns[id] = ok;
+      document.querySelectorAll(`[data-spot="${id}"]`).forEach(b => {
+        const on = (b.dataset.v === '1') === ok;
+        b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on);
+      });
+    }
+    async function tgSpotSave() {
+      const n = Object.keys(tgSpotAns).length;
+      if (!n) { showToast('Click Yes or No on at least one song', false); return; }
+      if (n < tgSpotTag.songs.length && !confirm(`You answered ${n} of ${tgSpotTag.songs.length}. Save anyway?`)) return;
+      try {
+        const r = await tgApi('spot/answer', { id: tgSpotTag.tag, answers: tgSpotAns });
+        const t = r.tag || { yes: 0, no: 0 };
+        const msg = r.rule.on
+          ? `✅ “${tgSpotTag.label}” is ON: ${t.yes} of ${t.yes + t.no} right. It now goes on ${r.rule.adds} songs. Click 🚀 Publish when you're done.`
+          : (t.yes + t.no < 6 ? `Saved. Answer ${6 - t.yes - t.no} more to decide.` : `❌ “${tgSpotTag.label}” stays off: only ${t.yes} of ${t.yes + t.no} right. Your Yes answers still count for those songs.`);
+        showToast(msg, r.rule.on || t.yes + t.no < 6);
+        await tgSpotList();
+        document.getElementById('tg-spot').insertAdjacentHTML('afterbegin', `<p style="white-space:normal;"><strong>${escapeHtml(msg)}</strong></p>`);
       } catch (err) { showToast(err.message, false); }
     }
 
@@ -1120,7 +1191,7 @@
 
     function statTable(title, cols, rows) {
       const body = rows.length
-        ? rows.map(r => '<tr>' + r.map(c => `<td>${escapeHtml(String(c))}</td>`).join('') + '</tr>').join('')
+        ? rows.map(r => '<tr>' + r.map(c => `<td>${c && c.html != null ? c.html : escapeHtml(String(c))}</td>`).join('') + '</tr>').join('')
         : `<tr><td colspan="${cols.length}" class="muted">Nothing yet</td></tr>`;
       return `<div style="margin-top:18px;"><h3 style="font-size:0.95rem;margin-bottom:6px;">${title}</h3>
         <div class="table-container"><table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
@@ -1144,7 +1215,18 @@
         const st = data.stats;
         statsLoaded = true;
         const pct = (a, b) => b ? Math.round((a / b) * 100) + '%' : '—';
-        el.innerHTML =
+        const r = data.rules || {};
+        const total = Object.values(st.totals || {}).reduce((a, b) => a + b, 0);
+        const fixRules = 'Fix: open <a href="https://console.firebase.google.com/project/portal-music-3b1a1/firestore/rules" target="_blank" rel="noopener">Firebase Console → Firestore Database → Rules</a>, ' +
+          'delete everything there, paste the whole <code>firestore.rules</code> file from the Portal-Music folder, click <strong>Publish</strong>. Numbers start counting right away.';
+        const rulesBanner = r.checked && !r.hasEvents
+          ? `<div style="background:rgba(255,77,106,0.12);border:1px solid #ff4d6a;border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"><strong>⚠ The site can't save any stats yet</strong>: your live Firebase rules don't allow it. ${fixRules}</div>`
+          : r.checked && !r.current
+          ? `<div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.5);border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"><strong>Your live Firebase rules are out of date</strong>${(r.missingEvents || []).length ? ' (not counted yet: ' + escapeHtml(r.missingEvents.join(', ')) + ')' : ''}. ${fixRules}</div>`
+          : !r.checked && !total
+          ? `<div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.5);border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"><strong>No stats in this range.</strong> If the site has had visitors, the live Firebase rules probably aren't published. ${fixRules}${r.error ? '<br><span class="muted">(Couldn\'t check the rules: ' + escapeHtml(r.error) + ')</span>' : ''}</div>`
+          : '';
+        el.innerHTML = rulesBanner +
           (st.truncated ? '<p style="color:#f5a623;">Showing the first 50,000 events only; pick a shorter range.</p>' : '') +
           '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
             statTile('Visitors', st.visitors.total, st.visitors.returning + ' came back on another day') +
@@ -1494,14 +1576,14 @@
     }
 
     function batchRender() {
-      const label = { ready: '⏳ ready', dupe: '⚠ already in catalog', uploading: '⬆ uploading…', done: '✅ added', skipped: '↷ skipped', error: '✗ ' };
+      const label = { ready: '⏳ ready', dupe: '⚠ name already in catalog', uploading: '⬆ uploading…', done: '✅ added', skipped: '↷ skipped', error: '✗ ' };
       document.getElementById('batch-rows').innerHTML = batchItems.map((it, i) => `
         <tr>
           <td>${i + 1}</td>
           <td><input class="form-control" style="padding:4px 8px;font-size:0.85rem;" value="${escapeHtml(it.title)}" ${it.status === 'done' ? 'disabled' : ''}
                onchange="batchItems[${i}].title=this.value.trim()||batchItems[${i}].title;batchItems[${i}].edited=true"></td>
           <td style="font-size:0.8rem;white-space:nowrap;">🎵 ${(it.mp3.size / 1048576).toFixed(1)} MB${it.wav ? ' · WAV ✓' : ''}${it.cover ? ' · 🖼 ✓' : ''}</td>
-          <td style="font-size:0.8rem;">${label[it.status] || ''}${it.status === 'error' ? escapeHtml(it.error || '') : ''}</td>
+          <td style="font-size:0.8rem;">${label[it.status] || ''}${it.error ? (it.status === 'error' ? '' : ' · ') + escapeHtml(it.error) : ''}</td>
           <td>${it.status === 'done' || batchRunning ? '' : `<button class="btn btn-secondary btn-sm" onclick="batchItems.splice(${i},1);batchRender()">✕</button>`}</td>
         </tr>`).join('');
       const c = s => batchItems.filter(it => it.status === s).length;
@@ -1554,6 +1636,7 @@
           else {
             newIds.push(result.track.id);
             it.title = result.track.title;
+            if (result.renamedFrom) it.error = `renamed: "${result.renamedFrom}" was taken`;
             if (it.wav) { try { await uploadWav(result.track.id, it.wav); } catch (e) { it.error = 'WAV: ' + e.message; } }
             it.status = 'done';
           }
@@ -1689,6 +1772,71 @@
     }
 
     // --- WAV attach / remove ---
+    // "A song with this name already exists": pick a suggested name, type one, or keep it
+    function askDuplicateName(title, suggestions) {
+      return new Promise(resolve => {
+        const wrap = document.createElement('div');
+        wrap.className = 'modal-overlay open';
+        wrap.style.zIndex = 3000;
+        wrap.innerHTML = `<div class="modal" style="max-width:480px;">
+          <h2 style="margin-top:0;">That name is taken</h2>
+          <p style="white-space:normal;">A song called <strong>“${escapeHtml(title)}”</strong> is already in your library. Pick a new name:</p>
+          <div class="action-btns" style="flex-wrap:wrap;margin-bottom:10px;">${(suggestions || []).map(x =>
+            `<button type="button" class="btn btn-secondary btn-sm" data-name="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
+          <input class="form-control" id="dup-name" value="${escapeHtml((suggestions || [])[0] || title)}">
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" data-act="use" style="flex:1;">Use this name</button>
+            <button type="button" class="btn btn-secondary" data-act="keep" style="flex:1;">Keep the same name</button>
+            <button type="button" class="btn btn-secondary" data-act="cancel">Cancel</button>
+          </div></div>`;
+        document.body.appendChild(wrap);
+        const input = wrap.querySelector('#dup-name');
+        input.focus(); input.select();
+        const done = v => { wrap.remove(); resolve(v); };
+        wrap.addEventListener('click', e => {
+          const b = e.target.closest('button');
+          if (!b) return;
+          if (b.dataset.name) { input.value = b.dataset.name; input.focus(); return; }
+          if (b.dataset.act === 'use') done(input.value.trim() ? { title: input.value.trim() } : null);
+          if (b.dataset.act === 'keep') done({ keep: true });
+          if (b.dataset.act === 'cancel') done(null);
+        });
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') wrap.querySelector('[data-act="use"]').click(); if (e.key === 'Escape') done(null); });
+      });
+    }
+
+    // Re-send a request after the duplicate-name dialog (title changed, or kept on purpose)
+    async function withNameCheck(send, body) {
+      let result = await send(body);
+      while (!result.success && result.code === 'DUPLICATE_TITLE') {
+        const pick = await askDuplicateName(result.title, result.suggestions);
+        if (!pick) throw new Error('Not saved: pick a different name');
+        body = { ...body, ...(pick.keep ? { allowDuplicateTitle: true } : { title: pick.title }) };
+        result = await send(body);
+      }
+      return result;
+    }
+
+    // 🔁 Replace a track's MP3 (wrong song uploaded): new file name, old WAV dropped, re-tagged
+    async function replaceAudio(file) {
+      if (!file) return;
+      const id = document.getElementById('edit-id').value;
+      document.getElementById('edit-mp3-input').value = '';
+      if (!/\.mp3$/i.test(file.name)) { showToast('Choose an .mp3 file', false); return; }
+      if (!confirm('Replace this song\'s audio with "' + file.name + '"? Its WAV is removed too (attach the new WAV after).')) return;
+      showToast('Replacing audio…');
+      try {
+        const res = await fetch('/api/track/audio?id=' + encodeURIComponent(id), { method: 'POST', headers: { 'Content-Type': 'audio/mpeg' }, body: file });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        const i = catalog.findIndex(x => x.id === id);
+        if (i !== -1) catalog[i] = result.track;
+        showWavStatus(result.track);
+        document.getElementById('edit-mp3-status').innerHTML = '✅ New audio saved. Now attach its WAV (if you have one), then run the R2 sync and push.';
+        showToast('Audio replaced.' + (result.autoTag === 'started' ? ' The AI is re-tagging it.' : ''));
+      } catch (err) { showToast('Replace failed: ' + err.message, false); }
+    }
+
     async function uploadWav(id, file) {
       if (!/\.wav$/i.test(file.name)) throw new Error('Choose a .wav file');
       const res = await fetch('/api/track/wav?id=' + encodeURIComponent(id), {
@@ -1772,11 +1920,13 @@
       saveBtn.disabled = true;
       saveBtn.textContent = sunoSong ? (wantWav ? 'Downloading MP3 + WAV from Suno…' : 'Downloading from Suno…') : 'Saving track...';
 
-      const post = async body => (await fetch('/api/track/add', {
+      let chosen = {};   // a new name or "keep it" from the duplicate-name dialog sticks for the Suno retry too
+      const post = async body => withNameCheck(async b => (await fetch('/api/track/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, artist, genre, subgenre, tags, isNewRelease, featured, coverBase64, ...body })
-      })).json();
+        body: JSON.stringify(b)
+      })).json(), { title, artist, genre, subgenre, tags, isNewRelease, featured, coverBase64, ...chosen, ...body })
+        .then(r => { if (r.success && r.track.title !== title) chosen = { title: r.track.title }; return r; });
 
       try {
         let result = await post(sunoSong && !audioBase64
@@ -1806,7 +1956,7 @@
           try { await uploadWav(result.track.id, wavFile); wavNote = ' (MP3 + WAV)'; }
           catch (e) { result.warning = 'WAV not added: ' + e.message; }
         }
-        showToast(`🎉 "${title}" added${wavNote}! Next: R2 sync, SEO rebuild, push.`);
+        showToast(`🎉 "${result.track.title}" added${wavNote}! Next: R2 sync, SEO rebuild, push.`);
         if (result.warning) setTimeout(() => showToast(result.warning, false), 3500);
         clearSuno();
         document.getElementById('wav-input').value = '';
@@ -1936,12 +2086,11 @@
       const isNew = wantNew === isNewRelease(t) ? undefined : wantNew;
 
       try {
-        const res = await fetch('/api/track/update', {
+        const result = await withNameCheck(async body => (await fetch('/api/track/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, title, artist, genre, subgenre, tags, featured, isNew })
-        });
-        const result = await res.json();
+          body: JSON.stringify(body)
+        })).json(), { id, title, artist, genre, subgenre, tags, featured, isNew });
         if (!result.success) throw new Error(result.error);
         showToast('Saved. To publish: Actions & Sync → Run SEO Rebuild, then push.');
         closeEditModal();

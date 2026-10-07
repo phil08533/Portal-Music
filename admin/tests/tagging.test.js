@@ -277,3 +277,29 @@ test('top-rank rule: a style both models rank highly is added only where your fo
   assert.ok(tagging.decideTrack(ctx, music[0]).labels.includes('techno'));
   assert.ok(!tagging.decideTrack(ctx, music[15]).labels.includes('gospel'));
 });
+
+test('spot-check: 5 of 6 right switches a mood on for every song both models rank highly; answers stick', () => {
+  const music = [], analyses = {};
+  for (let i = 0; i < 60; i++) {
+    const a = neutral(i), happy = i < 10;
+    music.push({ id: 'h' + i, title: 't' + i, genre: 'Jazz' });
+    if (happy) { a.ast['Happy music'] = 0.08; a.clap.happy = 0.45; }
+    analyses['h' + i] = a;
+  }
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'spot-'));
+  const spotPath = path.join(dir, 'spot.json');
+  let ctx = tagging.loadContext({ music, analyses, tags: dict, spotPath });
+  assert.ok(!ctx.rankRule.happy.on);
+  const sample = tagging.spotSample(ctx, 'happy');
+  assert.strictEqual(sample.songs.length, 6);
+  assert.ok(sample.songs.every(s => Number(s.id.slice(1)) < 10), 'only songs the rule would tag');
+  const answers = Object.fromEntries(sample.songs.map((s, k) => [s.id, k !== 0]));   // 5 yes, 1 no
+  tagging.spotAnswer('happy', answers, { spotPath });
+  ctx = tagging.loadContext({ music, analyses, tags: dict, spotPath });
+  assert.ok(ctx.rankRule.happy.on);
+  const no = sample.songs[0].id;
+  const tagged = music.filter(t => tagging.decideTrack(ctx, t).labels.includes('happy')).map(t => t.id);
+  assert.strictEqual(tagged.length, 9, 'all 10 candidates except the one you said no to: ' + tagged);
+  assert.ok(!tagged.includes(no));
+  assert.ok(tagging.spotList(ctx).find(r => r.id === 'happy').on);
+});

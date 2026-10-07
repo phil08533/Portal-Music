@@ -38,6 +38,7 @@ const TAGS_JSON = path.join(ROOT, 'data', 'tags.json');
 const SIMILAR_JSON = path.join(ROOT, 'data', 'similar.json');
 const GENRES_JSON = path.join(ROOT, 'data', 'genres.json');
 const FOLDER_TAGS_JSON = path.join(ROOT, 'data', 'folder-tags.json');
+const SPOT_JSON = path.join(__dirname, 'analysis', 'spotcheck.json');
 const ANALYSIS_DIR = path.join(__dirname, 'analysis');
 const CONFIG_JSON = path.join(ANALYSIS_DIR, 'config.json');
 
@@ -70,6 +71,9 @@ const DEFAULTS = {
   rankMinAst: 0.05,          // …Model A at least this sure…
   rankMinPrecision: 0.8,     // …switched on per tag only where it matches your folders this often…
   rankMinChecked: 8,         // …on at least this many songs
+  spotMinAst: 0.02,          // moods/instruments/uses: Model A floor for the top-rank rule (you spot-check it)
+  spotSample: 6,             // songs per spot-check round…
+  spotMinPrecision: 0.8,     // …and how many must be right (5 of 6) to switch the tag on
 };
 
 // ── loading ────────────────────────────────────────────────────────────────
@@ -112,7 +116,8 @@ function loadContext(opts = {}) {
   const stats = catalogStats(dict, analyses, opts.allowMock, config);
   const genres = opts.genres || readJson(GENRES_JSON, { genres: {} }).genres;
   const folderTags = opts.folderTags || readJson(FOLDER_TAGS_JSON, {});
-  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres, folderTags };
+  const spot = opts.spot || readJson(opts.spotPath || SPOT_JSON, { tags: {} });
+  const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres, folderTags, spot };
   ctx.calib = calibrate(ctx);
   ctx.folder = folderCheck(ctx);
   ctx.rankRule = rankRuleCheck(ctx);
@@ -123,6 +128,10 @@ function loadContext(opts = {}) {
 // Model A is rarely confident in absolute terms but ranks songs well, and Model B (when working)
 // ranks them too. A style goes on when BOTH put the song in their own top 10% for it, but only for
 // tags where that rule puts songs in the matching genre folder ≥ rankMinPrecision of the time.
+// Moods, instruments and uses can't be checked against folders: those are switched on by your
+// spot-check (admin/analysis/spotcheck.json), random songs the rule would tag, 5 of 6 right.
+const RANK_FACETS = { mood: 1, style: 1, instrument: 1, use: 1 };
+
 function rankRuleCheck(ctx) {
   const { dict, analyses, config, music, stats } = ctx;
   const out = {};
@@ -131,19 +140,76 @@ function rankRuleCheck(ctx) {
   if (items.length < config.calibrateMinTracks) return out;
   const zMin = 1.2816;   // top 10% of a normal curve
   for (const t of dict.tags) {
-    if (t.facet !== 'style' || !t.genre || !t.ast || !t.clap) continue;
+    if (!RANK_FACETS[t.facet] || !t.ast || !t.clap) continue;
+    const byFolder = t.facet === 'style' && !!t.genre;
     const As = items.map(x => astScore(x.a, t) || 0).sort((p, q) => p - q);
-    const aThr = Math.max(config.rankMinAst, As[Math.floor(As.length * (1 - config.rankTop))]);
+    const aThr = Math.max(byFolder ? config.rankMinAst : config.spotMinAst, As[Math.floor(As.length * (1 - config.rankTop))]);
     let checked = 0, right = 0;
+    const candidates = [];
     for (const x of items) {
-      if (x.a.review && x.a.review.autoGenre) continue;
       const B = clapZ(x.a, t, stats);
-      if ((astScore(x.a, t) || 0) >= aThr && B != null && B >= zMin) { checked++; if (x.t.genre === t.genre) right++; }
+      if ((astScore(x.a, t) || 0) < aThr || B == null || B < zMin) continue;
+      candidates.push(x.t.id);
+      if (byFolder && !(x.a.review && x.a.review.autoGenre)) { checked++; if (x.t.genre === t.genre) right++; }
     }
     const precision = checked ? right / checked : null;
-    out[t.id] = { aThr, zMin, checked, precision, on: checked >= config.rankMinChecked && precision >= config.rankMinPrecision };
+    const folderOn = byFolder && checked >= config.rankMinChecked && precision >= config.rankMinPrecision;
+    const sp = spotStatus(ctx, t.id);
+    out[t.id] = { aThr, zMin, checked, precision, candidates, byFolder: folderOn, spot: sp, on: folderOn || sp.on };
   }
   return out;
+}
+
+// What your spot-check answers say about a tag
+function spotStatus(ctx, tagId) {
+  const e = ((ctx.spot || {}).tags || {})[tagId] || {};
+  const yes = (e.yes || []).length, no = (e.no || []).length;
+  const n = yes + no;
+  return { yes, no, precision: n ? yes / n : null,
+    on: n >= ctx.config.spotSample && yes / n >= ctx.config.spotMinPrecision, tested: n > 0 };
+}
+
+// Random songs the top-rank rule would tag (and that don't have the tag yet), for you to listen to
+function spotSample(ctx, tagId, n) {
+  const rr = (ctx.rankRule || {})[tagId];
+  if (!rr) throw new Error(ctx.stats.clapOff ? 'Model B is off, so there is nothing to spot-check' : 'This tag can\'t be spot-checked');
+  const e = ((ctx.spot || {}).tags || {})[tagId] || {};
+  const answered = new Set([...(e.yes || []), ...(e.no || [])]);
+  const decisions = decideAll({ ...ctx, rankRule: { ...ctx.rankRule, [tagId]: { ...rr, on: false } } });
+  const pool = rr.candidates.filter(id => !answered.has(id) && !((decisions[id] || {}).labels || []).includes(tagId));
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const byId = Object.fromEntries(ctx.music.map(t => [t.id, t]));
+  return { tag: tagId, label: (ctx.tagById[tagId] || {}).label, wouldAdd: rr.candidates.length, remaining: pool.length,
+    songs: pool.slice(0, n || ctx.config.spotSample).map(id => {
+      const t = byId[id];
+      return { id, title: t.title, genre: t.genre, subgenre: t.subgenre, file: t.file, cover: t.cover };
+    }) };
+}
+
+// Save answers ({ trackId: true|false }); each answer also sticks to that song
+function spotAnswer(tagId, answers, opts = {}) {
+  const file = opts.spotPath || SPOT_JSON;
+  const data = readJson(file, { tags: {} });
+  data.tags = data.tags || {};
+  const e = data.tags[tagId] = data.tags[tagId] || { yes: [], no: [] };
+  for (const [id, ok] of Object.entries(answers || {})) {
+    if (!/^[a-z0-9_-]{1,64}$/i.test(id)) continue;
+    e.yes = e.yes.filter(x => x !== id); e.no = e.no.filter(x => x !== id);
+    (ok ? e.yes : e.no).push(id);
+  }
+  e.at = Date.now();
+  writeJson(file, data, true);
+  return data;
+}
+
+// Every tag that can be spot-checked, with what it would add
+function spotList(ctx) {
+  const counts = {};
+  for (const d of Object.values(decideAll(ctx))) for (const l of d.labels) counts[l] = (counts[l] || 0) + 1;
+  return Object.entries(ctx.rankRule || {}).filter(([, r]) => !r.byFolder).map(([id, r]) => ({
+    id, label: (ctx.tagById[id] || {}).label || id, facet: (ctx.tagById[id] || {}).facet,
+    songs: counts[id] || 0, candidates: r.candidates.length, ...r.spot,
+  })).filter(x => x.candidates >= ctx.config.spotSample || x.tested).sort((a, b) => a.songs - b.songs || b.candidates - a.candidates);
 }
 
 // ── Model A checked against the owner's genre folders ─────────────────────
@@ -472,6 +538,13 @@ function decideTrack(ctx, track, opts = {}) {
     ? { genre: styleGenre, subgenre: pickSubgenre(styleGenre, Object.keys(decided).filter(id => (tagById[id] || {}).facet === 'style').map(id => tagById[id]), ctx) }
     : null;
 
+  // Your spot-check answers for this song
+  for (const [id, e] of Object.entries((ctx.spot || {}).tags || {})) {
+    if (!tagById[id]) continue;
+    if ((e.no || []).includes(track.id)) { delete decided[id]; delete suggested[id]; }
+    else if ((e.yes || []).includes(track.id)) { decided[id] = { conf: 'owner', score: 1, why: 'you said yes (spot-check)' }; delete suggested[id]; }
+  }
+
   // The owner's review always wins
   const review = a.review || {};
   for (const id of review.remove || []) { delete decided[id]; delete suggested[id]; }
@@ -692,6 +765,7 @@ function tune(opts = {}) {
 }
 
 module.exports = {
+  spotSample, spotAnswer, spotList,
   DEFAULTS, loadContext, decideTrack, decideAll, publish, setReview, markAutoGenre, accuracy, tune, similarTracks, agreementReport,
   ANALYSIS_DIR,
 };

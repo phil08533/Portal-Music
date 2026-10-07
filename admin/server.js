@@ -49,6 +49,46 @@ function readSpotlight() {
   }
 }
 
+// ── duplicate names ──────────────────────────────────────────────────────
+// Two songs with one title confuse visitors (and file names), so a repeat title gets a word in front
+const NAME_WORDS = ['Midnight', 'Golden', 'Velvet', 'Neon', 'Silver', 'Crimson', 'Electric', 'Hidden', 'Wild', 'Lunar',
+  'Faded', 'Burning', 'Quiet', 'Endless', 'Distant', 'Summer', 'Winter', 'Late Night', 'Paper', 'Static', 'Ocean', 'Desert',
+  'Northern', 'Hollow', 'Bright', 'Slow', 'Little', 'Lost', 'Sunday', 'Cobalt'];
+const normTitle = t => String(t || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+function readCatalog() {
+  return fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [];
+}
+
+function titleTaken(music, title, exceptId) {
+  const n = normTitle(title);
+  return music.some(t => t.id !== exceptId && normTitle(t.title) === n);
+}
+
+function nameSuggestions(music, title, count = 3) {
+  const words = NAME_WORDS.slice().sort(() => Math.random() - 0.5);
+  const out = [];
+  for (const w of words) {
+    const s = `${w} ${String(title).trim()}`;
+    if (!titleTaken(music, s) && !out.includes(s)) out.push(s);
+    if (out.length >= count) break;
+  }
+  return out;
+}
+
+// A file name in music/<folder>/ that no file on disk AND no song in the catalog uses yet
+// (local copies may be gone after an R2 sync, so the disk alone isn't enough)
+function freeAssetName(folderRel, base, exts, music) {
+  const used = new Set(music.flatMap(t => [t.file, t.wav]).filter(Boolean).map(u => { try { return decodeURI(u); } catch (e) { return u; } }));
+  const clean = String(base).replace(/[/\\?%*:|"<>]/g, '').trim() || 'track';
+  for (let n = 1; ; n++) {
+    const name = n === 1 ? clean : `${clean} (${n})`;
+    const clash = exts.some(ext => fs.existsSync(path.join(ROOT_DIR, folderRel, name + ext)) ||
+      used.has(`https://assets.portal-music.com/${folderRel}/${name}${ext}`));
+    if (!clash) return name;
+  }
+}
+
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
@@ -338,6 +378,12 @@ const server = http.createServer(async (req, res) => {
       if (!title || !genre) throw new Error('Title and Genre are required');
       if (!audioBase64 && !sunoId) throw new Error('Choose an MP3 file or paste a Suno link');
       if (sunoId && !suno.isSunoId(sunoId)) throw new Error('Invalid Suno song ID');
+      const dupError = t => {
+        const err = new Error(`A song called "${t}" is already in your library`);
+        err.code = 'DUPLICATE_TITLE'; err.title = t; err.suggestions = nameSuggestions(readCatalog(), t);
+        return err;
+      };
+      if (!batch && !data.allowDuplicateTitle && titleTaken(readCatalog(), title)) throw dupError(title);
 
       // Get the audio first so nothing is written if the download fails
       const audioBuffer = sunoId
@@ -354,10 +400,12 @@ const server = http.createServer(async (req, res) => {
           }
         } catch (e) { /* tags are optional */ }
       }
-      if (batch) {
-        const existing = (fs.existsSync(MUSIC_JSON_PATH) ? JSON.parse(fs.readFileSync(MUSIC_JSON_PATH, 'utf8')) : [])
-          .some(t => String(t.title).trim().toLowerCase() === String(finalTitle).trim().toLowerCase());
-        if (existing && batch.skipDuplicates) return sendJson(200, { success: true, skipped: true, reason: 'already in the catalog' });
+      let renamedFrom = null;
+      if (batch && titleTaken(readCatalog(), finalTitle)) {
+        if (batch.skipDuplicates) return sendJson(200, { success: true, skipped: true, reason: 'already in the catalog' });
+        // No questions mid-batch: put a word in front ("Midnight I'll Hold You") and say so in the list
+        renamedFrom = finalTitle;
+        finalTitle = nameSuggestions(readCatalog(), finalTitle, 1)[0] || `${finalTitle} (${Date.now() % 1000})`;
       }
       let wavBuffer = null;
       let warning = '';
@@ -379,15 +427,11 @@ const server = http.createServer(async (req, res) => {
         coverUrl = `https://assets.portal-music.com/covers/${coverFilename}`;
       }
 
-      // Save audio as music/<genre>/<title>.mp3 (+ .wav)
-      let safeTitle = finalTitle.replace(/[/\\?%*:|"<>]/g, '').trim();
+      // Save audio as music/<genre>/<title>.mp3 (+ .wav), never reusing another song's file name
       const safeGenre = genre.replace(/[/\\?%*:|"<>]/g, '').trim();
       const targetFolder = path.join(MUSIC_DIR, safeGenre);
       fs.mkdirSync(targetFolder, { recursive: true });
-      // Never overwrite another song's file that happens to have the same title
-      for (let n = 2; fs.existsSync(path.join(targetFolder, `${safeTitle}.mp3`)) || fs.existsSync(path.join(targetFolder, `${safeTitle}.wav`)); n++) {
-        safeTitle = `${finalTitle.replace(/[/\\?%*:|"<>]/g, '').trim()} (${n})`;
-      }
+      const safeTitle = freeAssetName(`music/${safeGenre}`, finalTitle, ['.mp3', '.wav'], readCatalog());
       const finalFileName = `${safeTitle}.mp3`;
       const targetAudioPath = path.join(targetFolder, finalFileName);
       fs.writeFileSync(targetAudioPath, audioBuffer);
@@ -428,9 +472,45 @@ const server = http.createServer(async (req, res) => {
         });
         autoTag = tagRunner.analyzeNewTrack(id);   // 'started' | 'busy' | 'not-installed'
       }
-      return sendJson(200, { success: true, track: newEntry, warning, autoTag });
+      return sendJson(200, { success: true, track: newEntry, warning, autoTag, renamedFrom });
     } catch (err) {
-      return sendJson(500, { success: false, error: err.message, code: err.code || '' });
+      return sendJson(500, { success: false, error: err.message, code: err.code || '', title: err.title, suggestions: err.suggestions });
+    }
+  }
+
+  // --- API: Replace a track's MP3 (raw file body): wrong song uploaded, new mix… ---
+  // Saved under a NEW file name (so the old file can't be served from cache), the old WAV is
+  // dropped (it belonged to the old audio), and the song is re-analyzed and re-tagged.
+  if (req.method === 'POST' && pathname === '/api/track/audio') {
+    try {
+      const id = url.searchParams.get('id');
+      const music = readCatalog();
+      const track = music.find(t => t.id === id);
+      if (!track) throw new Error('Track not found');
+      const buf = await readRaw(req, MAX_WAV_BYTES);
+      if (!suno.isMp3(buf)) throw new Error('That file is not a playable MP3');
+      const prefix = 'https://assets.portal-music.com/';
+      let folderRel = `music/${String(track.genre || 'Other').replace(/[/\\?%*:|"<>]/g, '').trim()}`;
+      if (track.file && track.file.startsWith(prefix)) folderRel = path.posix.dirname(decodeURI(track.file.slice(prefix.length)));
+      const destDir = path.resolve(ROOT_DIR, folderRel);
+      if (!(destDir + path.sep).startsWith(MUSIC_DIR + path.sep)) throw new Error('Unexpected file location');
+      const name = freeAssetName(folderRel, track.title, ['.mp3', '.wav'], music);
+      fs.mkdirSync(destDir, { recursive: true });
+      const dest = path.join(destDir, name + '.mp3');
+      fs.writeFileSync(dest, buf);
+      writeId3(dest, { title: track.title, artist: track.artist, genre: track.genre });
+      track.file = prefix + encodeURI(`${folderRel}/${name}.mp3`);
+      delete track.wav;
+      track.duration = '';
+      delete track.durationSec; delete track.bpm; delete track.key;
+      fs.writeFileSync(MUSIC_JSON_PATH, JSON.stringify(music, null, 2), 'utf8');
+      // The old analysis described the old audio
+      try { fs.unlinkSync(path.join(tagging.ANALYSIS_DIR, id + '.json')); } catch (e) { /* none yet */ }
+      const autoTag = tagRunner.analyzeIds([id]);
+      if (autoTag !== 'started') exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, () => {});
+      return sendJson(200, { success: true, track, autoTag });
+    } catch (err) {
+      return sendJson(500, { success: false, error: err.message });
     }
   }
 
@@ -489,6 +569,11 @@ const server = http.createServer(async (req, res) => {
       const idx = music.findIndex(t => t.id === id);
       if (idx === -1) throw new Error('Track not found');
 
+      if (title !== undefined && normTitle(title) !== normTitle(music[idx].title) && !data.allowDuplicateTitle && titleTaken(music, title, id)) {
+        const err = new Error(`A song called "${title.trim()}" is already in your library`);
+        res.writeHead(409, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: false, error: err.message, code: 'DUPLICATE_TITLE', title: title.trim(), suggestions: nameSuggestions(music, title) }));
+      }
       if (title !== undefined) music[idx].title = title.trim();
       if (artist !== undefined) music[idx].artist = artist ? artist.trim() : null;
       if (genre !== undefined) music[idx].genre = genre.trim();
@@ -576,6 +661,12 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'GET' && pathname === '/api/tags/agreement') {
         return sendJson(200, { success: true, agreement: tagging.agreementReport(tagging.loadContext({ allowMock })) });
       }
+      if (req.method === 'GET' && pathname === '/api/tags/spot') {
+        return sendJson(200, { success: true, tags: tagging.spotList(tagging.loadContext({ allowMock })) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/spot/sample') {
+        return sendJson(200, { success: true, ...tagging.spotSample(tagging.loadContext({ allowMock }), String(url.searchParams.get('id') || '')) });
+      }
       if (req.method === 'GET' && pathname === '/api/tags/accuracy') {
         return sendJson(200, { success: true, accuracy: tagging.accuracy(tagging.loadContext({ allowMock })) });
       }
@@ -603,6 +694,14 @@ const server = http.createServer(async (req, res) => {
           exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, () => {});
           return sendJson(200, { success: true, result });
         }
+        if (pathname === '/api/tags/spot/answer') {
+          if (allowMock) throw new Error('Test mode: spot-checks are not saved.');
+          if (!data.id || typeof data.answers !== 'object') throw new Error('Tag and answers required');
+          tagging.spotAnswer(String(data.id), data.answers);
+          const ctx = tagging.loadContext();
+          const row = tagging.spotList(ctx).find(r => r.id === data.id) || null;
+          return sendJson(200, { success: true, tag: row, rule: { on: !!(ctx.rankRule[data.id] || {}).on, adds: ((ctx.rankRule[data.id] || {}).candidates || []).length } });
+        }
         if (pathname === '/api/tags/tune') return sendJson(200, { success: true, ...tagging.tune({ allowMock }) });
       }
       return sendJson(404, { success: false, error: 'Unknown tags action' });
@@ -614,7 +713,8 @@ const server = http.createServer(async (req, res) => {
   // --- API: Stats (anonymous usage events) ---
   if (req.method === 'GET' && pathname === '/api/stats') {
     try {
-      return sendJson(200, { success: true, stats: await stats.getStats(url.searchParams.get('days')) });
+      const [st, rules] = await Promise.all([stats.getStats(url.searchParams.get('days')), stats.rulesStatus()]);
+      return sendJson(200, { success: true, stats: st, rules });
     } catch (err) {
       return sendJson(500, { success: false, error: err.message });
     }
