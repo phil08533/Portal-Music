@@ -4327,3 +4327,83 @@ html.is-pro .creator-toolkit-card a[href="upgrade.html"] { display: none; }
 }
 .ts-chip:hover, .ts-chip.active { border-color: var(--accent); background: var(--accent-glow); }
 .ts-chip small { color: var(--text-muted); margin-left: 3px; }
+
+/* ============================================
+   Tighter sizing + homepage sections (each its own panel, its own card size)
+   ============================================ */
+.hero { padding: 1.5rem 0 1.75rem; }
+.hero h1 { font-size: clamp(2rem, 4.4vw, 3.2rem); margin-bottom: 0.6rem; }
+.hero p { font-size: 0.98rem; }
+.hero .hero-cta { margin-top: 1.25rem; padding: 11px 26px; font-size: 0.95rem; }
+.trust-banner { gap: 12px; }
+.trust-item { padding: 0.9rem 1rem; gap: 12px; }
+.trust-icon { width: 34px; height: 34px; border-radius: 10px; }
+.genre-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.genre-card { padding: 0.75rem 0.5rem; }
+.section-header { margin: 2rem 0 0.9rem; }
+.featured-artists-box { padding: 1rem 1.25rem; }
+.featured-artists-portraits { justify-content: flex-start; gap: 14px; }
+.featured-artist-portrait { flex: 0 1 150px; }
+.featured-artist-portrait-img { font-size: 2.2rem; }
+
+/* Cards everywhere: a bit smaller */
+.grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.music-card-body { padding: 0.75rem 0.85rem 0; }
+.music-card h3 { font-size: 0.9rem; }
+.card-actions { padding: 0 0.85rem 0.85rem; gap: 6px; }
+.btn-play, .btn-dl { padding: 8px 10px; font-size: 0.82rem; white-space: nowrap; }
+.music-card-cover .fav-btn { width: 28px; height: 28px; }
+
+/* Panels: a slightly different background so each section stands on its own */
+.home-panel {
+  margin-top: 1.75rem;
+  padding: 0.25rem 1.1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--surface);
+}
+.home-panel--new { background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.home-panel--featured { background: var(--surface); }
+.home-panel--recent { background: color-mix(in srgb, var(--text) 4%, var(--bg)); }
+.home-panel--spotlight { background: color-mix(in srgb, var(--accent-2) 9%, var(--surface)); }
+.home-panel > .section-header { margin: 0.9rem 0 0.8rem; }
+.home-panel .spotlight-subtitle { margin: -0.4rem 0 0.8rem; }
+
+/* New Releases: one row of medium cards that scrolls sideways */
+.grid.grid--row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  grid-auto-columns: 172px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+.grid--row .music-card { scroll-snap-align: start; }
+.grid--row .music-card .meta .badge.subgenre,
+.grid--row .music-card .tags { display: none; }
+
+/* Featured: the main grid, more per row */
+.grid.grid--dense { grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); }
+
+/* Recently Played: compact rows (small cover, title, buttons) */
+.grid.grid--list { grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr)); gap: 8px; }
+.grid--list .music-card { flex-direction: row; align-items: center; gap: 10px; padding: 6px; }
+.grid--list .music-card:hover { transform: none; }
+.grid--list .music-card-cover { width: 56px; min-width: 56px; height: 56px; aspect-ratio: auto; border-radius: var(--radius-sm); }
+.grid--list .music-card-cover .art-icon { font-size: 1.3rem; }
+.grid--list .music-card-cover button { display: none; }
+.grid--list .music-card-body { flex: 1; min-width: 0; padding: 0; }
+.grid--list .music-card h3 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.grid--list .artist-name { margin: 0; font-size: 0.75rem; }
+.grid--list .meta, .grid--list .tags, .grid--list .match-why { display: none; }
+.grid--list .card-actions { padding: 0; margin: 0; flex: none; }
+.grid--list .btn-play, .grid--list .btn-dl { padding: 7px 10px; font-size: 0.78rem; }
+
+@media (max-width: 600px) {
+  .home-panel { padding: 0.1rem 0.75rem 0.85rem; }
+  .grid.grid--dense { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .grid.grid--row { grid-auto-columns: 150px; }
+  .featured-artist-portrait { flex: 1 1 0; }
+}
