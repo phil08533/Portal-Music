@@ -2,6 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
+    <loc>https://portal-music.com/genres/rock.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/genres/ambient-chill.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/genres/cinematic.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/genres/dark-suspense.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -32,12 +50,6 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/genres/rock.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
     <loc>https://portal-music.com/genres/classical.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -45,18 +57,6 @@
 
   <url>
     <loc>https://portal-music.com/genres/hip-hop.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/genres/cinematic.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/genres/ambient-chill.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -86,31 +86,7 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/use/horror.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/use/sci-fi.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/use/gaming.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
     <loc>https://portal-music.com/use/meditation.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/use/game-dev.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -122,7 +98,7 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/use/fantasy.html</loc>
+    <loc>https://portal-music.com/use/sci-fi.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -134,7 +110,67 @@
   </url>
 
   <url>
+    <loc>https://portal-music.com/use/gaming.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/use/tech.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/horror.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/vlog.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/film.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/ads.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/cooking.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/fashion.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/edits.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/game-dev.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/use/fantasy.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -143,6 +179,138 @@
     <loc>https://portal-music.com/use/western-scene.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-creatitproductions-muxm35fu2bhh.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/star-bound-creatitproductions-muxm35cz8bdl.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/low-creatitproductions-muxm359elxu5.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/star-bound-creatitproductions-muxlx5vfcxok.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/goodbye-creatitproductions-muxlw69ysm4n.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/you-nailed-it-avilyn-grace-muxl3jd30djg.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/low-creatitproductions-muxl3j6uruv8.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/star-bound-creatitproductions-muxl3ixzesq1.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/puking-in-the-sink-dem-bois-muxl3iuav1vj.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-dem-bois-muxl3ioy8zvc.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/the-end-dem-bois-muxl3iltj32c.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/welcome-to-the-show-creatitproductions-muxl3ii16qge.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/bouncy-piano-hook-creatitproductions-muxl3ifmg585.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/the-enchanted-unfolding-creatitproductions-muxl3icum2h8.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/mushroom-bar-creatitproductions-muxl3i811n9p.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/swelling-light-creatitproductions-muxl3i3r186d.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/heavenly-hymn-creatitproductions-muxl3hzuba9x.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/moonlit-wander-creatitproductions-muxl3hv1pars.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/magical-forest-creatitproductions-muxl3hqi37ks.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/neon-velocity-creatitproductions-muxl3hls4ohp.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/lake-static-creatitproductions-muxl3hh208xh.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/neon-shadows-creatitproductions-muxl3hcvmgtm.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
   </url>
 
   <url>
