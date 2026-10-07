@@ -888,6 +888,9 @@
         const f = ag.folder;
         const folderHtml = f ? statTable('Model A checked against your genre folders', ['When Model A is at least', 'Songs', 'In the right folder'],
           f.levels.filter(l => l.checked).map(l => [Math.round(l.thr * 100) + '% sure', l.checked, tgPct(l.precision) + (l.thr === f.sureThreshold ? ' ✅ trusted alone from here' : '')])) : '';
+        const rr = (ag.rankRule || []).filter(r => r.checked >= 3).sort((a, b) => b.precision - a.precision);
+        const rankHtml = rr.length ? statTable('Styles both models rank in their top 10%: checked against your folders', ['Style', 'Songs', 'In the right folder', 'Used?'],
+          rr.map(r => [r.label, r.checked, tgPct(r.precision), r.on ? '✅ yes' : '— no (not reliable)'])) : '';
         const folderLine = ag.folderSongs ? `<p style="white-space:normal;">📁 <strong>${ag.folderSongs} songs</strong> get tags straight from the genre folder you put them in (e.g. Punk Rock → rock + punk). That's your own choice, so no AI guessing; the AI adds more only where two sources agree.</p>` : '';
         const aLine = folderLine + (f && f.sureThreshold != null
           ? `<p style="white-space:normal;">✅ <strong>Model A</strong> tags on its own only when it is at least ${Math.round(f.sureThreshold * 100)}% sure. At that level it put songs in the right genre folder ${tgPct((f.levels.find(l => l.thr === f.sureThreshold) || {}).precision)} of the time.</p>`
@@ -906,7 +909,7 @@
         el.innerHTML = `<p style="white-space:normal;">Across ${ag.tracks} songs, when either model hears a tag, the other agrees <strong>${tgPct(ag.overallAgreement)}</strong> of the time.
           Typical agreement per tag: <strong>${word(ag.medianKappa)}</strong> (κ ${ag.medianKappa}).
           Only tags both models hear are published, so weak-agreement tags simply appear on fewer songs; they don't create wrong tags.
-          ${ag.unheard ? `(${ag.unheard} tags Model A hasn't heard in any song yet are left out.)` : ''}</p>` + aLine + folderHtml +
+          ${ag.unheard ? `(${ag.unheard} tags Model A hasn't heard in any song yet are left out.)` : ''}</p>` + aLine + folderHtml + rankHtml +
           statTable('Every tag (weakest first)', ['Tag', 'Group', 'Model A', 'Model B', 'Both', 'Agreement'],
             ag.tags.map(r => [r.label, label(r.facet), r.songsA, r.songsB, r.both, word(r.kappa) + ' (' + r.kappa + ')']));
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });

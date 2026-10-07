@@ -66,6 +66,10 @@ const DEFAULTS = {
   sureMinPrecision: 0.9,     // Model A may tag on its own only where it matches your genre folders this often…
   sureMinChecked: 10,        // …measured on at least this many songs
   sureTagMinPrecision: 0.75, // a style tag whose own folder match is worse than this never goes alone
+  rankTop: 0.1,              // "top-rank" rule: both models put the song in their top 10% for a style…
+  rankMinAst: 0.05,          // …Model A at least this sure…
+  rankMinPrecision: 0.8,     // …switched on per tag only where it matches your folders this often…
+  rankMinChecked: 8,         // …on at least this many songs
 };
 
 // ── loading ────────────────────────────────────────────────────────────────
@@ -111,7 +115,35 @@ function loadContext(opts = {}) {
   const ctx = { music, dict, analyses, config, tagById, allowMock: !!opts.allowMock, stats, genres, folderTags };
   ctx.calib = calibrate(ctx);
   ctx.folder = folderCheck(ctx);
+  ctx.rankRule = rankRuleCheck(ctx);
   return ctx;
+}
+
+// ── "top-rank" rule for styles, verified per tag against your folders ─────
+// Model A is rarely confident in absolute terms but ranks songs well, and Model B (when working)
+// ranks them too. A style goes on when BOTH put the song in their own top 10% for it, but only for
+// tags where that rule puts songs in the matching genre folder ≥ rankMinPrecision of the time.
+function rankRuleCheck(ctx) {
+  const { dict, analyses, config, music, stats } = ctx;
+  const out = {};
+  if (stats.clapOff) return out;
+  const items = music.map(t => ({ t, a: analyses[t.id] })).filter(x => usable(x.a, ctx.allowMock) && x.a.clap);
+  if (items.length < config.calibrateMinTracks) return out;
+  const zMin = 1.2816;   // top 10% of a normal curve
+  for (const t of dict.tags) {
+    if (t.facet !== 'style' || !t.genre || !t.ast || !t.clap) continue;
+    const As = items.map(x => astScore(x.a, t) || 0).sort((p, q) => p - q);
+    const aThr = Math.max(config.rankMinAst, As[Math.floor(As.length * (1 - config.rankTop))]);
+    let checked = 0, right = 0;
+    for (const x of items) {
+      if (x.a.review && x.a.review.autoGenre) continue;
+      const B = clapZ(x.a, t, stats);
+      if ((astScore(x.a, t) || 0) >= aThr && B != null && B >= zMin) { checked++; if (x.t.genre === t.genre) right++; }
+    }
+    const precision = checked ? right / checked : null;
+    out[t.id] = { aThr, zMin, checked, precision, on: checked >= config.rankMinChecked && precision >= config.rankMinPrecision };
+  }
+  return out;
 }
 
 // ── Model A checked against the owner's genre folders ─────────────────────
@@ -221,6 +253,8 @@ function agreementReport(ctx) {
   return {
     calibrated: entries.length > 0,
     unheard,
+    rankRule: Object.entries(ctx.rankRule || {}).filter(([, r]) => r.checked).map(([id, r]) => ({
+      id, label: (ctx.tagById[id] || {}).label || id, checked: r.checked, precision: r.precision, on: r.on })),
     folderSongs: ctx.music.filter(t => folderTagsFor(ctx, t, ctx.analyses[t.id]).length).length,
     modelB: { working: !ctx.stats.clapOff, spread: ctx.stats.clapSpread },
     folder: ctx.folder ? { sureThreshold: ctx.folder.sureThreshold, levels: ctx.folder.levels } : null,
@@ -365,6 +399,10 @@ function decideTrack(ctx, track, opts = {}) {
         if (hits >= Math.min(fc.implyMin || 2, t.imply.length)) votes.push('R');
       }
       const strength = Math.max(A != null ? A / Math.max(fc.astStrong, 1e-6) : 0, B != null ? B / fc.clapStrongZ : 0);
+      const rr = ctx.rankRule && ctx.rankRule[t.id];
+      if (rr && rr.on && A != null && A >= rr.aThr && B != null && B >= rr.zMin && votes.length < 2) {
+        votes.length = 0; votes.push('A', 'B');   // both rank it top 10%, a rule your folders verified
+      }
       const sure = A != null && A >= aloneThreshold(ctx, t, fc);
       const why = [A != null ? `A ${A.toFixed(2)}${sure ? ' (sure)' : ''}` : null, B != null ? `B z${B.toFixed(1)}` : null,
         votes.includes('F') ? 'your folder' : null, votes.includes('R') ? 'rule' : null].filter(Boolean).join(', ');

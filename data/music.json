@@ -17,12 +17,13 @@
       "medium-tempo",
       "horror",
       "dark",
+      "orchestral",
+      "cinematic",
       "instrumental",
       "low-energy"
     ],
     "hints": [
       "organ",
-      "orchestral",
       "strings",
       "choir",
       "film",
@@ -50,6 +51,8 @@
       "fast",
       "horror",
       "dark",
+      "orchestral",
+      "cinematic",
       "instrumental",
       "low-energy"
     ],
@@ -107,6 +110,7 @@
       "medium-length",
       "fast",
       "electronic",
+      "techno",
       "edm",
       "synthwave",
       "vocals",
@@ -211,6 +215,7 @@
       "medium-tempo",
       "pop",
       "indie",
+      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -239,6 +244,7 @@
       "pop",
       "indie",
       "punk",
+      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -1400,6 +1406,7 @@
       "long",
       "fast",
       "classical",
+      "orchestral",
       "strings",
       "instrumental",
       "medium-energy"
@@ -1579,6 +1586,7 @@
       "medium-length",
       "slow",
       "classical",
+      "orchestral",
       "strings",
       "instrumental",
       "low-energy"
@@ -1608,6 +1616,7 @@
       "medium-length",
       "slow",
       "country",
+      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -2218,6 +2227,7 @@
       "long",
       "medium-tempo",
       "country",
+      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -2686,6 +2696,7 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "jazz",
       "instrumental",
       "low-energy"
     ],
@@ -2780,6 +2791,7 @@
       "medium-tempo",
       "cinematic",
       "epic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -3556,6 +3568,7 @@
       "medium-tempo",
       "rock",
       "aggressive",
+      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -4967,6 +4980,7 @@
       "medium-length",
       "medium-tempo",
       "playful",
+      "jazz",
       "instrumental",
       "high-energy"
     ],
@@ -4974,7 +4988,6 @@
       "saxophone",
       "ukulele",
       "comedy",
-      "jazz",
       "banjo",
       "kids"
     ],
@@ -4998,6 +5011,7 @@
       "medium-tempo",
       "playful",
       "funk",
+      "edm",
       "instrumental",
       "high-energy"
     ],
@@ -5205,11 +5219,11 @@
       "slow",
       "rock",
       "punk",
+      "metal",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
-      "metal",
       "harp",
       "aggressive"
     ],
@@ -5259,16 +5273,17 @@
       "rock",
       "punk",
       "aggressive",
+      "metal",
       "instrumental",
       "high-energy"
     ],
     "hints": [
       "harp",
-      "metal",
       "chiptune",
       "harmonica",
       "electric-guitar",
-      "accordion"
+      "accordion",
+      "blues"
     ],
     "bpm": 92,
     "key": "A minor",
@@ -5433,16 +5448,17 @@
       "rock",
       "punk",
       "aggressive",
+      "metal",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "accordion",
       "harp",
-      "metal",
       "electric-guitar",
       "harmonica",
-      "blues"
+      "blues",
+      "folk"
     ],
     "bpm": 96,
     "key": "E major",
@@ -5464,12 +5480,12 @@
       "fast",
       "rock",
       "punk",
+      "metal",
       "instrumental",
       "high-energy"
     ],
     "hints": [
       "harp",
-      "metal",
       "electric-guitar",
       "aggressive"
     ],
@@ -5518,12 +5534,12 @@
       "rock",
       "punk",
       "aggressive",
+      "metal",
       "instrumental",
       "high-energy"
     ],
     "hints": [
-      "harp",
-      "metal"
+      "harp"
     ],
     "bpm": 108,
     "key": "D major",
@@ -5573,6 +5589,7 @@
       "medium-tempo",
       "rock",
       "punk",
+      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -5744,6 +5761,7 @@
       "medium-length",
       "medium-tempo",
       "rock",
+      "country",
       "instrumental",
       "high-energy"
     ],
@@ -5796,8 +5814,8 @@
       "medium-length",
       "medium-tempo",
       "rock",
-      "medium-energy",
       "metal",
+      "medium-energy",
       "ads",
       "action",
       "aggressive",
@@ -5960,6 +5978,7 @@
       "long",
       "medium-tempo",
       "rock",
+      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -6005,6 +6024,7 @@
       "long",
       "medium-tempo",
       "rock",
+      "metal",
       "instrumental",
       "high-energy"
     ],
@@ -6225,6 +6245,7 @@
       "long",
       "medium-tempo",
       "classical",
+      "jazz",
       "instrumental",
       "medium-energy"
     ],
@@ -6703,6 +6724,8 @@
       "medium-tempo",
       "cinematic",
       "sci-fi",
+      "techno",
+      "electronic",
       "medium-energy"
     ],
     "hints": [
@@ -6728,13 +6751,14 @@
       "medium-tempo",
       "cinematic",
       "sci-fi",
+      "techno",
+      "electronic",
+      "edm",
       "tech",
       "gaming",
       "high-energy",
       "game-dev",
-      "electronic",
       "ambient",
-      "edm",
       "instrumental"
     ],
     "bpm": 112,
@@ -6779,14 +6803,15 @@
       "medium-tempo",
       "cinematic",
       "sci-fi",
+      "edm",
+      "electronic",
       "tech",
       "vocals",
       "high-energy"
     ],
     "hints": [
       "dubstep",
-      "house",
-      "edm"
+      "house"
     ],
     "bpm": 96,
     "key": "A# minor",
@@ -7034,13 +7059,14 @@
       "slow",
       "cinematic",
       "sci-fi",
+      "electronic",
+      "edm",
       "tech",
       "gaming",
       "high-energy",
       "game-dev",
       "ambient",
       "techno",
-      "electronic",
       "synthwave",
       "dubstep",
       "instrumental"
@@ -7260,6 +7286,7 @@
       "long",
       "medium-tempo",
       "electronic",
+      "edm",
       "tech",
       "sci-fi",
       "gaming",
@@ -7289,6 +7316,7 @@
       "electronic",
       "techno",
       "edm",
+      "lofi",
       "gaming",
       "sci-fi",
       "vocals",
@@ -7314,6 +7342,7 @@
       "fast",
       "electronic",
       "edm",
+      "techno",
       "lofi",
       "gaming",
       "sci-fi",
@@ -7339,6 +7368,7 @@
       "long",
       "fast",
       "electronic",
+      "techno",
       "synthwave",
       "edm",
       "tech",
@@ -7400,6 +7430,7 @@
       "long",
       "medium-tempo",
       "electronic",
+      "techno",
       "edm",
       "instrumental",
       "high-energy"
@@ -7423,14 +7454,12 @@
       "long",
       "medium-tempo",
       "electronic",
+      "techno",
       "edm",
       "sci-fi",
       "tech",
       "gaming",
       "medium-energy"
-    ],
-    "hints": [
-      "techno"
     ],
     "bpm": 123,
     "key": "F# major",
@@ -7510,6 +7539,7 @@
       "electronic",
       "techno",
       "edm",
+      "lofi",
       "gaming",
       "vocals",
       "high-energy"
@@ -7535,6 +7565,7 @@
       "electronic",
       "techno",
       "edm",
+      "lofi",
       "gaming",
       "vocals",
       "high-energy"
@@ -7636,6 +7667,8 @@
       "medium-length",
       "medium-tempo",
       "electronic",
+      "orchestral",
+      "cinematic",
       "chiptune",
       "game-dev",
       "instrumental",
@@ -7745,6 +7778,7 @@
       "electronic",
       "dubstep",
       "lofi",
+      "synthwave",
       "gaming",
       "tech",
       "sci-fi",
@@ -8420,6 +8454,7 @@
       "medium-tempo",
       "country",
       "western-scene",
+      "jazz",
       "instrumental",
       "medium-energy"
     ],
@@ -9351,6 +9386,7 @@
       "medium-tempo",
       "cinematic",
       "sad",
+      "orchestral",
       "sad-scene",
       "instrumental",
       "low-energy"
@@ -9358,7 +9394,6 @@
     "hints": [
       "strings",
       "classical",
-      "orchestral",
       "wedding",
       "epic"
     ],
@@ -9381,13 +9416,13 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "epic",
       "trailer",
-      "orchestral",
       "action",
       "film",
       "triumphant"
@@ -9411,11 +9446,9 @@
       "long",
       "fast",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
-    ],
-    "hints": [
-      "orchestral"
     ],
     "bpm": 129,
     "key": "A minor",
@@ -9436,6 +9469,7 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -9483,6 +9517,7 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -9505,6 +9540,7 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -9577,6 +9613,7 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -9599,6 +9636,7 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -9648,17 +9686,18 @@
       "medium-length",
       "fast",
       "cinematic",
+      "orchestral",
       "sad-scene",
       "instrumental",
       "low-energy"
     ],
     "hints": [
       "strings",
-      "orchestral",
       "fantasy",
       "organ",
       "epic",
-      "wedding"
+      "wedding",
+      "classical"
     ],
     "bpm": 129,
     "key": "A# major",
@@ -9679,13 +9718,13 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "strings",
       "fantasy",
-      "orchestral",
       "epic",
       "triumphant",
       "film"
@@ -9709,6 +9748,7 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -9717,8 +9757,8 @@
       "epic",
       "film",
       "fantasy",
-      "orchestral",
-      "trailer"
+      "trailer",
+      "mysterious"
     ],
     "bpm": 96,
     "key": "G minor",
@@ -9739,6 +9779,7 @@
       "medium-length",
       "fast",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -9746,9 +9787,9 @@
       "strings",
       "fantasy",
       "epic",
-      "orchestral",
       "triumphant",
-      "trailer"
+      "trailer",
+      "film"
     ],
     "bpm": 152,
     "key": "E minor",
@@ -9770,6 +9811,7 @@
       "medium-tempo",
       "cinematic",
       "aggressive",
+      "metal",
       "gaming",
       "high-energy"
     ],
@@ -9792,12 +9834,12 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
     "hints": [
       "epic",
-      "orchestral",
       "trailer",
       "film",
       "triumphant",
@@ -9822,6 +9864,7 @@
       "long",
       "fast",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -9844,6 +9887,7 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -9852,7 +9896,6 @@
       "epic",
       "trailer",
       "film",
-      "orchestral",
       "taiko"
     ],
     "bpm": 118,
@@ -9874,13 +9917,13 @@
       "medium-length",
       "fast",
       "cinematic",
+      "orchestral",
       "sad-scene",
       "instrumental",
       "low-energy"
     ],
     "hints": [
       "organ",
-      "orchestral",
       "classical"
     ],
     "bpm": 136,
@@ -9902,6 +9945,7 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -9928,13 +9972,13 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "epic",
       "strings",
-      "orchestral",
       "trailer",
       "film",
       "tense"
@@ -9958,12 +10002,12 @@
       "medium-length",
       "fast",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "epic",
-      "orchestral",
       "fantasy",
       "triumphant",
       "taiko"
@@ -9988,6 +10032,7 @@
       "medium-tempo",
       "cinematic",
       "dreamy",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
@@ -10019,12 +10064,12 @@
       "fast",
       "cinematic",
       "sad",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "strings",
-      "orchestral",
       "organ"
     ],
     "bpm": 129,
@@ -10099,13 +10144,13 @@
       "fast",
       "cinematic",
       "sad",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
     "hints": [
       "organ",
-      "strings",
-      "orchestral"
+      "strings"
     ],
     "bpm": 136,
     "key": "E minor",
@@ -10181,13 +10226,13 @@
       "long",
       "fast",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "trailer",
-      "epic",
-      "orchestral"
+      "epic"
     ],
     "bpm": 129,
     "key": "C minor",
@@ -10208,6 +10253,7 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "gaming",
       "instrumental",
       "medium-energy"
@@ -10314,6 +10360,7 @@
       "long",
       "slow",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -10336,6 +10383,7 @@
       "medium-length",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -10416,13 +10464,13 @@
       "long",
       "fast",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "triumphant",
-      "epic",
-      "orchestral"
+      "epic"
     ],
     "bpm": 129,
     "key": "E minor",
@@ -10443,6 +10491,7 @@
       "long",
       "medium-tempo",
       "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
@@ -10469,6 +10518,7 @@
       "medium-tempo",
       "cinematic",
       "aggressive",
+      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -10616,6 +10666,7 @@
       "medium-tempo",
       "electronic",
       "dreamy",
+      "edm",
       "dubstep",
       "vocals",
       "medium-energy"
@@ -10785,16 +10836,17 @@
       "long",
       "fast",
       "electronic",
+      "cinematic",
+      "orchestral",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
-      "cinematic",
       "film",
       "epic",
-      "orchestral",
       "trailer",
-      "fantasy"
+      "fantasy",
+      "sci-fi"
     ],
     "bpm": 136,
     "key": "A# minor",
@@ -10817,6 +10869,7 @@
       "electronic",
       "dubstep",
       "edm",
+      "lofi",
       "gaming",
       "sci-fi",
       "vocals",
@@ -10844,14 +10897,14 @@
       "long",
       "medium-tempo",
       "electronic",
+      "cinematic",
+      "orchestral",
       "instrumental",
       "low-energy"
     ],
     "hints": [
-      "cinematic",
       "film",
-      "epic",
-      "orchestral"
+      "epic"
     ],
     "bpm": 112,
     "key": "D# major",
@@ -10901,15 +10954,13 @@
       "long",
       "medium-tempo",
       "electronic",
+      "techno",
       "edm",
       "lofi",
       "gaming",
       "sci-fi",
       "vocals",
       "high-energy"
-    ],
-    "hints": [
-      "techno"
     ],
     "bpm": 99,
     "key": "F minor",
@@ -10930,6 +10981,7 @@
       "long",
       "slow",
       "electronic",
+      "techno",
       "edm",
       "synthwave",
       "gaming",
@@ -10939,7 +10991,6 @@
       "medium-energy"
     ],
     "hints": [
-      "techno",
       "house"
     ],
     "bpm": 89,
@@ -10961,12 +11012,11 @@
       "long",
       "medium-tempo",
       "electronic",
+      "techno",
+      "edm",
       "sci-fi",
       "vocals",
       "high-energy"
-    ],
-    "hints": [
-      "edm"
     ],
     "bpm": 118,
     "key": "D# minor",
@@ -10988,6 +11038,7 @@
       "medium-tempo",
       "electronic",
       "edm",
+      "techno",
       "lofi",
       "sci-fi",
       "gaming",
@@ -10996,7 +11047,6 @@
       "medium-energy"
     ],
     "hints": [
-      "techno",
       "dubstep"
     ],
     "bpm": 112,
@@ -11020,6 +11070,7 @@
       "electronic",
       "techno",
       "edm",
+      "lofi",
       "gaming",
       "sci-fi",
       "vocals",
@@ -11045,6 +11096,7 @@
       "slow",
       "electronic",
       "edm",
+      "techno",
       "lofi",
       "gaming",
       "sci-fi",
@@ -11072,6 +11124,7 @@
       "electronic",
       "edm",
       "synthwave",
+      "lofi",
       "gaming",
       "tech",
       "sci-fi",
@@ -11097,8 +11150,9 @@
       "long",
       "fast",
       "electronic",
+      "techno",
+      "edm",
       "synthwave",
-      "lofi",
       "gaming",
       "vocals",
       "high-energy"
@@ -11124,6 +11178,7 @@
       "electronic",
       "dubstep",
       "edm",
+      "lofi",
       "gaming",
       "sci-fi",
       "vocals",
@@ -11148,6 +11203,7 @@
       "medium-length",
       "medium-tempo",
       "lofi",
+      "electronic",
       "instrumental",
       "high-energy"
     ],
@@ -11995,6 +12051,7 @@
       "long",
       "medium-tempo",
       "pop",
+      "metal",
       "sci-fi",
       "medium-energy"
     ],
