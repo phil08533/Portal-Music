@@ -165,6 +165,9 @@ Only songs where both models are confident *and* contradict each other come to y
 **Your folders come first.** Every song gets the tags of the genre folder you put it in (Punk Rock → rock + punk,
 Space → cinematic + sci-fi, …). The list is `data/folder-tags.json`. The AI only adds more on top.
 
+**🎧 Spot-check tags** (Tags tab) fills out thin tags like Happy, Epic or Piano: you hear 6 random songs the
+AI would give the tag and click Yes/No. 5 or more right → the tag goes on all of them. Then 🚀 Publish.
+
 Two safety checks so it never guesses:
 - **Your genre folders are the referee.** Model A is checked against them; it may tag on its own only
   at the confidence level where it put songs in the right folder at least 9 times out of 10. A style

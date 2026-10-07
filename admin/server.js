@@ -576,6 +576,12 @@ const server = http.createServer(async (req, res) => {
       if (req.method === 'GET' && pathname === '/api/tags/agreement') {
         return sendJson(200, { success: true, agreement: tagging.agreementReport(tagging.loadContext({ allowMock })) });
       }
+      if (req.method === 'GET' && pathname === '/api/tags/spot') {
+        return sendJson(200, { success: true, tags: tagging.spotList(tagging.loadContext({ allowMock })) });
+      }
+      if (req.method === 'GET' && pathname === '/api/tags/spot/sample') {
+        return sendJson(200, { success: true, ...tagging.spotSample(tagging.loadContext({ allowMock }), String(url.searchParams.get('id') || '')) });
+      }
       if (req.method === 'GET' && pathname === '/api/tags/accuracy') {
         return sendJson(200, { success: true, accuracy: tagging.accuracy(tagging.loadContext({ allowMock })) });
       }
@@ -602,6 +608,14 @@ const server = http.createServer(async (req, res) => {
           const result = tagging.publish();
           exec(`node "${path.join(ROOT_DIR, 'scripts', 'generate-seo-pages.js')}"`, { cwd: ROOT_DIR }, () => {});
           return sendJson(200, { success: true, result });
+        }
+        if (pathname === '/api/tags/spot/answer') {
+          if (allowMock) throw new Error('Test mode: spot-checks are not saved.');
+          if (!data.id || typeof data.answers !== 'object') throw new Error('Tag and answers required');
+          tagging.spotAnswer(String(data.id), data.answers);
+          const ctx = tagging.loadContext();
+          const row = tagging.spotList(ctx).find(r => r.id === data.id) || null;
+          return sendJson(200, { success: true, tag: row, rule: { on: !!(ctx.rankRule[data.id] || {}).on, adds: ((ctx.rankRule[data.id] || {}).candidates || []).length } });
         }
         if (pathname === '/api/tags/tune') return sendJson(200, { success: true, ...tagging.tune({ allowMock }) });
       }

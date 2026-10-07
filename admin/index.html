@@ -575,6 +575,15 @@
       <div id="tg-review"><p class="muted">Open this tab to load songs.</p></div>
     </div>
 
+    <div class="card" id="tg-spot-card">
+      <h2>🎧 Spot-check tags</h2>
+      <p class="muted" style="white-space:normal;">Some tags (moods, instruments, "best for") are on only a few songs because your folders can't confirm them.
+        Pick a tag: you'll hear <strong>6 random songs</strong> the AI would give it. If at least 5 are right, the tag is switched on for all of them.
+        Every answer also sticks to that song. Then click 🚀 Publish.</p>
+      <button class="btn btn-secondary btn-sm" onclick="tgSpotList()">Show tags to check</button>
+      <div id="tg-spot" style="margin-top:12px;"></div>
+    </div>
+
     <div class="card" id="tg-acc-card" style="display:none;">
       <h2>🎯 Accuracy</h2>
       <div id="tg-acc"></div>
@@ -800,7 +809,7 @@
     let tgPoll = null, tgLoaded = false, tgWasRunning = false;
 
     async function tgApi(pathname, body) {
-      const res = await fetch('/api/tags/' + pathname + TG_MOCK, body ? {
+      const res = await fetch('/api/tags/' + pathname + (TG_MOCK && pathname.includes('?') ? '&mock=1' : TG_MOCK), body ? {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       } : undefined);
       const data = await res.json();
@@ -913,6 +922,62 @@
           statTable('Every tag (weakest first)', ['Tag', 'Group', 'Model A', 'Model B', 'Both', 'Agreement'],
             ag.tags.map(r => [r.label, label(r.facet), r.songsA, r.songsB, r.both, word(r.kappa) + ' (' + r.kappa + ')']));
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) { showToast(err.message, false); }
+    }
+
+    // --- 🎧 Spot-check ---
+    let tgSpotTag = null, tgSpotAns = {};
+    async function tgSpotList() {
+      const el = document.getElementById('tg-spot');
+      el.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const { tags } = await tgApi('spot');
+        if (!tags.length) { el.innerHTML = '<p class="muted">Nothing to check right now.</p>'; return; }
+        const status = t => t.on ? '✅ on' : t.tested ? `❌ off (${t.yes} of ${t.yes + t.no} right)` : '—';
+        el.innerHTML = statTable('Tags (fewest songs first)', ['Tag', 'Group', 'Songs now', 'Would add', 'Status', ''],
+          tags.map(t => [t.label, (tgDict && tgDict.facets[t.facet] || {}).label || t.facet, t.songs, '+' + t.candidates, status(t),
+            { html: `<button class="btn btn-secondary btn-sm" onclick="tgSpotStart('${escapeHtml(t.id)}')">${t.tested ? 'Check more' : 'Check'}</button>` }]));
+      } catch (err) { el.innerHTML = `<p style="color:#ff4d6a;">${escapeHtml(err.message)}</p>`; }
+    }
+    async function tgSpotStart(id) {
+      const el = document.getElementById('tg-spot');
+      el.innerHTML = '<p class="muted">Picking songs…</p>';
+      try {
+        const r = await tgApi('spot/sample?id=' + encodeURIComponent(id));
+        tgSpotTag = r; tgSpotAns = {};
+        if (!r.songs.length) { el.innerHTML = '<p class="muted">You\'ve already checked every song for this tag.</p>'; return; }
+        el.innerHTML = `<h3 style="margin:0 0 4px;">Is it “${escapeHtml(r.label)}”?</h3>
+          <p class="muted" style="white-space:normal;margin-bottom:10px;">${r.songs.length} random songs out of ${r.wouldAdd} the AI would tag. Listen a few seconds, then click Yes or No.</p>` +
+          r.songs.map(s => `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--border);">
+              <div style="flex:1 1 200px;"><strong>${escapeHtml(s.title)}</strong> <span class="muted" style="font-size:0.8rem;">${escapeHtml(s.genre || '')}${s.subgenre ? ' › ' + escapeHtml(s.subgenre) : ''}</span></div>
+              <audio controls preload="none" src="${escapeHtml(s.file)}" style="height:32px;max-width:260px;"></audio>
+              <button class="btn btn-sm btn-secondary" data-spot="${s.id}" data-v="1" onclick="tgSpotMark('${s.id}', true)">👍 Yes</button>
+              <button class="btn btn-sm btn-secondary" data-spot="${s.id}" data-v="0" onclick="tgSpotMark('${s.id}', false)">👎 No</button>
+            </div>`).join('') +
+          `<div class="action-btns" style="margin-top:12px;"><button class="btn btn-primary btn-sm" style="width:auto;" onclick="tgSpotSave()">Save answers</button>
+            <button class="btn btn-secondary btn-sm" onclick="tgSpotList()">Back</button></div>`;
+      } catch (err) { el.innerHTML = `<p style="color:#ff4d6a;">${escapeHtml(err.message)}</p>`; }
+    }
+    function tgSpotMark(id, ok) {
+      tgSpotAns[id] = ok;
+      document.querySelectorAll(`[data-spot="${id}"]`).forEach(b => {
+        const on = (b.dataset.v === '1') === ok;
+        b.classList.toggle('btn-primary', on); b.classList.toggle('btn-secondary', !on);
+      });
+    }
+    async function tgSpotSave() {
+      const n = Object.keys(tgSpotAns).length;
+      if (!n) { showToast('Click Yes or No on at least one song', false); return; }
+      if (n < tgSpotTag.songs.length && !confirm(`You answered ${n} of ${tgSpotTag.songs.length}. Save anyway?`)) return;
+      try {
+        const r = await tgApi('spot/answer', { id: tgSpotTag.tag, answers: tgSpotAns });
+        const t = r.tag || { yes: 0, no: 0 };
+        const msg = r.rule.on
+          ? `✅ “${tgSpotTag.label}” is ON: ${t.yes} of ${t.yes + t.no} right. It now goes on ${r.rule.adds} songs. Click 🚀 Publish when you're done.`
+          : (t.yes + t.no < 6 ? `Saved. Answer ${6 - t.yes - t.no} more to decide.` : `❌ “${tgSpotTag.label}” stays off: only ${t.yes} of ${t.yes + t.no} right. Your Yes answers still count for those songs.`);
+        showToast(msg, r.rule.on || t.yes + t.no < 6);
+        await tgSpotList();
+        document.getElementById('tg-spot').insertAdjacentHTML('afterbegin', `<p style="white-space:normal;"><strong>${escapeHtml(msg)}</strong></p>`);
       } catch (err) { showToast(err.message, false); }
     }
 
@@ -1120,7 +1185,7 @@
 
     function statTable(title, cols, rows) {
       const body = rows.length
-        ? rows.map(r => '<tr>' + r.map(c => `<td>${escapeHtml(String(c))}</td>`).join('') + '</tr>').join('')
+        ? rows.map(r => '<tr>' + r.map(c => `<td>${c && c.html != null ? c.html : escapeHtml(String(c))}</td>`).join('') + '</tr>').join('')
         : `<tr><td colspan="${cols.length}" class="muted">Nothing yet</td></tr>`;
       return `<div style="margin-top:18px;"><h3 style="font-size:0.95rem;margin-bottom:6px;">${title}</h3>
         <div class="table-container"><table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>

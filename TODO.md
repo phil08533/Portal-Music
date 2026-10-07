@@ -15,6 +15,9 @@ Tick items off as you go.
 - [ ] Click **🤝 Model agreement** and send Claude a screenshot, plus clear the (short) **Needs review**
       list (keys A / N). Then **Publish tags to site** (SEO pages rebuild automatically) and push.
 
+- [ ] Admin → 🏷️ Tags → **🎧 Spot-check tags**: check the tags you care about (Epic, Happy, Piano, Trailers,
+      Film, Groovy…; about a minute each), then **🚀 Publish** and push.
+
 ## Stats (new)
 - [ ] **Publish the updated `firestore.rules`** (Firebase Console → Firestore Database → Rules → paste the whole
       file → Publish). Until then the site can't record downloads/visits and the 📊 Stats tab stays empty.
