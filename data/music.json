@@ -1,5 +1,146 @@
 [
   {
+    "id": "muxm35fu2bhh",
+    "title": "I'll hold you til tonight",
+    "artist": "creatitproductions",
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "https://assets.portal-music.com/music/Rock/I'll%20hold%20you%20til%20tonight.mp3",
+    "duration": "1:25",
+    "featured": false,
+    "cover": "https://assets.portal-music.com/covers/muxm35fu2bhh.jpg",
+    "added": "2026-10-07",
+    "wav": "https://assets.portal-music.com/music/Rock/I'll%20hold%20you%20til%20tonight.wav",
+    "labels": [
+      "medium-length",
+      "fast",
+      "rock",
+      "vocals",
+      "medium-energy"
+    ],
+    "bpm": 136,
+    "key": "G major",
+    "durationSec": 85
+  },
+  {
+    "id": "muxm35cz8bdl",
+    "title": "Star Bound",
+    "artist": "creatitproductions",
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "https://assets.portal-music.com/music/Rock/Star%20Bound%20(2).mp3",
+    "duration": "3:14",
+    "featured": false,
+    "cover": "https://assets.portal-music.com/covers/muxm35cz8bdl.jpg",
+    "added": "2026-10-07",
+    "wav": "https://assets.portal-music.com/music/Rock/Star%20Bound%20(2).wav",
+    "labels": [
+      "long",
+      "fast",
+      "rock",
+      "peaceful",
+      "ambient",
+      "meditation",
+      "vocals",
+      "low-energy"
+    ],
+    "hints": [
+      "chill",
+      "dreamy",
+      "mysterious",
+      "study",
+      "sci-fi"
+    ],
+    "bpm": 136,
+    "key": "F minor",
+    "durationSec": 194
+  },
+  {
+    "id": "muxm359elxu5",
+    "title": "low",
+    "artist": "creatitproductions",
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "https://assets.portal-music.com/music/Rock/low.mp3",
+    "duration": "2:17",
+    "featured": false,
+    "cover": "https://assets.portal-music.com/covers/muxm359elxu5.jpg",
+    "added": "2026-10-07",
+    "wav": "https://assets.portal-music.com/music/Rock/low.wav",
+    "labels": [
+      "medium-length",
+      "fast",
+      "rock",
+      "instrumental",
+      "high-energy"
+    ],
+    "hints": [
+      "podcast"
+    ],
+    "bpm": 136,
+    "key": "C minor",
+    "durationSec": 137
+  },
+  {
+    "id": "muxlx5vfcxok",
+    "title": "Star Bound",
+    "artist": "creatitproductions",
+    "genre": "Ambient & Chill",
+    "subgenre": "Ambient",
+    "tags": [],
+    "file": "https://assets.portal-music.com/music/Rock/Star%20Bound.mp3",
+    "duration": "3:14",
+    "featured": false,
+    "cover": "https://assets.portal-music.com/covers/muxlx5vfcxok.jpg",
+    "added": "2026-10-07",
+    "wav": "https://assets.portal-music.com/music/Rock/Star%20Bound.wav",
+    "labels": [
+      "long",
+      "fast",
+      "ambient",
+      "peaceful",
+      "meditation",
+      "vocals",
+      "low-energy"
+    ],
+    "hints": [
+      "chill",
+      "dreamy",
+      "mysterious",
+      "study",
+      "sci-fi"
+    ],
+    "bpm": 136,
+    "key": "F minor",
+    "durationSec": 194
+  },
+  {
+    "id": "muxlw69ysm4n",
+    "title": "Goodbye",
+    "artist": "creatitproductions",
+    "genre": "Rock",
+    "subgenre": "Rock",
+    "tags": [],
+    "file": "https://assets.portal-music.com/music/Rock/Goodbye.mp3",
+    "duration": "2:45",
+    "featured": false,
+    "cover": "https://assets.portal-music.com/covers/muxlw69ysm4n.jpg",
+    "added": "2026-10-07",
+    "wav": "https://assets.portal-music.com/music/Rock/Goodbye.wav",
+    "labels": [
+      "medium-length",
+      "fast",
+      "vocals",
+      "low-energy"
+    ],
+    "bpm": 129,
+    "key": "A# major",
+    "durationSec": 165
+  },
+  {
     "id": "muxl3jd30djg",
     "title": "You Nailed It",
     "artist": "Avilyn Grace",
@@ -96,7 +237,8 @@
     "labels": [
       "medium-length",
       "slow",
-      "cinematic",
+      "rock",
+      "punk",
       "vocals",
       "medium-energy"
     ],
@@ -120,7 +262,7 @@
     "labels": [
       "medium-length",
       "fast",
-      "cinematic",
+      "rock",
       "vocals",
       "medium-energy"
     ],
@@ -131,9 +273,9 @@
   {
     "id": "muxl3iltj32c",
     "title": "The End",
-    "artist": "creatitproductions",
-    "genre": "Cinematic",
-    "subgenre": "Cinematic",
+    "artist": "Dem Bois",
+    "genre": "Rock",
+    "subgenre": "Pop",
     "tags": [],
     "file": "https://assets.portal-music.com/music/Cinematic/The%20End.mp3",
     "duration": "4:38",
@@ -144,7 +286,7 @@
     "labels": [
       "long",
       "medium-tempo",
-      "cinematic",
+      "rock",
       "vocals",
       "medium-energy"
     ],
@@ -233,7 +375,6 @@
       "long",
       "medium-tempo",
       "cinematic",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -293,6 +434,7 @@
       "long",
       "fast",
       "cinematic",
+      "dreamy",
       "ambient",
       "meditation",
       "instrumental",
@@ -301,7 +443,6 @@
     "hints": [
       "chill",
       "peaceful",
-      "dreamy",
       "mysterious",
       "study",
       "sci-fi"
@@ -406,8 +547,8 @@
     ],
     "hints": [
       "mysterious",
-      "fantasy",
       "woodwinds",
+      "fantasy",
       "strings",
       "adventurous",
       "melancholy"
@@ -717,7 +858,6 @@
       "medium-tempo",
       "pop",
       "indie",
-      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -2146,7 +2286,6 @@
       "medium-length",
       "slow",
       "country",
-      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -2173,8 +2312,8 @@
       "medium-energy"
     ],
     "hints": [
-      "electric-guitar",
       "harp",
+      "electric-guitar",
       "bells",
       "holiday",
       "blues",
@@ -2248,7 +2387,7 @@
       "medium-tempo",
       "country",
       "instrumental",
-      "high-energy"
+      "medium-energy"
     ],
     "hints": [
       "ukulele",
@@ -2527,10 +2666,10 @@
     ],
     "hints": [
       "blues",
-      "electric-guitar",
       "punk",
-      "reggae",
+      "electric-guitar",
       "synth",
+      "reggae",
       "rock"
     ],
     "bpm": 86,
@@ -2652,8 +2791,7 @@
       "medium-energy"
     ],
     "hints": [
-      "blues",
-      "funny"
+      "blues"
     ],
     "bpm": 86,
     "key": "G minor",
@@ -2762,7 +2900,6 @@
       "long",
       "medium-tempo",
       "country",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -3280,7 +3417,6 @@
       "low-energy"
     ],
     "hints": [
-      "choir",
       "strings"
     ],
     "bpm": 118,
@@ -3350,6 +3486,7 @@
       "slow",
       "cinematic",
       "fantasy",
+      "instrumental",
       "medium-energy"
     ],
     "bpm": 83,
@@ -3633,7 +3770,8 @@
       "saxophone",
       "piano",
       "chiptune",
-      "drums"
+      "drums",
+      "taiko"
     ],
     "bpm": 118,
     "key": "G minor",
@@ -3663,8 +3801,8 @@
     "hints": [
       "saxophone",
       "playful",
-      "workout",
       "chiptune",
+      "workout",
       "comedy",
       "accordion"
     ],
@@ -3777,8 +3915,8 @@
     "hints": [
       "saxophone",
       "chiptune",
-      "comedy",
       "piano-solo",
+      "comedy",
       "playful",
       "banjo"
     ],
@@ -3808,8 +3946,8 @@
       "saxophone",
       "banjo",
       "harmonica",
-      "cooking",
       "synth",
+      "cooking",
       "chiptune"
     ],
     "bpm": 103,
@@ -4083,6 +4221,7 @@
       "medium-tempo",
       "rock",
       "metal",
+      "instrumental",
       "medium-energy"
     ],
     "bpm": 99,
@@ -4105,7 +4244,6 @@
       "medium-tempo",
       "rock",
       "aggressive",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -4736,8 +4874,10 @@
       "meditation",
       "peaceful",
       "dreamy",
+      "mysterious",
       "ambient",
       "new-age",
+      "sci-fi",
       "instrumental",
       "low-energy"
     ],
@@ -4852,8 +4992,10 @@
       "meditation",
       "peaceful",
       "dreamy",
+      "mysterious",
       "ambient",
       "new-age",
+      "sci-fi",
       "instrumental",
       "low-energy"
     ],
@@ -4946,9 +5088,6 @@
       "study",
       "instrumental",
       "low-energy"
-    ],
-    "hints": [
-      "choir"
     ],
     "bpm": 123,
     "key": "E minor",
@@ -5139,6 +5278,7 @@
     "hints": [
       "sad-scene",
       "true-crime",
+      "melancholy",
       "sad"
     ],
     "bpm": 129,
@@ -5644,6 +5784,7 @@
       "medium-length",
       "medium-tempo",
       "playful",
+      "instrumental",
       "high-energy",
       "comedy",
       "kids",
@@ -5659,8 +5800,7 @@
       "house",
       "drums",
       "electric-guitar",
-      "bells",
-      "instrumental"
+      "bells"
     ],
     "bpm": 103,
     "key": "C# minor",
@@ -5762,11 +5902,11 @@
       "slow",
       "rock",
       "punk",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
+      "metal",
       "harp"
     ],
     "bpm": 89,
@@ -5815,17 +5955,16 @@
       "rock",
       "punk",
       "aggressive",
-      "metal",
       "instrumental",
       "high-energy"
     ],
     "hints": [
       "harp",
+      "metal",
       "chiptune",
-      "electric-guitar",
       "harmonica",
-      "accordion",
-      "blues"
+      "electric-guitar",
+      "accordion"
     ],
     "bpm": 92,
     "key": "A minor",
@@ -5882,8 +6021,8 @@
       "harp",
       "folk",
       "blues",
-      "electric-guitar",
       "accordion",
+      "electric-guitar",
       "harmonica"
     ],
     "bpm": 96,
@@ -5966,8 +6105,8 @@
       "punk",
       "aggressive",
       "metal",
-      "high-energy",
-      "instrumental"
+      "instrumental",
+      "high-energy"
     ],
     "bpm": 129,
     "key": "E major",
@@ -5990,17 +6129,16 @@
       "rock",
       "punk",
       "aggressive",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
     "hints": [
       "accordion",
       "harp",
+      "metal",
       "electric-guitar",
       "blues",
-      "harmonica",
-      "folk"
+      "harmonica"
     ],
     "bpm": 96,
     "key": "E major",
@@ -6022,12 +6160,12 @@
       "fast",
       "rock",
       "punk",
-      "metal",
       "instrumental",
       "high-energy"
     ],
     "hints": [
       "harp",
+      "metal",
       "electric-guitar",
       "aggressive"
     ],
@@ -6076,12 +6214,12 @@
       "rock",
       "punk",
       "aggressive",
-      "metal",
       "instrumental",
       "high-energy"
     ],
     "hints": [
-      "harp"
+      "harp",
+      "metal"
     ],
     "bpm": 108,
     "key": "D major",
@@ -6131,7 +6269,6 @@
       "medium-tempo",
       "rock",
       "punk",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -6357,8 +6494,8 @@
       "medium-length",
       "medium-tempo",
       "rock",
-      "metal",
       "medium-energy",
+      "metal",
       "ads",
       "action",
       "aggressive",
@@ -6521,7 +6658,6 @@
       "long",
       "medium-tempo",
       "rock",
-      "metal",
       "vocals",
       "medium-energy"
     ],
@@ -6567,7 +6703,6 @@
       "long",
       "medium-tempo",
       "rock",
-      "metal",
       "instrumental",
       "high-energy"
     ],
@@ -6822,8 +6957,8 @@
       "chill",
       "lofi",
       "groovy",
-      "study",
       "new-age",
+      "study",
       "bass"
     ],
     "bpm": 89,
@@ -6924,6 +7059,7 @@
       "long",
       "slow",
       "sad",
+      "instrumental",
       "low-energy"
     ],
     "hints": [
@@ -7167,6 +7303,7 @@
       "medium-tempo",
       "cinematic",
       "sci-fi",
+      "instrumental",
       "medium-energy"
     ],
     "hints": [
@@ -7241,7 +7378,7 @@
       "cinematic",
       "sci-fi",
       "vocals",
-      "low-energy"
+      "medium-energy"
     ],
     "bpm": 144,
     "key": "F# major",
@@ -7988,6 +8125,7 @@
       "medium-tempo",
       "electronic",
       "edm",
+      "sci-fi",
       "instrumental",
       "high-energy"
     ],
@@ -8236,7 +8374,8 @@
       "triumphant",
       "medieval",
       "strings",
-      "wedding"
+      "wedding",
+      "accordion"
     ],
     "bpm": 96,
     "key": "E minor",
@@ -9140,7 +9279,10 @@
     ],
     "bpm": 144,
     "key": "D minor",
-    "durationSec": 199
+    "durationSec": 199,
+    "hints": [
+      "gospel"
+    ]
   },
   {
     "id": "mndnhu6v9jj1",
@@ -9754,9 +9896,9 @@
       "low-energy"
     ],
     "hints": [
+      "scary",
       "dark",
       "choir",
-      "scary",
       "horror",
       "study"
     ],
@@ -9780,13 +9922,13 @@
       "slow",
       "ambient",
       "new-age",
+      "meditation",
       "instrumental",
       "low-energy"
     ],
     "hints": [
       "peaceful",
-      "dreamy",
-      "meditation"
+      "dreamy"
     ],
     "bpm": 108,
     "key": "C major",
@@ -9858,6 +10000,7 @@
       "medium-length",
       "slow",
       "ambient",
+      "dreamy",
       "sci-fi",
       "vocals",
       "low-energy"
@@ -10128,7 +10271,7 @@
       "medium-tempo",
       "cinematic",
       "instrumental",
-      "low-energy"
+      "medium-energy"
     ],
     "bpm": 123,
     "key": "C minor",
@@ -10374,7 +10517,6 @@
       "medium-tempo",
       "cinematic",
       "aggressive",
-      "metal",
       "gaming",
       "high-energy"
     ],
@@ -11090,7 +11232,6 @@
       "medium-tempo",
       "cinematic",
       "aggressive",
-      "metal",
       "instrumental",
       "medium-energy"
     ],
@@ -11418,7 +11559,9 @@
     "hints": [
       "film",
       "epic",
-      "trailer"
+      "trailer",
+      "fantasy",
+      "sci-fi"
     ],
     "bpm": 136,
     "key": "A# minor",
@@ -12086,12 +12229,12 @@
       "instrumental",
       "medium-energy"
     ],
-    "hints": [
-      "tech"
-    ],
     "bpm": 99,
     "key": "F# major",
-    "durationSec": 200
+    "durationSec": 200,
+    "hints": [
+      "tech"
+    ]
   },
   {
     "id": "mndnhugw7x8w",
@@ -12129,6 +12272,7 @@
       "medium-length",
       "medium-tempo",
       "lofi",
+      "instrumental",
       "medium-energy"
     ],
     "bpm": 96,
@@ -12553,8 +12697,8 @@
     ],
     "hints": [
       "funk",
-      "funny",
       "groovy",
+      "funny",
       "comedy",
       "vlog",
       "playful"
@@ -12627,7 +12771,6 @@
       "long",
       "medium-tempo",
       "pop",
-      "metal",
       "sci-fi",
       "medium-energy"
     ],
@@ -12672,6 +12815,7 @@
       "medium-length",
       "slow",
       "pop",
+      "instrumental",
       "medium-energy"
     ],
     "hints": [
