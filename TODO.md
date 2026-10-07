@@ -18,6 +18,10 @@ Tick items off as you go.
 - [ ] Admin → 🏷️ Tags → **🎧 Spot-check tags**: check the tags you care about (Epic, Happy, Piano, Trailers,
       Film, Groovy…; about a minute each), then **🚀 Publish** and push.
 
+- [ ] **Fix "I'll hold you til tonight"** (it plays the "I love you" song): Admin → 📚 Manage Catalog → ✏️ Edit it →
+      **🔁 Replace audio (MP3)** → pick your correct `I'll hold you til tonight.mp3`, then **📎 Attach WAV** → the .wav.
+      Then Actions & Sync → R2 sync command, and push.
+
 ## Stats (new)
 - [ ] **Publish the updated `firestore.rules`** (Firebase Console → Firestore Database → Rules → paste the whole
       file → Publish). Until then the site can't record downloads/visits and the 📊 Stats tab stays empty.

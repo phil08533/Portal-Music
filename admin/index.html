@@ -180,7 +180,7 @@
         <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="batch-new" checked>
           <span>Show in <strong>New Releases</strong> (45 days)</span></label>
         <label class="checkbox-group" style="margin:0 0 10px;"><input type="checkbox" id="batch-skip-dupes" checked>
-          <span>Skip songs whose title is already in the catalog</span></label>
+          <span>Skip songs whose title is already in the catalog <span class="muted">(untick to add them with a word in front instead, e.g. “Midnight …”; rename any of them in the list first)</span></span></label>
         <div class="table-container" style="max-height:360px;overflow:auto;">
           <table>
             <thead><tr><th>#</th><th>Title</th><th>Files</th><th>Status</th><th></th></tr></thead>
@@ -724,6 +724,12 @@
         <span>Show in New Releases <span class="muted" id="edit-new-note"></span></span>
       </label>
       <div class="form-group" style="margin-top:12px;">
+        <label>Audio (MP3)</label>
+        <div id="edit-mp3-status" class="muted" style="font-size:0.85rem;margin-bottom:6px;white-space:normal;">Wrong song or a new version? Replace the MP3 (it gets re-tagged automatically).</div>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('edit-mp3-input').click()">🔁 Replace audio (MP3)</button>
+        <input type="file" id="edit-mp3-input" accept=".mp3,audio/mpeg" style="display:none;" onchange="replaceAudio(this.files[0])">
+      </div>
+      <div class="form-group" style="margin-top:12px;">
         <label>WAV download</label>
         <div id="edit-wav-status" style="font-size:0.85rem;margin-bottom:6px;"></div>
         <div class="action-btns">
@@ -1209,7 +1215,18 @@
         const st = data.stats;
         statsLoaded = true;
         const pct = (a, b) => b ? Math.round((a / b) * 100) + '%' : '—';
-        el.innerHTML =
+        const r = data.rules || {};
+        const total = Object.values(st.totals || {}).reduce((a, b) => a + b, 0);
+        const fixRules = 'Fix: open <a href="https://console.firebase.google.com/project/portal-music-3b1a1/firestore/rules" target="_blank" rel="noopener">Firebase Console → Firestore Database → Rules</a>, ' +
+          'delete everything there, paste the whole <code>firestore.rules</code> file from the Portal-Music folder, click <strong>Publish</strong>. Numbers start counting right away.';
+        const rulesBanner = r.checked && !r.hasEvents
+          ? `<div style="background:rgba(255,77,106,0.12);border:1px solid #ff4d6a;border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"><strong>⚠ The site can't save any stats yet</strong>: your live Firebase rules don't allow it. ${fixRules}</div>`
+          : r.checked && !r.current
+          ? `<div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.5);border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"><strong>Your live Firebase rules are out of date</strong>${(r.missingEvents || []).length ? ' (not counted yet: ' + escapeHtml(r.missingEvents.join(', ')) + ')' : ''}. ${fixRules}</div>`
+          : !r.checked && !total
+          ? `<div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.5);border-radius:8px;padding:12px;margin-bottom:12px;white-space:normal;"><strong>No stats in this range.</strong> If the site has had visitors, the live Firebase rules probably aren't published. ${fixRules}${r.error ? '<br><span class="muted">(Couldn\'t check the rules: ' + escapeHtml(r.error) + ')</span>' : ''}</div>`
+          : '';
+        el.innerHTML = rulesBanner +
           (st.truncated ? '<p style="color:#f5a623;">Showing the first 50,000 events only; pick a shorter range.</p>' : '') +
           '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
             statTile('Visitors', st.visitors.total, st.visitors.returning + ' came back on another day') +
@@ -1559,14 +1576,14 @@
     }
 
     function batchRender() {
-      const label = { ready: '⏳ ready', dupe: '⚠ already in catalog', uploading: '⬆ uploading…', done: '✅ added', skipped: '↷ skipped', error: '✗ ' };
+      const label = { ready: '⏳ ready', dupe: '⚠ name already in catalog', uploading: '⬆ uploading…', done: '✅ added', skipped: '↷ skipped', error: '✗ ' };
       document.getElementById('batch-rows').innerHTML = batchItems.map((it, i) => `
         <tr>
           <td>${i + 1}</td>
           <td><input class="form-control" style="padding:4px 8px;font-size:0.85rem;" value="${escapeHtml(it.title)}" ${it.status === 'done' ? 'disabled' : ''}
                onchange="batchItems[${i}].title=this.value.trim()||batchItems[${i}].title;batchItems[${i}].edited=true"></td>
           <td style="font-size:0.8rem;white-space:nowrap;">🎵 ${(it.mp3.size / 1048576).toFixed(1)} MB${it.wav ? ' · WAV ✓' : ''}${it.cover ? ' · 🖼 ✓' : ''}</td>
-          <td style="font-size:0.8rem;">${label[it.status] || ''}${it.status === 'error' ? escapeHtml(it.error || '') : ''}</td>
+          <td style="font-size:0.8rem;">${label[it.status] || ''}${it.error ? (it.status === 'error' ? '' : ' · ') + escapeHtml(it.error) : ''}</td>
           <td>${it.status === 'done' || batchRunning ? '' : `<button class="btn btn-secondary btn-sm" onclick="batchItems.splice(${i},1);batchRender()">✕</button>`}</td>
         </tr>`).join('');
       const c = s => batchItems.filter(it => it.status === s).length;
@@ -1619,6 +1636,7 @@
           else {
             newIds.push(result.track.id);
             it.title = result.track.title;
+            if (result.renamedFrom) it.error = `renamed: "${result.renamedFrom}" was taken`;
             if (it.wav) { try { await uploadWav(result.track.id, it.wav); } catch (e) { it.error = 'WAV: ' + e.message; } }
             it.status = 'done';
           }
@@ -1754,6 +1772,71 @@
     }
 
     // --- WAV attach / remove ---
+    // "A song with this name already exists": pick a suggested name, type one, or keep it
+    function askDuplicateName(title, suggestions) {
+      return new Promise(resolve => {
+        const wrap = document.createElement('div');
+        wrap.className = 'modal-overlay open';
+        wrap.style.zIndex = 3000;
+        wrap.innerHTML = `<div class="modal" style="max-width:480px;">
+          <h2 style="margin-top:0;">That name is taken</h2>
+          <p style="white-space:normal;">A song called <strong>“${escapeHtml(title)}”</strong> is already in your library. Pick a new name:</p>
+          <div class="action-btns" style="flex-wrap:wrap;margin-bottom:10px;">${(suggestions || []).map(x =>
+            `<button type="button" class="btn btn-secondary btn-sm" data-name="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('')}</div>
+          <input class="form-control" id="dup-name" value="${escapeHtml((suggestions || [])[0] || title)}">
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" data-act="use" style="flex:1;">Use this name</button>
+            <button type="button" class="btn btn-secondary" data-act="keep" style="flex:1;">Keep the same name</button>
+            <button type="button" class="btn btn-secondary" data-act="cancel">Cancel</button>
+          </div></div>`;
+        document.body.appendChild(wrap);
+        const input = wrap.querySelector('#dup-name');
+        input.focus(); input.select();
+        const done = v => { wrap.remove(); resolve(v); };
+        wrap.addEventListener('click', e => {
+          const b = e.target.closest('button');
+          if (!b) return;
+          if (b.dataset.name) { input.value = b.dataset.name; input.focus(); return; }
+          if (b.dataset.act === 'use') done(input.value.trim() ? { title: input.value.trim() } : null);
+          if (b.dataset.act === 'keep') done({ keep: true });
+          if (b.dataset.act === 'cancel') done(null);
+        });
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') wrap.querySelector('[data-act="use"]').click(); if (e.key === 'Escape') done(null); });
+      });
+    }
+
+    // Re-send a request after the duplicate-name dialog (title changed, or kept on purpose)
+    async function withNameCheck(send, body) {
+      let result = await send(body);
+      while (!result.success && result.code === 'DUPLICATE_TITLE') {
+        const pick = await askDuplicateName(result.title, result.suggestions);
+        if (!pick) throw new Error('Not saved: pick a different name');
+        body = { ...body, ...(pick.keep ? { allowDuplicateTitle: true } : { title: pick.title }) };
+        result = await send(body);
+      }
+      return result;
+    }
+
+    // 🔁 Replace a track's MP3 (wrong song uploaded): new file name, old WAV dropped, re-tagged
+    async function replaceAudio(file) {
+      if (!file) return;
+      const id = document.getElementById('edit-id').value;
+      document.getElementById('edit-mp3-input').value = '';
+      if (!/\.mp3$/i.test(file.name)) { showToast('Choose an .mp3 file', false); return; }
+      if (!confirm('Replace this song\'s audio with "' + file.name + '"? Its WAV is removed too (attach the new WAV after).')) return;
+      showToast('Replacing audio…');
+      try {
+        const res = await fetch('/api/track/audio?id=' + encodeURIComponent(id), { method: 'POST', headers: { 'Content-Type': 'audio/mpeg' }, body: file });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        const i = catalog.findIndex(x => x.id === id);
+        if (i !== -1) catalog[i] = result.track;
+        showWavStatus(result.track);
+        document.getElementById('edit-mp3-status').innerHTML = '✅ New audio saved. Now attach its WAV (if you have one), then run the R2 sync and push.';
+        showToast('Audio replaced.' + (result.autoTag === 'started' ? ' The AI is re-tagging it.' : ''));
+      } catch (err) { showToast('Replace failed: ' + err.message, false); }
+    }
+
     async function uploadWav(id, file) {
       if (!/\.wav$/i.test(file.name)) throw new Error('Choose a .wav file');
       const res = await fetch('/api/track/wav?id=' + encodeURIComponent(id), {
@@ -1837,11 +1920,13 @@
       saveBtn.disabled = true;
       saveBtn.textContent = sunoSong ? (wantWav ? 'Downloading MP3 + WAV from Suno…' : 'Downloading from Suno…') : 'Saving track...';
 
-      const post = async body => (await fetch('/api/track/add', {
+      let chosen = {};   // a new name or "keep it" from the duplicate-name dialog sticks for the Suno retry too
+      const post = async body => withNameCheck(async b => (await fetch('/api/track/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, artist, genre, subgenre, tags, isNewRelease, featured, coverBase64, ...body })
-      })).json();
+        body: JSON.stringify(b)
+      })).json(), { title, artist, genre, subgenre, tags, isNewRelease, featured, coverBase64, ...chosen, ...body })
+        .then(r => { if (r.success && r.track.title !== title) chosen = { title: r.track.title }; return r; });
 
       try {
         let result = await post(sunoSong && !audioBase64
@@ -1871,7 +1956,7 @@
           try { await uploadWav(result.track.id, wavFile); wavNote = ' (MP3 + WAV)'; }
           catch (e) { result.warning = 'WAV not added: ' + e.message; }
         }
-        showToast(`🎉 "${title}" added${wavNote}! Next: R2 sync, SEO rebuild, push.`);
+        showToast(`🎉 "${result.track.title}" added${wavNote}! Next: R2 sync, SEO rebuild, push.`);
         if (result.warning) setTimeout(() => showToast(result.warning, false), 3500);
         clearSuno();
         document.getElementById('wav-input').value = '';
@@ -2001,12 +2086,11 @@
       const isNew = wantNew === isNewRelease(t) ? undefined : wantNew;
 
       try {
-        const res = await fetch('/api/track/update', {
+        const result = await withNameCheck(async body => (await fetch('/api/track/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, title, artist, genre, subgenre, tags, featured, isNew })
-        });
-        const result = await res.json();
+          body: JSON.stringify(body)
+        })).json(), { id, title, artist, genre, subgenre, tags, featured, isNew });
         if (!result.success) throw new Error(result.error);
         showToast('Saved. To publish: Actions & Sync → Run SEO Rebuild, then push.');
         closeEditModal();

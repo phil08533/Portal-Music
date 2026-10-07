@@ -56,10 +56,19 @@ function start({ mode = 'missing', ids = [], limit = 0, mock = false } = {}, don
   const log = fs.openSync(LOG, 'w');
   child = spawn(py, args, { cwd: ROOT, stdio: ['ignore', log, log] });
   if (done) onDone.push(done);
-  child.on('exit', code => {
-    fs.closeSync(log);
+  let finished = false;
+  const finish = code => {
+    if (finished) return;
+    finished = true;
+    try { fs.closeSync(log); } catch (e) { /* already closed */ }
     const callbacks = onDone; onDone = [];
     for (const cb of callbacks) { try { cb(code); } catch (e) { console.error(e); } }
+  };
+  child.on('exit', finish);
+  // Python missing or moved: report it in the Tags tab instead of crashing the whole studio
+  child.on('error', err => {
+    try { fs.writeFileSync(PROGRESS, JSON.stringify({ running: false, fatal: 'Could not start the analyzer: ' + err.message + '. Run: npm run analyze:setup', updatedAt: Date.now() / 1000 })); } catch (e) { /* ignore */ }
+    finish(-1);
   });
   return status();
 }

@@ -199,3 +199,10 @@ Upload & Add Track → **📦 Batch upload**: drag in a folder (subfolders inclu
   tags every song and moves it into its genre/subgenre (the genre you picked is used when it isn't sure).
 - Then: R2 sync (Actions & Sync step 2, uploads the files), and push.
 
+## Wrong audio on a song / duplicate names
+
+- **Replace audio:** 📚 Manage Catalog → ✏️ Edit the song → **🔁 Replace audio (MP3)**, then **📎 Attach WAV**.
+  The new file gets a fresh name, the AI re-tags it, then run the R2 sync and push.
+- **Duplicate names:** adding or renaming a song to a name that's already in the library asks you to pick a new
+  name (suggestions like "Midnight …") or keep it. Batch uploads skip those songs, or (box unticked) add them with
+  a word in front and say so in the list.

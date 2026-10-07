@@ -116,4 +116,27 @@ async function getStats(rangeDays) {
   };
 }
 
-module.exports = { getStats };
+// Are the LIVE Firestore rules the ones in firestore.rules? If the events part was never
+// published, the site can't save any visits and every number here stays at 0.
+const RULES_PATH = path.join(__dirname, '..', 'firestore.rules');
+async function rulesStatus() {
+  const norm = s => String(s || '').replace(/\/\/.*$/gm, '').replace(/\s+/g, '');
+  try {
+    const { admin } = users.init();
+    const rs = await admin.securityRules().getFirestoreRuleset();
+    const live = (rs.source || []).map(f => f.content).join('\n');
+    const local = fs.readFileSync(RULES_PATH, 'utf8');
+    const names = (local.match(/name in \[([^\]]*)\]/) || [])[1] || '';
+    const missing = (names.match(/'([a-z_]+)'/g) || []).map(x => x.slice(1, -1)).filter(n => !live.includes(`'${n}'`));
+    return {
+      checked: true,
+      current: norm(live) === norm(local),
+      hasEvents: /match\s*\/events\//.test(live),
+      missingEvents: missing,
+    };
+  } catch (e) {
+    return { checked: false, error: e.message };
+  }
+}
+
+module.exports = { getStats, rulesStatus };
