@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
+    <loc>https://portal-music.com/genres/rock.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/genres/ambient-chill.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/genres/cinematic.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -38,12 +50,6 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/genres/rock.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
     <loc>https://portal-music.com/genres/classical.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -51,12 +57,6 @@
 
   <url>
     <loc>https://portal-music.com/genres/hip-hop.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/genres/ambient-chill.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -182,7 +182,37 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/tracks/you-nailed-it-creatitproductions-muxl3jd30djg.html</loc>
+    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-creatitproductions-muxm35fu2bhh.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/star-bound-creatitproductions-muxm35cz8bdl.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/low-creatitproductions-muxm359elxu5.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/star-bound-creatitproductions-muxlx5vfcxok.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/goodbye-creatitproductions-muxlw69ysm4n.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://portal-music.com/tracks/you-nailed-it-avilyn-grace-muxl3jd30djg.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -200,19 +230,19 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/tracks/puking-in-the-sink-creatitproductions-muxl3iuav1vj.html</loc>
+    <loc>https://portal-music.com/tracks/puking-in-the-sink-dem-bois-muxl3iuav1vj.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
-    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-creatitproductions-muxl3ioy8zvc.html</loc>
+    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-dem-bois-muxl3ioy8zvc.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
-    <loc>https://portal-music.com/tracks/the-end-creatitproductions-muxl3iltj32c.html</loc>
+    <loc>https://portal-music.com/tracks/the-end-dem-bois-muxl3iltj32c.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
