@@ -99,12 +99,7 @@
         <div class="stream-setup-grid">
           <label>Music
             <select id="ov-station" onchange="pmOverlayUrl()">
-              <option value="all">🌌 Everything</option>
-              <option value="focus">🧠 Deep Focus</option>
-              <option value="energy">⚡ High Energy</option>
-              <option value="chill">🍷 Late Night Chill</option>
-              <option value="epic">🐉 Epic Adventures</option>
-              <option value="country">🤠 Backroads</option>
+              <!-- Filled from js/stations.js: free stations, plus Pro stations and your playlists for Pro members -->
             </select>
           </label>
           <label>Card position
@@ -131,6 +126,8 @@
             <input type="range" id="ov-vol" min="0" max="100" value="40" oninput="pmOverlayUrl()">
           </label>
         </div>
+        <p class="stream-setup-note" id="ov-pro-hint">✦ <a href="pro.html">Pro members</a> can also stream the Pro stations and any of their own playlists.</p>
+        <p class="stream-setup-note" id="ov-playlist-hint" style="display:none;">🎧 Streaming a playlist? The link holds its tracks, so copy a fresh link after you change the playlist.</p>
         <div class="stream-setup-url">
           <input type="text" id="ov-url" readonly onclick="this.select()">
           <button type="button" id="ov-copy" onclick="pmCopyOverlay()">📋 Copy link</button>
@@ -145,56 +142,30 @@
       </section>
 
     </div>
+  <script src="js/stations.js"></script>
   <script>
-    // Builds the streamer's personal overlay link (see overlay.html)
-    window.pmOverlayUrl = function () {
-      var val = function (id) { return document.getElementById(id).value; };
-      var url = 'https://portal-music.com/overlay.html?station=' + val('ov-station') + '&pos=' + val('ov-pos') +
-        '&theme=' + val('ov-theme') + '&show=' + val('ov-show') + '&vol=' + val('ov-vol');
-      document.getElementById('ov-url').value = url;
-      document.getElementById('ov-preview').href = url.replace('https://portal-music.com/', '');
-      return url;
-    };
-    window.pmCopyOverlay = function () {
-      var btn = document.getElementById('ov-copy');
-      var done = function () { btn.textContent = '✓ Copied'; setTimeout(function () { btn.textContent = '📋 Copy link'; }, 2000); };
-      var url = window.pmOverlayUrl();
-      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done, done);
-      else { document.getElementById('ov-url').select(); document.execCommand('copy'); done(); }
-    };
-    if (document.getElementById('ov-url')) window.pmOverlayUrl();
-
-    (function() {
+    (function () {
       // Clean up previous instances if they exist
       if (window._radioInterval) clearInterval(window._radioInterval);
       if (window._syncLargePlayer) {
         audio.removeEventListener('play', window._syncLargePlayer);
         audio.removeEventListener('pause', window._syncLargePlayer);
       }
-      
-      const STATIONS = [
-        { id: 'all', name: 'Everything', icon: '🌌', desc: 'Shuffle the entire catalog' },
-        { id: 'favorites', name: 'My Favorites', icon: '❤️', desc: 'Your saved tracks' },
-        { id: 'focus', name: 'Deep Focus', icon: '🧠', desc: 'Electronic, Ambient, Lo-fi' },
-        { id: 'energy', name: 'High Energy', icon: '⚡', desc: 'Rock, Pop, Hip-Hop' },
-        { id: 'chill', name: 'Late Night Chill', icon: '🍷', desc: 'Jazz, R&B, Acoustic' },
-        { id: 'epic', name: 'Epic Adventures', icon: '🐉', desc: 'Cinematic, Fantasy' },
-        { id: 'country', name: 'Backroads', icon: '🤠', desc: 'Country & Folk' }
-      ];
 
-      const PRO_STATIONS = [
-        { id: 'vaporlounge', name: 'Vapor Lounge', icon: '🌊', desc: 'Electronic, Chill & Ambient — pure vibes' },
-        { id: 'studyhall', name: 'Study Hall', icon: '📚', desc: 'Classical, Ambient & Lo-fi focus music' },
-        { id: 'darkhours', name: 'Dark Hours', icon: '🌑', desc: 'Dark Suspense & Cinematic tension' },
-        { id: 'soultrain', name: 'Soul Train', icon: '🎷', desc: 'R&B, Soul & Jazz grooves' },
-        { id: 'gameon', name: 'Game On', icon: '🎮', desc: 'Cinematic & Rock — gaming energy' },
-      ];
-
-      const isPro = localStorage.getItem('pm_is_pro') === '1';
-      const allStations = isPro ? [...STATIONS, ...PRO_STATIONS] : STATIONS;
+      // Stations live in js/stations.js (shared with the stream overlay, overlay.html)
+      const FREE = PMStations.FREE;
+      const PRO = PMStations.PRO;
+      const MAX_OVERLAY_IDS = 300;
 
       let currentStation = null;
       let stationSongs = [];
+      let playlists = [];        // Pro members' own playlists, loaded once sign-in resolves
+
+      // Before sign-in resolves, use the Pro flag cached on this device; afterwards, the real one
+      function proNow() {
+        if (window._fbAuthReady) return !!window._fbIsPro;
+        try { return localStorage.getItem('pm_is_pro') === '1'; } catch (e) { return false; }
+      }
 
       function shuffleArray(array) {
         const arr = array.slice();
@@ -205,54 +176,74 @@
         return arr;
       }
 
+      function el(tag, cls, text) {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text != null) e.textContent = text; // textContent: playlist names are user-typed
+        return e;
+      }
+
+      function stationCard(id, icon, name, desc, badge, href) {
+        const card = el(href ? 'a' : 'div', 'station-card' + (badge ? ' pro-station' : ''));
+        card.dataset.station = id;
+        if (href) card.href = href;
+        if (badge) card.appendChild(el('span', 'station-pro-badge', badge));
+        card.appendChild(el('div', 'station-icon', icon));
+        card.appendChild(el('div', 'station-name', name));
+        card.appendChild(el('div', 'station-desc', desc));
+        if (!href) card.addEventListener('click', () => startStation(id));
+        if (id === currentStation) card.classList.add('active');
+        return card;
+      }
+
+      function playlistSongs(pl) {
+        const byId = new Map((window.allSongsRaw || []).map(s => [String(s.id), s]));
+        return (pl.songs || []).map(id => byId.get(String(id))).filter(s => s && s.file);
+      }
+
       function renderStations() {
         const grid = document.getElementById('station-grid');
-        grid.innerHTML = allStations.map(s => `
-          <div class="station-card ${PRO_STATIONS.find(p=>p.id===s.id) ? 'pro-station' : ''}" data-station="${s.id}">
-            ${PRO_STATIONS.find(p=>p.id===s.id) ? '<span class="station-pro-badge">PRO</span>' : ''}
-            <div class="station-icon">${s.icon}</div>
-            <div class="station-name">${s.name}</div>
-            <div class="station-desc">${s.desc}</div>
-          </div>
-        `).join('');
+        const isPro = proNow();
+        grid.replaceChildren();
+        FREE.forEach(s => grid.appendChild(stationCard(s.id, s.icon, s.name, s.desc)));
+        if (isPro) PRO.forEach(s => grid.appendChild(stationCard(s.id, s.icon, s.name, s.desc, 'PRO')));
 
-        document.querySelectorAll('.station-card').forEach(card => {
-          card.addEventListener('click', () => startStation(card.dataset.station));
-        });
+        if (isPro && playlists.length) {
+          grid.appendChild(el('div', 'station-group-title', 'Your playlists'));
+          playlists.forEach(pl => {
+            const n = playlistSongs(pl).length;
+            grid.appendChild(stationCard('pl:' + pl.id, '🎧', pl.name || 'Playlist', n + (n === 1 ? ' track' : ' tracks'), 'PRO'));
+          });
+        } else if (!isPro && window._fbUser) {
+          // Signed-in free members: show what Pro adds
+          grid.appendChild(stationCard('pro-upsell', '🎧', 'Your Playlists', 'Stream any of your playlists as a station', '✦ PRO', 'pro.html'));
+        }
       }
 
       function startStation(stationId) {
         document.querySelectorAll('.station-card').forEach(c => c.classList.remove('active'));
-        const activeCard = document.querySelector(`.station-card[data-station="${stationId}"]`);
+        const activeCard = document.querySelector(`.station-card[data-station="${CSS.escape(stationId)}"]`);
         if (activeCard) activeCard.classList.add('active');
 
         currentStation = stationId;
-        if (window.pmTrack) pmTrack('radio_start', { v: stationId });
+        const isPlaylist = stationId.startsWith('pl:');
+        if (window.pmTrack) pmTrack('radio_start', { v: isPlaylist ? 'playlist' : stationId });
         document.getElementById('radio-large-player').style.display = 'block';
-        
-        let pool = [];
-        const all = window.allSongsRaw || [];
 
-        switch (stationId) {
-          case 'all': pool = all; break;
-          case 'favorites':
-            const favs = getFavorites();
-            pool = all.filter(s => favs.includes(String(s.id)));
-            break;
-          case 'focus': pool = all.filter(s => ['Electronic', 'Ambient & Chill', 'Classical'].includes(s.genre) || ['lo-fi', 'ambient'].includes(s.subgenre)); break;
-          case 'energy': pool = all.filter(s => ['Rock', 'Hip-Hop', 'Pop'].includes(s.genre)); break;
-          case 'chill': pool = all.filter(s => ['Jazz', 'R&B / Soul', 'Acoustic'].includes(s.genre)); break;
-          case 'epic': pool = all.filter(s => ['Cinematic'].includes(s.genre)); break;
-          case 'country': pool = all.filter(s => ['Country & Folk'].includes(s.genre)); break;
-          case 'vaporlounge': pool = all.filter(s => ['Electronic', 'Ambient & Chill'].includes(s.genre)); break;
-          case 'studyhall': pool = all.filter(s => ['Classical', 'Ambient & Chill'].includes(s.genre)); break;
-          case 'darkhours': pool = all.filter(s => ['Dark & Suspense', 'Cinematic'].includes(s.genre)); break;
-          case 'soultrain': pool = all.filter(s => ['R&B / Soul', 'Jazz'].includes(s.genre)); break;
-          case 'gameon': pool = all.filter(s => ['Cinematic', 'Rock'].includes(s.genre)); break;
+        const all = window.allSongsRaw || [];
+        let pool = [];
+        if (isPlaylist) {
+          const pl = playlists.find(p => 'pl:' + p.id === stationId);
+          pool = pl ? playlistSongs(pl) : [];
+        } else if (stationId === 'favorites') {
+          const favs = getFavorites();
+          pool = all.filter(s => s.file && favs.includes(String(s.id)));
+        } else {
+          pool = PMStations.songsFor(stationId, all);
         }
 
         if (pool.length === 0) {
-          document.getElementById('rp-title').textContent = 'No tracks found in station';
+          document.getElementById('rp-title').textContent = isPlaylist ? 'This playlist is empty' : 'No tracks found in station';
           document.getElementById('rp-artist').textContent = '';
           return;
         }
@@ -261,6 +252,69 @@
         window.currentSongsView = stationSongs;
         playSong(stationSongs[0], stationSongs);
       }
+
+      // ── Stream overlay link builder (overlay.html) ──────────────────────────
+      function buildOverlayOptions() {
+        const sel = document.getElementById('ov-station');
+        if (!sel) return;
+        const keep = sel.value;
+        const isPro = proNow();
+        sel.replaceChildren();
+        const opt = (value, label) => { const o = el('option', null, label); o.value = value; return o; };
+        FREE.filter(s => !s.personal).forEach(s => sel.appendChild(opt(s.id, s.icon + ' ' + s.name)));
+        if (isPro) {
+          const g = el('optgroup'); g.label = '✦ Pro stations';
+          PRO.forEach(s => g.appendChild(opt(s.id, s.icon + ' ' + s.name)));
+          sel.appendChild(g);
+          const lists = playlists.filter(pl => playlistSongs(pl).length);
+          if (lists.length) {
+            const p = el('optgroup'); p.label = '✦ Your playlists';
+            lists.forEach(pl => p.appendChild(opt('pl:' + pl.id, '🎧 ' + (pl.name || 'Playlist'))));
+            sel.appendChild(p);
+          }
+        }
+        if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
+        const hint = document.getElementById('ov-pro-hint');
+        if (hint) hint.style.display = isPro ? 'none' : '';
+        const plHint = document.getElementById('ov-playlist-hint');
+        if (plHint) plHint.style.display = isPro ? '' : 'none';
+        window.pmOverlayUrl();
+      }
+
+      window.pmOverlayUrl = function () {
+        const val = id => document.getElementById(id).value;
+        const choice = val('ov-station');
+        let music = 'station=' + encodeURIComponent(choice);
+        if (choice.startsWith('pl:')) {
+          // OBS isn't signed in, so the playlist's tracks travel in the link itself
+          const pl = playlists.find(p => 'pl:' + p.id === choice);
+          const ids = pl ? playlistSongs(pl).map(s => s.id).slice(0, MAX_OVERLAY_IDS) : [];
+          music = 'ids=' + ids.map(encodeURIComponent).join(',');
+        }
+        const url = 'https://portal-music.com/overlay.html?' + music + '&pos=' + val('ov-pos') +
+          '&theme=' + val('ov-theme') + '&show=' + val('ov-show') + '&vol=' + val('ov-vol');
+        document.getElementById('ov-url').value = url;
+        document.getElementById('ov-preview').href = url.replace('https://portal-music.com/', '');
+        return url;
+      };
+      window.pmCopyOverlay = function () {
+        const btn = document.getElementById('ov-copy');
+        const done = () => { btn.textContent = '✓ Copied'; setTimeout(() => { btn.textContent = '📋 Copy link'; }, 2000); };
+        const url = window.pmOverlayUrl();
+        if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done, done);
+        else { document.getElementById('ov-url').select(); document.execCommand('copy'); done(); }
+      };
+
+      // ── Pro status + playlists, once sign-in resolves ──────────────────────
+      async function refreshPersonal() {
+        playlists = [];
+        if (proNow() && window._fbUser && typeof window._fbGetPlaylists === 'function') {
+          try { playlists = await window._fbGetPlaylists(); } catch (e) { playlists = []; }
+        }
+        renderStations();
+        buildOverlayOptions();
+      }
+      window.addEventListener('portalAuthReady', refreshPersonal);
 
       window._syncLargePlayer = function() {
         const song = window.currentSong;
@@ -340,13 +394,16 @@
         if (typeof shareTrack === 'function') shareTrack(song.id, song.title);
       });
 
+      renderStations();
+      buildOverlayOptions();
       if (typeof loadSongs === 'function') {
         loadSongs().then(songs => {
           window.allSongsRaw = songs;
-          renderStations();
+          // Sign-in may already have resolved while the catalog loaded
+          if (window._fbAuthReady) refreshPersonal(); else { renderStations(); buildOverlayOptions(); }
         });
       }
-      
+
       window._radioInit = true;
     })();
 
