@@ -123,13 +123,24 @@ function renderBrowseFilters(songs) {
     html += '</div></div>';
   });
 
-  filtersEl.innerHTML = html;
+  // One bar ("Genre selection") that opens to show every genre, so the list doesn't push the music down
+  filtersEl.innerHTML =
+    '<details class="genre-picker" id="genre-picker">' +
+      '<summary class="genre-picker-bar">' +
+        '<span class="genre-picker-icon">🎚️</span>' +
+        '<span class="genre-picker-title">Genre selection</span>' +
+        '<span class="genre-picker-sum" id="genre-picker-sum"></span>' +
+        '<span class="genre-picker-arrow" aria-hidden="true">▾</span>' +
+      '</summary>' +
+      '<div class="genre-picker-body">' + html + '</div>' +
+    '</details>';
 
   if (subgenreParam) {
     activeFilters = [subgenreParam];
     var preBtn = filtersEl.querySelector('.browse-chip[data-sub="' + subgenreParam + '"]');
     if (preBtn) preBtn.classList.add('active');
   }
+  updateGenrePickerSummary();
 
   filtersEl.querySelectorAll('.browse-chip').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -142,9 +153,20 @@ function renderBrowseFilters(songs) {
         activeFilters.push(sub);
         btn.classList.add('active');
       }
+      updateGenrePickerSummary();
       renderFilteredGrid();
     });
   });
+}
+
+// What the closed "Genre selection" bar says: all genres, or the picked ones
+function updateGenrePickerSummary() {
+  var sum = document.getElementById('genre-picker-sum');
+  if (!sum) return;
+  sum.textContent = !activeFilters.length ? 'All genres'
+    : activeFilters.length <= 3 ? activeFilters.join(', ')
+    : activeFilters.slice(0, 2).join(', ') + ' +' + (activeFilters.length - 2) + ' more';
+  sum.classList.toggle('active', activeFilters.length > 0);
 }
 
 // --- Clear filters ---
@@ -159,6 +181,7 @@ document.getElementById('browse-clear-btn').addEventListener('click', function (
   var lenEl = document.getElementById('length-filter');
   if (ucEl)  ucEl.value  = '';
   if (lenEl) lenEl.value = '';
+  updateGenrePickerSummary();
   renderFilteredGrid();
 });
 
