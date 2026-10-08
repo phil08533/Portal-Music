@@ -247,30 +247,6 @@
     "durationSec": 168
   },
   {
-    "id": "muxl3ioy8zvc",
-    "title": "I'll hold you til tonight",
-    "artist": "Dem Bois",
-    "genre": "Rock",
-    "subgenre": "Pop",
-    "tags": [],
-    "file": "https://assets.portal-music.com/music/Cinematic/I'll%20hold%20you%20til%20tonight.mp3",
-    "duration": "1:25",
-    "featured": true,
-    "cover": "https://assets.portal-music.com/covers/muxl3ioy8zvc.jpg",
-    "added": "2026-10-07",
-    "wav": "https://assets.portal-music.com/music/Cinematic/I'll%20hold%20you%20til%20tonight.wav",
-    "labels": [
-      "medium-length",
-      "fast",
-      "rock",
-      "vocals",
-      "medium-energy"
-    ],
-    "bpm": 136,
-    "key": "G major",
-    "durationSec": 85
-  },
-  {
     "id": "muxl3iltj32c",
     "title": "The End",
     "artist": "Dem Bois",

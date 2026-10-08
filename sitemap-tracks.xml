@@ -2,6 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
+    <loc>https://portal-music.com/genres/pop.html</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
     <loc>https://portal-music.com/genres/rock.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -27,12 +33,6 @@
 
   <url>
     <loc>https://portal-music.com/genres/electronic.html</loc>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/genres/pop.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -182,7 +182,7 @@
   </url>
 
   <url>
-    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-creatitproductions-muxm35fu2bhh.html</loc>
+    <loc>https://portal-music.com/tracks/i-love-you-i-love-you-avilyn-grace-muxm35fu2bhh.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -231,12 +231,6 @@
 
   <url>
     <loc>https://portal-music.com/tracks/puking-in-the-sink-dem-bois-muxl3iuav1vj.html</loc>
-    <priority>0.6</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-
-  <url>
-    <loc>https://portal-music.com/tracks/i-ll-hold-you-til-tonight-dem-bois-muxl3ioy8zvc.html</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
