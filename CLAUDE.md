@@ -19,9 +19,13 @@ Read README.md first for the architecture. Key rules:
 - **Usage events**: `pmTrack(name, {track, v})` in `js/app.js` writes anonymous events to Firestore `events`
   (create-only, validated in `firestore.rules`); the admin studio's 📊 Stats tab reads them (`admin/stats.js`).
   A new event name must be added to both `PM_EVENT_NAMES` and the list in `firestore.rules`.
-- **Stream overlay**: `overlay.html` is an OBS/Streamlabs Browser Source (plays a free radio station and shows a
-  "Now playing · portal-music.com" card); streamers build their link in the box on `radio.html`. Its station
-  filters must stay in sync with the free stations in `radio.html`. No ads ever run on it.
+- **Radio stations** are defined once in `js/stations.js` (genres/subgenres/AI tags; `pin` = the owner's genre
+  folder always belongs), shared by `radio.html` and `overlay.html`, checked by `tests/stations.test.js`. Re-check
+  the station counts there after big retagging.
+- **Stream overlay**: `overlay.html` is an OBS/Streamlabs Browser Source (plays a radio station, or a playlist via
+  `?ids=` — OBS isn't signed in, so the tracks travel in the link — and shows a "Now playing · portal-music.com"
+  card); streamers build their link in the box on `radio.html`, where Pro stations and playlists are offered to Pro
+  members only. No ads ever run on it.
 - **AI tags + "Search a sound"**: `data/tags.json` is the tag dictionary (facets, search synonyms, AudioSet
   labels for Model A, CLAP prompts for Model B). `admin/analyze/analyze.py` (owner's PC, Python venv) saves raw
   scores to `admin/analysis/<id>.json`; `admin/tagging.js` calibrates Model B to Model A per tag (prevalence

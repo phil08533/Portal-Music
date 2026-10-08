@@ -4407,3 +4407,15 @@ html.is-pro .creator-toolkit-card a[href="upgrade.html"] { display: none; }
   .grid.grid--row { grid-auto-columns: 150px; }
   .featured-artist-portrait { flex: 1 1 0; }
 }
+
+/* Radio: "Your playlists" heading inside the station grid, and stream-setup notes */
+.station-group-title {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text);
+}
+a.station-card { text-decoration: none; color: inherit; }
+.stream-setup-note { font-size: 0.85rem; color: var(--text-muted); margin: 0.8rem 0 0; }
+.stream-setup-note a { color: var(--accent); font-weight: 600; }

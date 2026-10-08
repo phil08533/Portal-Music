@@ -9,11 +9,14 @@
     OBS / Streamlabs "Browser Source" for streamers (set up on radio.html):
     plays a Portal Radio station and shows a "Now playing" card that credits
     portal-music.com on stream.
-      ?station=all|focus|energy|chill|epic|country   which music
+      ?station=<id>          which music: any station in js/stations.js (free or Pro)
+      ?ids=<id>,<id>,...     or a playlist (Pro members copy this link on radio.html;
+                             the tracks travel in the link because OBS isn't signed in)
       &pos=bl|br|tl|tr                                card corner (1920×1080 source)
       &theme=dark|light   &vol=0-100   &show=always|change (card hides 12 s after each new song)
   -->
   <script src="js/app.js"></script>
+  <script src="js/stations.js"></script>
   <style>
     html, body { margin: 0; background: transparent; overflow: hidden; }
     body { width: 100vw; height: 100vh; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -65,17 +68,11 @@
 
   <script>
     (function () {
-      // Keep in sync with the free stations in radio.html
-      var STATIONS = {
-        all:     function () { return true; },
-        focus:   function (s) { return ['Electronic', 'Ambient & Chill', 'Classical'].indexOf(s.genre) !== -1; },
-        energy:  function (s) { return ['Rock', 'Hip-Hop', 'Pop'].indexOf(s.genre) !== -1; },
-        chill:   function (s) { return ['Jazz', 'R&B / Soul', 'Acoustic'].indexOf(s.genre) !== -1; },
-        epic:    function (s) { return s.genre === 'Cinematic'; },
-        country: function (s) { return s.genre === 'Country & Folk'; },
-      };
+      // Stations live in js/stations.js (shared with radio.html)
       var q = new URLSearchParams(location.search);
-      var station = STATIONS[q.get('station')] ? q.get('station') : 'all';
+      var ids = (q.get('ids') || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+      var picked = PMStations.byId(q.get('station'));
+      var station = picked && !picked.personal ? picked.id : 'all';
       var pos = /^(bl|br|tl|tr)$/.test(q.get('pos')) ? q.get('pos') : 'bl';
       var vol = Math.max(0, Math.min(100, parseInt(q.get('vol'), 10)));
       var showOnChange = q.get('show') === 'change';
@@ -140,11 +137,26 @@
       player.addEventListener('error', next);
       document.getElementById('start').addEventListener('click', play);
 
-      fetch('data/music.json', { cache: 'no-cache' })
-        .then(function (r) { return r.json(); })
-        .then(function (songs) {
-          list = shuffle(songs.filter(function (s) { return s.file && STATIONS[station](s); }));
-          if (window.pmTrack) pmTrack('overlay_start', { v: station });
+      // Playlist links hold track ids; re-imported tracks get new ids (data/id-map.json maps old → new)
+      var idMap = ids.length
+        ? fetch('data/id-map.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+        : Promise.resolve({});
+
+      Promise.all([fetch('data/music.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }), idMap])
+        .then(function (res) {
+          var songs = res[0], map = res[1];
+          if (ids.length) {
+            var byId = {};
+            songs.forEach(function (s) { byId[s.id] = s; });
+            var seen = {};
+            ids.forEach(function (id) {
+              var s = byId[map[id] || id];
+              if (s && s.file && !seen[s.id]) { seen[s.id] = true; list.push(s); }
+            });
+          }
+          if (!list.length) list = PMStations.songsFor(station, songs); // no ids, or none still in the catalog
+          list = shuffle(list);
+          if (window.pmTrack) pmTrack('overlay_start', { v: ids.length ? 'playlist' : station });
           play();
         })
         .catch(function () {
